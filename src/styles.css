@@ -303,7 +303,6 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
   animation: rise 0.2s var(--ease-out);
 }
 .fname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 200px; font-weight: 600; }
-.fname small { color: var(--muted); font-weight: 400; }
 .filerow .range-inline { max-width: 200px; flex: 0 1 180px; padding: 7px 10px; font-size: 0.85rem; }
 .frow-btns, .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
@@ -382,6 +381,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .thumb-btns { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
 .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .compare-col { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-s); padding: 10px; max-height: 640px; overflow: auto; }
+.compare-col h3 { font-size: 0.9rem; overflow-wrap: anywhere; }
 .compare-col canvas { width: 100%; height: auto; border: 1px solid var(--line); margin-bottom: 10px; background: #fff; }
 .redact-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-s); padding: 10px; }
 .scanner { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
@@ -536,7 +536,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 
 @media (max-width: 700px) {
   .compare { grid-template-columns: 1fr; }
-  .topnav > a:nth-child(2), .topnav > a:nth-child(3) { display: none; }
+  .topnav > a { display: none; }
   .hero { padding-top: 32px; }
   .foot-cols { grid-template-columns: repeat(2, 1fr); }
   .preview-frame { height: 340px; }

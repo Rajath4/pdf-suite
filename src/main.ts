@@ -295,7 +295,7 @@ function openPalette(): void {
   const box = el('div', { class: 'palette', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Jump to a tool or action' });
   const input = document.createElement('input');
   input.className = 'input palette-input';
-  input.placeholder = 'Type a tool or action…  (Esc to close)';
+  input.placeholder = 'Type a tool or action…  ( / to open · Esc to close )';
   input.setAttribute('aria-label', 'Search tools and actions');
   input.setAttribute('role', 'combobox');
   input.setAttribute('aria-expanded', 'true');
@@ -761,8 +761,6 @@ function header(): HTMLElement {
   });
   nav.append(
     el('a', { href: '/' }, 'All tools'),
-    el('a', { href: toolHref('merge') }, 'Merge'),
-    el('a', { href: toolHref('compress') }, 'Compress'),
     el('a', { href: '/guides/' }, 'Guides'),
     paletteBtn,
     themeBtn,
@@ -840,8 +838,7 @@ function homePage(): HTMLElement {
     el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, nothing is tracked, and it installs for offline use.'),
   );
   // One search surface only (header palette) — no duplicate hero search box.
-  // The palette shortcut is taught once, right here.
-  hero.append(el('p', { class: 'muted' }, 'Tip: press / anywhere to jump to any tool instantly.'));
+  // The palette itself teaches its shortcut; nothing more needed here.
 
   // File-first entry (pdfguru pattern, done smarter): drop a file, then pick
   // what to do with it. The staged files ride along to whichever tool wins.
@@ -1145,7 +1142,7 @@ function homePage(): HTMLElement {
   const items: [string, string][] = [
     ['Are my files uploaded anywhere?', 'No. Every tool runs with JavaScript in your tab. Prove it: load any tool, then turn on airplane mode — everything still works.'],
     ['Is there a watermark or limit?', 'No watermark, no account, no daily cap. Practical limit is your device memory (~100–150 MB PDFs on desktop).'],
-    ['Which tools are included?', 'Merge, split, compress, images↔PDF, rotate, organize, watermark, page numbers, headers, redact, extract text, OCR, protect/unlock, flatten, privacy scan, PDF↔Word, PDF↔Excel, PDF→HTML, invert, create/Markdown/HTML→PDF, compare, repair, camera scan.'],
+    ['Which tools are included?', '36 tools: merge with page ranges and photos, split, compress to exact sizes, sign, annotate, crop, fill forms, convert to and from Word, Excel, and PowerPoint, OCR in 14 languages, protect and unlock, redact, extract text and images, compare, repair, scan — plus step-by-step guides.'],
     ['Password-protected PDFs?', 'Unlock first with Security → Unlock PDF, then use any other tool, then re-protect if needed.'],
   ];
   for (const [q, a] of items) {
@@ -1741,7 +1738,7 @@ function toolPage(id: string): HTMLElement {
 
   const tips = el('details', { class: 'tips' });
   tips.append(el('summary', {}, 'Tips & limits'), el('p', {},
-    'Large PDFs are limited by device memory. Password-protected files must be unlocked first. Rasterizing tools (Heavy compress, Invert, Dark mode) produce smaller or recolored files but text is no longer selectable.'));
+    'Large PDFs are limited by device memory. Password-protected files must be unlocked first. Heavy compress and recolor modes rebuild pages as images, so text is no longer selectable.'));
   root.append(tips);
 
   // Same content the prerendered landing page carries: About + How-to + FAQ.
@@ -1830,9 +1827,9 @@ function buildOptions(
         { value: 'oddeven', label: 'Odd pages + even pages (2 files)' },
         { value: 'bysize', label: 'Split by file size (email-friendly ZIP)' },
       ], 'ranges'));
-      add('Pages (e.g. 1-3, 5)', 'ranges', textInput('1-3, 5'));
-      add('Pages per file (chunks mode)', 'size', textInput('5', '', 'number'));
-      add('Target MB per file (by-size mode)', 'targetMB', textInput('5', '', 'number'));
+      add('Pages — which ones (e.g. 1-3, 5)', 'ranges', textInput('1-3, 5'));
+      add('Pages per file · chunks only', 'size', textInput('5', '', 'number'));
+      add('MB per file · by-size only', 'targetMB', textInput('5', '', 'number'));
       break;
     case 'compress':
       add('Preset', 'preset', selectInput([
@@ -1842,7 +1839,7 @@ function buildOptions(
         { value: 'target', label: 'Target size — e.g. under 1 MB for portals' },
         { value: 'lossless', label: 'Lossless — re-save only (keeps text sharp)' },
       ], 'medium'));
-      add('Target MB (target-size mode)', 'targetMB', textInput('1', '', 'number'));
+      add('Target size in MB', 'targetMB', textInput('1', '', 'number'));
       break;
     case 'pdf-to-jpg':
       add('Image format', 'format', selectInput([
@@ -1863,27 +1860,27 @@ function buildOptions(
       add('Margin (pt)', 'margin', textInput('24', '24', 'number'));
       break;
     case 'rotate':
-      add('Angle', 'angle', selectInput([
+      add('Rotation', 'angle', selectInput([
         { value: '90', label: '90° clockwise' },
         { value: '180', label: '180°' },
         { value: '270', label: '90° counter-clockwise' },
       ], '90'));
-      add('Pages (blank = all, e.g. 1-2, 5)', 'pages', textInput('', '1-3, 5'));
+      add('Which pages (blank = all)', 'pages', textInput('', '1-3, 5'));
       break;
     case 'watermark':
       add('Kind', 'wmmode', selectInput([
         { value: 'text', label: 'Text watermark' },
         { value: 'image', label: 'Logo / image watermark' },
       ], 'text'));
-      add('Text', 'text', textInput('CONFIDENTIAL'));
-      add('Opacity (0.05–0.6)', 'opacity', textInput('0.25', '', 'number'));
-      add('Font size (text mode)', 'size', textInput('48', '', 'number'));
-      add('Rotation degrees (text mode)', 'rotation', textInput('-45', '', 'number'));
-      add('Logo width % (image mode)', 'wmwidth', textInput('22', '', 'number'));
-      add('Tiled pattern?', 'tile', selectInput([{ value: 'no', label: 'Single center' }, { value: 'yes', label: 'Tiled' }], 'no'));
+      add('Text to stamp', 'text', textInput('CONFIDENTIAL'));
+      add('Transparency', 'opacity', textInput('0.25', '0.05 light … 0.6 strong', 'number'));
+      add('Text size · text mode', 'size', textInput('48', '', 'number'));
+      add('Tilt · text mode', 'rotation', textInput('-45', 'degrees', 'number'));
+      add('Logo size · image mode', 'wmwidth', textInput('22', '% of page width', 'number'));
+      add('Layout', 'tile', selectInput([{ value: 'no', label: 'Single center' }, { value: 'yes', label: 'Tiled' }], 'no'));
       break;
     case 'page-numbers':
-      add('Start number', 'start', textInput('1', '', 'number'));
+      add('First number', 'start', textInput('1', '', 'number'));
       add('Format', 'format', selectInput([
         { value: 'page-n-of-N', label: 'Page X of Y' },
         { value: 'page-n', label: 'Page X' },
@@ -1897,12 +1894,12 @@ function buildOptions(
         { value: 'top-center', label: 'Top center' },
         { value: 'top-right', label: 'Top right' },
       ], 'bottom-center'));
-      add('Font size', 'size', textInput('10', '', 'number'));
+      add('Text size', 'size', textInput('10', '', 'number'));
       break;
     case 'header-footer':
-      add('Header (supports {page}, {total})', 'header', textInput(''));
-      add('Footer (supports {page}, {total})', 'footer', textInput('Page {page} of {total}'));
-      add('Font size', 'size', textInput('9', '', 'number'));
+      add('Header — use {page} and {total}', 'header', textInput(''));
+      add('Footer — use {page} and {total}', 'footer', textInput('Page {page} of {total}'));
+      add('Text size', 'size', textInput('9', '', 'number'));
       break;
     case 'redact': {
       const hidden = document.createElement('input');
@@ -1919,21 +1916,21 @@ function buildOptions(
       box.append(el('p', { class: 'muted' }, 'Build annotations below — text, yellow highlights, or image stamps. Positions are % of page size.'));
       break;
     case 'crop':
-      add('Top margin %', 'top', textInput('5', '', 'number'));
-      add('Bottom margin %', 'bottom', textInput('5', '', 'number'));
-      add('Left margin %', 'left', textInput('5', '', 'number'));
-      add('Right margin %', 'right', textInput('5', '', 'number'));
-      add('Pages (blank = all)', 'pages', textInput('', '1-3, 5'));
+      add('Trim from top %', 'top', textInput('5', '', 'number'));
+      add('Trim from bottom %', 'bottom', textInput('5', '', 'number'));
+      add('Trim from left %', 'left', textInput('5', '', 'number'));
+      add('Trim from right %', 'right', textInput('5', '', 'number'));
+      add('Which pages (blank = all)', 'pages', textInput('', '1-3, 5'));
       break;
     case 'fill-forms':
-      add('Lock fields after filling? (flatten)', 'flatten', selectInput([
+      add('Lock fields after filling', 'flatten', selectInput([
         { value: 'yes', label: 'Yes — make static (recommended)' },
         { value: 'no', label: 'No — keep editable' },
       ], 'yes'));
       box.append(el('p', { class: 'muted' }, 'Form fields appear below after upload. Fill them, then Run.'));
       break;
     case 'encrypt':
-      add('Password (min 4 chars)', 'password', textInput('', '••••••••', 'password'));
+      add('Password (4+ characters)', 'password', textInput('', '••••••••', 'password'));
       add('Owner password (optional)', 'owner', textInput('', 'defaults to same', 'password'));
       break;
     case 'decrypt':
@@ -1945,25 +1942,25 @@ function buildOptions(
         { value: 'edit', label: 'Edit title/author/subject/keywords' },
         { value: 'strip', label: 'Strip metadata + download clean PDF' },
       ], 'inspect'));
-      add('Title (edit mode)', 'title', textInput(''));
-      add('Author (edit mode)', 'author', textInput(''));
-      add('Subject (edit mode)', 'subject', textInput(''));
-      add('Keywords, comma-separated (edit mode)', 'keywords', textInput(''));
+      add('Title', 'title', textInput(''));
+      add('Author', 'author', textInput(''));
+      add('Subject', 'subject', textInput(''));
+      add('Keywords, comma-separated', 'keywords', textInput(''));
       break;
     case 'create':
       add('Title', 'title', textInput('My document'));
-      add('Font size', 'size', textInput('12', '', 'number'));
+      add('Text size', 'size', textInput('12', '', 'number'));
       add('Body', 'body', textArea('Write here…\n\nBlank lines separate paragraphs.', '', 10));
       break;
     case 'markdown':
-      add('Markdown', 'body', textArea('# Title\n\n- point one\n- point two\n\nSome **bold** text.', 'Paste Markdown…', 12));
+      add('Markdown text', 'body', textArea('# Title\n\n- point one\n- point two\n\nSome **bold** text.', 'Paste Markdown…', 12));
       break;
     case 'html-to-pdf':
       add('Title', 'title', textInput('Webpage'));
-      add('HTML', 'body', textArea('<h1>Hello</h1><p>Paste HTML here…</p>', 'Paste HTML…', 12));
+      add('HTML code', 'body', textArea('<h1>Hello</h1><p>Paste HTML here…</p>', 'Paste HTML…', 12));
       break;
     case 'excel-to-pdf':
-      add('PDF title', 'title', textInput('Spreadsheet'));
+      add('Title for the PDF', 'title', textInput('Spreadsheet'));
       break;
     case 'organize':
     case 'compare':
@@ -1992,7 +1989,7 @@ function buildOptions(
         ['ara', 'Arabic'], ['hin', 'Hindi'], ['chi_sim', 'Chinese (Simplified)'],
         ['jpn', 'Japanese'], ['kor', 'Korean'], ['tur', 'Turkish'],
       ];
-      add('Recognition language', 'lang', selectInput(langs.map(([value, label]) => ({ value, label })), 'eng'));
+      add('Document language', 'lang', selectInput(langs.map(([value, label]) => ({ value, label })), 'eng'));
       box.append(el('p', { class: 'muted' }, 'First use downloads the language pack (cached for offline after).'));
       break;
     }
@@ -2235,10 +2232,9 @@ function mountRedact(
   const form = el('div', { class: 'redact-form' });
   form.append(
     el('label', {}, 'Page ', pageIn),
-    el('label', {}, 'X% ', x),
-    el('label', {}, 'Y% (from bottom) ', y),
-    el('label', {}, 'W% ', w),
-    el('label', {}, 'H% ', h),
+    el('label', {}, 'From left % ', x),
+    el('label', {}, 'From bottom % ', y),
+    el('label', {}, 'Width % ', w),
   );
   const addBtn = el('button', { class: 'btn', type: 'button' }, 'Add black box');
   const list = el('div', { class: 'filelist' });
@@ -2417,9 +2413,9 @@ function mountSign(
   const w = numInput('25');
   form.append(
     el('label', {}, 'Page ', pageIn),
-    el('label', {}, 'X% (from left) ', x),
-    el('label', {}, 'Y% (from bottom) ', y),
-    el('label', {}, 'Width% ', w),
+    el('label', {}, 'From left % ', x),
+    el('label', {}, 'From bottom % ', y),
+    el('label', {}, 'Width % ', w),
   );
   const list = el('div', { class: 'filelist' });
   const paint = () => {
@@ -2507,13 +2503,13 @@ function mountAnnotate(
   form.append(
     el('label', {}, 'Kind ', kind),
     el('label', {}, 'Page ', pageIn),
-    el('label', {}, 'X% ', x),
-    el('label', {}, 'Y% (from bottom) ', y),
+    el('label', {}, 'From left % ', x),
+    el('label', {}, 'From bottom % ', y),
     el('label', {}, 'Text ', text),
-    el('label', {}, 'Size ', size),
+    el('label', {}, 'Text size ', size),
     el('label', {}, 'Color ', color),
-    el('label', {}, 'Weight ', bold),
-    el('label', {}, 'Image width% ', w),
+    el('label', {}, 'Style ', bold),
+    el('label', {}, 'Image width % ', w),
   );
   const list = el('div', { class: 'filelist' });
   const paint = () => {
