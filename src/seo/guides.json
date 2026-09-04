@@ -781,6 +781,73 @@
    "title": "Best Free PDF Tools Compared 2026 | PDF Suite",
    "updated": "2026-09-04",
    "icon": "⚖️"
+  },
+  {
+   "slug": "why-is-my-pdf-so-big",
+   "icon": "🔍",
+   "title": "Why Is My PDF So Big? Shrink It Free (2026 Guide) | PDF Suite",
+   "description": "Two-page PDF weighing 9 MB? Diagnose KB-per-page, fix phone scans, decks, and fonts, then compress free. No signup.",
+   "h1": "Why Is My PDF So Big? (And How to Actually Shrink It)",
+   "category": "How-to",
+   "updated": "2026-09-04",
+   "intro": [
+    "You scanned a lease with your phone — eight pages, 9.4 MB — and the agency inbox rejected it. Meanwhile a 40-page contract arrives as a 300 KB attachment. Same format, wildly different weight.",
+    "This guide diagnoses where your megabytes hide with one number (KB per page), then fixes each cause: oversized scans, bloated decks, and font packing."
+   ],
+   "sections": [
+    {
+     "h2": "The one-number diagnosis: KB per page",
+     "body": [
+      "Divide file size by page count. Under 200 KB per page is a normal text document with little fat to trim. Between 200 KB and 1 MB means text plus images or heavy fonts — moderate savings available. Over 1 MB per page means every page is essentially a photograph, and compression works miracles there."
+     ]
+    },
+    {
+     "h2": "The three usual culprits",
+     "body": [
+      "Phone scanning apps save each page as a full-resolution 12-megapixel photo — twelve times more pixels than anyone views. Slide decks carry every background and screenshot at original size; a 30-slide deck quietly becomes 25 MB. And quick-export tools sometimes embed entire font families (1–2 MB of typefaces) instead of just used characters.",
+      "Scan text documents at 150 DPI instead of 300 — file size quarters with no visible difference on screen. Shrink photos to display size before pasting into Word. Prefer exporters that subset fonts."
+     ]
+    },
+    {
+     "h2": "Why email bounces 'fitting' files",
+     "body": [
+      "Attachments travel base64-encoded, inflating them by a third in transit: a 19 MB file becomes ~25 MB of message and bounces off Gmail's 25 MB wall. Outlook allows 20 MB, Exchange defaults to 10 MB. Rule of thumb: aim for 70% of the stated cap."
+     ]
+    }
+   ],
+   "steps": [
+    "Check KB per page to name the culprit",
+    "Split out only the pages you need",
+    "Compress with the matching preset — or an exact MB target",
+    "Verify the result opens, then send at 70% of the cap"
+   ],
+   "tips": [
+    "Merge first, compress second — optimizers dedupe shared resources across the whole file.",
+    "A 600 DPI scan holds sixteen times the data of 150 DPI. Nothing on screen needs 600."
+   ],
+   "faqs": [
+    [
+     "Why is my 2-page PDF 9 MB?",
+     "Almost certainly phone-camera pages at full resolution. Re-scan at 150 DPI or compress hard — expect 90%+ reductions on photo-pages."
+    ],
+    [
+     "Will compression ruin my document?",
+     "Text reflows losslessly; photos trade pixels for bytes. Lean text PDFs only lose 10–15% because there is little to remove."
+    ],
+    [
+     "The file fits the limit but still bounced. Why?",
+     "Base64 transit encoding adds ~33%. A file at 95% of the cap routinely fails — aim for 70%."
+    ]
+   ],
+   "relatedTools": [
+    "compress",
+    "split",
+    "merge"
+   ],
+   "relatedGuides": [
+    "how-to-compress-pdf-under-1mb",
+    "compress-pdf-for-job-application"
+   ]
   }
  ]
 }

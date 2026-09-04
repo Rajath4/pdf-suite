@@ -1,7 +1,7 @@
 # PDF Suite — Free Offline PDF Toolkit
 
 A full end-to-end working clone of the **ihatepdf.cv essentials**, at parity
-with the best of iLovePDF/Smallpdf — **36 tools + 13 guides, 100% client-side**. No upload,
+with the best of iLovePDF/Smallpdf — **36 tools + 14 guides, 100% client-side**. No upload,
 no watermark, no sign-up, no per-hour limits. Files never leave the device.
 
 ## Features (36 tools, all functional offline after first load)

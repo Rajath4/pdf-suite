@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { baseName, classifyMergeFile, fileLimitBytes, fmtMonth, formatBytes, isPdfName, parseProgress, pushRecent, readMinutes, withExt } from './fileUtils.js';
+import { baseName, classifyMergeFile, fileLimitBytes, fmtMonth, formatBytes, isPdfName, pageWeight, pageWeightHint, parseProgress, pushRecent, readMinutes, withExt } from './fileUtils.js';
 
 describe('formatBytes', () => {
   it('formats bytes, KB and MB', () => {
@@ -100,5 +100,25 @@ describe('fileLimitBytes', () => {
     expect(fileLimitBytes('compress')).toBe(200 * 1024 * 1024);
     expect(fileLimitBytes('ocr')).toBe(200 * 1024 * 1024);
     expect(fileLimitBytes('')).toBe(250 * 1024 * 1024);
+  });
+});
+
+describe('pageWeight', () => {
+  it('classifies lean, mixed, and photo pages', () => {
+    expect(pageWeight(100 * 1024, 1)?.kind).toBe('lean');
+    expect(pageWeight(500 * 1024, 1)?.kind).toBe('mixed');
+    expect(pageWeight(2 * 1024 * 1024, 1)?.kind).toBe('photo');
+    expect(pageWeight(10 * 1024 * 1024, 20)?.kind).toBe('mixed');
+  });
+
+  it('rejects nonsense input', () => {
+    expect(pageWeight(0, 5)).toBeNull();
+    expect(pageWeight(1000, 0)).toBeNull();
+    expect(pageWeight(NaN, 3)).toBeNull();
+  });
+
+  it('explains what each class means for compression', () => {
+    expect(pageWeightHint('photo')).toMatch(/dramatically/);
+    expect(pageWeightHint('lean')).toMatch(/modest/);
   });
 });

@@ -139,6 +139,35 @@ export function fileLimitBytes(toolId = ''): number {
   return baseMB * MB;
 }
 
+/**
+ * Demand-driven diagnosis (users constantly ask "why is my PDF so big?"):
+ * KB per page reveals the culprit — lean text (<200 KB), mixed content,
+ * or photo-pages (≥1 MB) where compression works miracles.
+ */
+export function pageWeight(
+  bytes: number,
+  pageCount: number,
+): { kbPerPage: number; kind: 'lean' | 'mixed' | 'photo' } | null {
+  if (!Number.isFinite(bytes) || !Number.isFinite(pageCount) || bytes <= 0 || pageCount <= 0) {
+    return null;
+  }
+  const kbPerPage = bytes / pageCount / 1024;
+  return {
+    kbPerPage,
+    kind: kbPerPage < 200 ? 'lean' : kbPerPage < 1000 ? 'mixed' : 'photo',
+  };
+}
+
+export function pageWeightHint(kind: 'lean' | 'mixed' | 'photo'): string {
+  if (kind === 'photo') {
+    return 'Pages are essentially photos — Heavy or target-size will shrink this dramatically.';
+  }
+  if (kind === 'mixed') {
+    return 'Mix of text and images — Medium or Heavy gives the best size/quality trade-off.';
+  }
+  return 'Already lean text — expect modest savings, not miracles.';
+}
+
 /** Editorial read-time estimate (words per minute), minimum 1 minute. */
 export function readMinutes(wordCount: number, wpm = 200): number {
   if (!Number.isFinite(wordCount) || wordCount <= 0) return 1;

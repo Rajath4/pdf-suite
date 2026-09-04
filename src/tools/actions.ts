@@ -18,7 +18,7 @@ import {
 import {
   renderAllPages, extractAllText, extractStyledLines, canvasToBlob, invertCanvas, tintCanvas,
 } from '../lib/pdfRender.js';
-import { baseName, loadImageElement, readAsArrayBuffer, readAsText, classifyMergeFile } from '../lib/fileUtils.js';
+import { baseName, loadImageElement, readAsArrayBuffer, readAsText, classifyMergeFile, pageWeight, pageWeightHint } from '../lib/fileUtils.js';
 
 // Office-format engines (docx / mammoth / xlsx) are heavy and rarely needed —
 // load them on demand so the main tool chunk stays lean.
@@ -71,6 +71,14 @@ function downscale(src: HTMLCanvasElement, factor: number): HTMLCanvasElement {
   return out;
 }
 
+/** "Why is my PDF so big?" — per-page weight + what it means for compression. */
+function diagnoseWeight(bytes: ArrayBuffer, pageCount: number): string {
+  const w = pageWeight(bytes.byteLength, pageCount);
+  if (!w) return '';
+  const kb = w.kbPerPage >= 1024 ? `${(w.kbPerPage / 1024).toFixed(1)} MB` : `${Math.round(w.kbPerPage)} KB`;
+  return `≈${kb}/page. ${pageWeightHint(w.kind)}`;
+}
+
 /**
  * Compress-to-size (portal-friendly): render once at high scale, then iterate
  * JPEG quality + downscale steps until under the target — students uploading
@@ -84,6 +92,7 @@ async function compressToSize(ctx: Ctx, bytes: ArrayBuffer): Promise<ActionOut[]
   const target = targetMB * 1024 * 1024;
   ctx.onProgress('Rendering pages…');
   let canvases = await renderAllPages(bytes, 2.0, (d, t) => ctx.onProgress(`Rendering ${d}/${t}…`));
+  const diagnosis = diagnoseWeight(bytes, canvases.length);
 
   const build = async (quality: number): Promise<Uint8Array> => {
     const doc = await PDFDocument.create();
@@ -107,7 +116,7 @@ async function compressToSize(ctx: Ctx, bytes: ArrayBuffer): Promise<ActionOut[]
       return [{
         blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }),
         filename: `${baseName(ctx.files[0].name)}-${targetMB}mb.pdf`,
-        note: `Hit ${targetMB} MB target. Rasterized output: text is not selectable.`,
+        note: `${diagnosis} Hit ${targetMB} MB target. Rasterized output: text is not selectable.`,
       }];
     }
     if (attempt % 6 === 5) {
@@ -118,7 +127,7 @@ async function compressToSize(ctx: Ctx, bytes: ArrayBuffer): Promise<ActionOut[]
   return [{
     blob: new Blob([best! as unknown as BlobPart], { type: 'application/pdf' }),
     filename: `${baseName(ctx.files[0].name)}-${targetMB}mb.pdf`,
-    note: `Could not reach ${targetMB} MB without destroying readability — this is the smallest usable version (${(best!.length / 1024 / 1024).toFixed(2)} MB).`,
+    note: `${diagnosis} Could not reach ${targetMB} MB without destroying readability — this is the smallest usable version (${(best!.length / 1024 / 1024).toFixed(2)} MB).`,
   }];
 }
 
@@ -221,7 +230,7 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
         page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
       }
       const data = await doc.save({ useObjectStreams: true });
-      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-compressed.pdf`, note: 'Rasterized compression: smallest size, text is no longer selectable.' }];
+      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-compressed.pdf`, note: `${diagnoseWeight(bytes, canvases.length)} Rasterized compression: smallest size, text is no longer selectable.` }];
     }
     case 'pdf-to-jpg': {
       need(ctx, 1);
