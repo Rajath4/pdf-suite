@@ -108,6 +108,22 @@ export function pushRecent(list: string[], id: string, max = 5): string[] {
   return [id, ...list.filter((x) => x !== id)].slice(0, Math.max(1, max));
 }
 
+/** Editorial read-time estimate (words per minute), minimum 1 minute. */
+export function readMinutes(wordCount: number, wpm = 200): number {
+  if (!Number.isFinite(wordCount) || wordCount <= 0) return 1;
+  return Math.max(1, Math.ceil(wordCount / wpm));
+}
+
+/** "2026-09-04" → "Sep 2026". Falls back to the raw string when invalid. */
+export function fmtMonth(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-\d{2}$/.exec(iso.trim());
+  if (!m) return iso;
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const month = months[Number(m[2]) - 1];
+  if (!month) return iso;
+  return `${month} ${m[1]}`;
+}
+
 export async function loadImageElement(src: string): Promise<HTMLImageElement> {
   const img = new Image();
   img.decoding = 'async';

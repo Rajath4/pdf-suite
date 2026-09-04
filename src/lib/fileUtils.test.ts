@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { baseName, classifyMergeFile, formatBytes, isPdfName, parseProgress, pushRecent, withExt } from './fileUtils.js';
+import { baseName, classifyMergeFile, fmtMonth, formatBytes, isPdfName, parseProgress, pushRecent, readMinutes, withExt } from './fileUtils.js';
 
 describe('formatBytes', () => {
   it('formats bytes, KB and MB', () => {
@@ -70,5 +70,25 @@ describe('classifyMergeFile', () => {
   it('flags pdfs for range support', () => {
     expect(isPdfName('a.pdf', 'application/pdf')).toBe(true);
     expect(isPdfName('a.jpg', 'image/jpeg')).toBe(false);
+  });
+});
+
+describe('readMinutes', () => {
+  it('estimates minutes with a floor of one', () => {
+    expect(readMinutes(0)).toBe(1);
+    expect(readMinutes(-50)).toBe(1);
+    expect(readMinutes(199)).toBe(1);
+    expect(readMinutes(200)).toBe(1);
+    expect(readMinutes(201)).toBe(2);
+    expect(readMinutes(1200)).toBe(6);
+  });
+});
+
+describe('fmtMonth', () => {
+  it('renders ISO dates as Mon YYYY', () => {
+    expect(fmtMonth('2026-09-04')).toBe('Sep 2026');
+    expect(fmtMonth('2025-01-31')).toBe('Jan 2025');
+    expect(fmtMonth('garbage')).toBe('garbage');
+    expect(fmtMonth('2026-13-01')).toBe('2026-13-01');
   });
 });

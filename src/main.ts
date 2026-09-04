@@ -1,7 +1,7 @@
 import './styles.css';
 import { CATEGORIES, TOOLS, getTool, searchTools, toolSlug, toolIdFromSlug, nextTools } from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
-import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent, isPdfName } from './lib/fileUtils.js';
+import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent, isPdfName, readMinutes, fmtMonth } from './lib/fileUtils.js';
 import { UserError } from './types.js';
 import type { ToolDef } from './types.js';
 import { registerSW } from 'virtual:pwa-register';
@@ -200,23 +200,6 @@ function showToast(msg: string, actionLabel?: string, onAction?: () => void): vo
   t.append(close);
   document.body.append(t);
   window.setTimeout(() => t.remove(), 12000);
-}
-
-function offlineDot(): HTMLElement {
-  // Shown ONLY while offline: when online it added noise and confused the
-  // offline story ("it says online — are my files uploading?"). Offline,
-  // it becomes live proof the app keeps working.
-  const dot = el('span', { class: 'netdot', title: 'You are offline — the app keeps working' });
-  const paint = () => {
-    const off = !navigator.onLine;
-    dot.hidden = !off;
-    dot.textContent = '● Offline — app still works';
-    dot.dataset['off'] = String(off);
-  };
-  paint();
-  window.addEventListener('online', paint);
-  window.addEventListener('offline', paint);
-  return dot;
 }
 
 // ---------- Theme: system-aware dark mode, user-overridable ----------
@@ -542,6 +525,7 @@ interface SeoEntry {
 
 interface GuideEntry {
   slug: string;
+  icon: string;
   title: string;
   description: string;
   h1: string;
@@ -561,12 +545,29 @@ async function loadGuides(): Promise<GuideEntry[]> {
   return (GUIDES as unknown as { guides: GuideEntry[] }).guides;
 }
 
-function guideCard(g: GuideEntry): HTMLElement {
-  const card = el('a', { class: 'card', href: `/guides/${g.slug}/` });
+/** Full-text word count for read-time estimates. */
+function guideWords(g: GuideEntry): number {
+  return [...g.intro, ...g.sections.flatMap((s) => [s.h2, ...s.body]), ...g.steps, ...g.tips, ...g.faqs.flat()]
+    .join(' ')
+    .split(/\s+/).length;
+}
+
+function guideCard(g: GuideEntry, featured = false): HTMLElement {
+  const card = el('a', { class: featured ? 'card guide-card featured' : 'card guide-card', href: `/guides/${g.slug}/` });
+  card.setAttribute('data-gcat', g.category);
+  const meta = el('div', { class: 'guide-meta' });
+  meta.append(
+    el('span', { class: 'guide-cat' }, g.category),
+    el('span', {}, `${readMinutes(guideWords(g))} min read`),
+    el('span', {}, fmtMonth(g.updated)),
+  );
   card.append(
-    el('div', { class: 'card-title' }, g.h1.replace(/ —.*$/, '').slice(0, 60)),
-    el('div', { class: 'card-desc' }, g.description),
-    el('div', { class: 'card-desc' }, `${g.category} · Updated ${g.updated}`),
+    el('div', { class: 'card-icon' }, g.icon || '📖'),
+    el('div', {},
+      el('div', { class: 'card-title' }, g.h1.replace(/ —.*$/, '').slice(0, 60)),
+      el('div', { class: 'card-desc' }, g.description),
+      meta,
+    ),
   );
   return card;
 }
@@ -578,16 +579,46 @@ function guidesIndexPage(): HTMLElement {
     el('span', { 'aria-hidden': 'true' }, ' / '),
     el('span', { 'aria-current': 'page' }, 'Guides'),
   ));
-  root.append(el('h1', {}, 'Free PDF Guides & Tutorials'));
-  root.append(el('p', { class: 'lede' }, 'Step-by-step playbooks for compressing, merging, signing, and converting PDFs — written from the features above, tested against the live tools.'));
+  const hero = el('section', { class: 'guide-hero' });
+  hero.append(
+    el('div', { class: 'hero-eyebrow' }, '✦ Learn by doing'),
+    el('h1', {}, 'Free PDF Guides & Tutorials'),
+    el('p', { class: 'lede' }, 'Step-by-step playbooks written from the features above and tested against the live tools — from 1 MB portal limits to honest tool comparisons.'),
+  );
+  root.append(hero);
+  const pills = el('div', { class: 'pills', role: 'tablist', 'aria-label': 'Filter guides by type' });
   const grid = el('div', { class: 'grid' });
-  grid.append(el('p', { class: 'muted' }, 'Loading guides…'));
-  root.append(grid);
+  const skel = el('div', { class: 'skel-grid', 'aria-hidden': 'true' });
+  for (let i = 0; i < 6; i++) skel.append(el('div', { class: 'skel' }));
+  grid.append(skel);
+  root.append(pills, grid);
+  let guides: GuideEntry[] = [];
+  let activeType = 'All';
+  const paint = () => {
+    pills.innerHTML = '';
+    grid.innerHTML = '';
+    const types = ['All', ...new Set(guides.map((g) => g.category))];
+    for (const t of types) {
+      const n = t === 'All' ? guides.length : guides.filter((g) => g.category === t).length;
+      const b = el('button', { class: 'pillbtn', type: 'button', role: 'tab' }, `${t} · ${n}`);
+      b.setAttribute('aria-selected', String(t === activeType));
+      if (t === activeType) b.classList.add('on');
+      b.addEventListener('click', () => {
+        activeType = t;
+        paint();
+      });
+      pills.append(b);
+    }
+    const visible = guides.filter((x) => activeType === 'All' || x.category === activeType);
+    visible.forEach((g, i) => {
+      // Lead story: the first card spans wide on the unfiltered view.
+      grid.append(guideCard(g, activeType === 'All' && i === 0));
+    });
+  };
   void (async () => {
     try {
-      const guides = await loadGuides();
-      grid.innerHTML = '';
-      for (const g of guides) grid.append(guideCard(g));
+      guides = await loadGuides();
+      paint();
     } catch {
       grid.innerHTML = '';
       grid.append(el('p', { class: 'muted' }, 'Could not load guides. Check your connection and retry.'));
@@ -622,8 +653,52 @@ function guidePage(slug: string): HTMLElement {
         el('span', { 'aria-current': 'page' }, g.category),
       ));
       root.append(el('h1', {}, g.h1));
-      root.append(el('p', { class: 'muted' }, `${g.category} · Updated ${g.updated} · Free forever`));
-      for (const para of g.intro) root.append(el('p', {}, para));
+      const byline = el('p', { class: 'byline' });
+      byline.append(
+        el('span', { class: 'byline-cat' }, g.category),
+        el('span', {}, `${readMinutes(guideWords(g))} min read`),
+        el('span', {}, fmtMonth(g.updated)),
+      );
+      // Editorial share (URL only — never document content).
+      try {
+        const shareUrl = `${location.origin}/guides/${g.slug}/`;
+        if (typeof navigator.share === 'function') {
+          const shareBtn = el('button', { class: 'btn small', type: 'button' }, '⤴ Share guide');
+          shareBtn.addEventListener('click', () => {
+            void navigator.share({ title: g.title, url: shareUrl }).catch(() => {});
+          });
+          byline.append(shareBtn);
+        } else if (navigator.clipboard) {
+          const copyBtn = el('button', { class: 'btn small', type: 'button' }, '🔗 Copy link');
+          copyBtn.addEventListener('click', () => {
+            void navigator.clipboard.writeText(shareUrl).then(
+              () => showToast('Guide link copied.', undefined, undefined),
+              () => showToast('Copy blocked — long-press the address bar instead.'),
+            );
+          });
+          byline.append(copyBtn);
+        }
+      } catch {
+        /* share affordances are enhancement only */
+      }
+      root.append(byline);
+      // Reading progress (scroll-driven, no timers; removed on route leave).
+      const progress = el('div', { class: 'read-progress', 'aria-hidden': 'true' });
+      document.body.append(progress);
+      const onScroll = () => {
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+        progress.style.transform = `scaleX(${pct})`;
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+      onRouteLeave(() => {
+        window.removeEventListener('scroll', onScroll);
+        progress.remove();
+      });
+      // Readable measure: article body capped for comfortable line lengths.
+      const article = el('article', { class: 'article' });
+      for (const para of g.intro) article.append(el('p', { class: 'lede' }, para));
       // Jump links: the tool itself first (intent → action in one screen).
       const cta = el('div', { class: 'row' });
       for (const id of g.relatedTools.slice(0, 2)) {
@@ -643,8 +718,8 @@ function guidePage(slug: string): HTMLElement {
       root.append(toc);
       g.sections.forEach((s, i) => {
         const h = el('h2', { id: `section-${i}` }, s.h2);
-        root.append(h);
-        for (const para of s.body) root.append(el('p', {}, para));
+        article.append(h);
+        for (const para of s.body) article.append(el('p', {}, para));
       });
       const how = el('section', { class: 'faq' });
       how.append(el('h2', {}, 'Steps'));
@@ -653,7 +728,7 @@ function guidePage(slug: string): HTMLElement {
       how.append(ol);
       if (g.tips.length > 0) {
         how.append(el('h2', {}, 'Pro tips'));
-        const ul = el('ul', {});
+        const ul = el('ul', { class: 'tip-list' });
         for (const tip of g.tips) ul.append(el('li', {}, tip));
         how.append(ul);
       }
@@ -663,7 +738,8 @@ function guidePage(slug: string): HTMLElement {
         d.append(el('summary', {}, q), el('p', {}, a));
         how.append(d);
       }
-      root.append(how);
+      article.append(how);
+      root.append(article);
       const rel = el('div', { class: 'related' });
       rel.append(el('span', { class: 'muted' }, 'Try it now: '));
       for (const id of g.relatedTools) {
@@ -678,6 +754,26 @@ function guidePage(slug: string): HTMLElement {
         if (rg) more.append(el('a', { class: 'chip', href: `/guides/${rg.slug}/` }, rg.h1.replace(/ —.*$/, '').slice(0, 42)));
       }
       root.append(more);
+      // Sequential flow: previous / next guide for binge readers.
+      const idx = guides.findIndex((x) => x.slug === g.slug);
+      const prev = idx > 0 ? guides[idx - 1] : null;
+      const next = idx >= 0 && idx < guides.length - 1 ? guides[idx + 1] : null;
+      if (prev || next) {
+        const pager = el('nav', { class: 'pager', 'aria-label': 'More guides' });
+        if (prev) {
+          const a = el('a', { class: 'page-prev', href: `/guides/${prev.slug}/` });
+          a.append(el('small', {}, '← Previous'), el('strong', {}, prev.h1.replace(/ —.*$/, '').slice(0, 48)));
+          pager.append(a);
+        } else {
+          pager.append(el('span', {}));
+        }
+        if (next) {
+          const a = el('a', { class: 'page-next', href: `/guides/${next.slug}/` });
+          a.append(el('small', {}, 'Next →'), el('strong', {}, next.h1.replace(/ —.*$/, '').slice(0, 48)));
+          pager.append(a);
+        }
+        root.append(pager);
+      }
       root.append(footerNote());
     } catch {
       root.innerHTML = '';
@@ -765,7 +861,6 @@ function header(): HTMLElement {
     paletteBtn,
     themeBtn,
     installBtn,
-    offlineDot(),
   );
   inner.append(logo, nav);
   h.append(inner);

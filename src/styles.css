@@ -116,6 +116,7 @@ main { animation: rise 0.28s var(--ease-out); }
   color: var(--topbar-ink);
   position: sticky; top: 0; z-index: 10;
   backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
   border-bottom: 1px solid var(--line);
 }
 .topbar-inner { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; gap: 12px; }
@@ -207,10 +208,11 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9rem; }
 
 /* ---------- Category pills ---------- */
-.pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 24px 0 4px; }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 26px 0 14px; }
 .pillbtn {
   border: 1px solid var(--line); background: var(--surface); color: var(--muted);
   border-radius: 999px; padding: 8px 15px; font: inherit; font-size: 0.86rem; font-weight: 650; cursor: pointer;
+  white-space: nowrap;
   transition: all 0.1s var(--ease-out);
 }
 .pillbtn:hover { border-color: var(--brand); color: var(--ink); transform: translateY(-1px); }
@@ -218,7 +220,9 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 
 /* ---------- Tool cards ---------- */
 .cat h2 { margin: 28px 0 12px; font-size: 1.2rem; letter-spacing: -0.01em; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(245px, 1fr)); gap: 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(245px, 1fr)); gap: 14px; }
+/* Skeleton loader fills the grid it stands in for (no geometry jump). */
+.grid > .skel-grid { grid-column: 1 / -1; grid-template-columns: repeat(auto-fill, minmax(245px, 1fr)); }
 .card {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 18px 16px; text-decoration: none; color: inherit; box-shadow: var(--shadow-s);
@@ -232,7 +236,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
   transition: transform 0.12s var(--ease-spring);
 }
 .card:hover .card-icon { transform: scale(1.08) rotate(-4deg); }
-.card-title { font-weight: 750; margin: 10px 0 4px; letter-spacing: -0.01em; }
+.card-title { font-weight: 750; margin: 10px 0 4px; letter-spacing: -0.01em; padding-right: 26px; }
 .card-desc { color: var(--muted); font-size: 0.88rem; }
 .card::after {
   content: "→"; position: absolute; right: 16px; top: 18px; color: var(--cat);
@@ -397,7 +401,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .chip {
   border: 1px solid var(--line); background: var(--surface); color: var(--ink);
   border-radius: 999px; padding: 7px 13px; font: inherit; font-size: 0.85rem; text-decoration: none; font-weight: 600;
-  cursor: pointer;
+  cursor: pointer; white-space: nowrap;
   transition: all 0.1s var(--ease-out);
 }
 .chip:hover { border-color: var(--brand); color: var(--brand); transform: translateY(-1px); }
@@ -408,8 +412,6 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
   box-shadow: none; min-height: 32px;
 }
 .topnav .install-btn:hover, .topnav .palette-btn:hover, .topnav .theme-btn:hover { background: rgba(255, 255, 255, 0.2); }
-.netdot { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
-.netdot[data-off="true"] { color: var(--ok); }
 .install-banner {
   display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
@@ -471,6 +473,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .palette-overlay {
   position: fixed; inset: 0; z-index: 60; background: rgba(8, 9, 12, 0.55);
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex; justify-content: center; align-items: flex-start; padding: 12vh 16px 16px;
   animation: fadein 0.12s ease;
 }
@@ -502,6 +505,99 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .palette-kind { font-size: 0.78rem; color: var(--muted); }
 .palette-empty { padding: 18px; color: var(--muted); text-align: center; }
 .palette-hints { padding: 8px 14px; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--muted); }
+
+/* Guides hub + articles (premium editorial surface) */
+.guide-hero { padding: 36px 0 4px; position: relative; }
+.guide-hero::before {
+  content: ""; position: absolute; top: -20px; height: 260px; z-index: -1;
+  left: calc(50% - 50vw);
+  right: calc(50% - 50vw);
+  background:
+    radial-gradient(480px 180px at 15% 0%, rgba(225, 29, 72, 0.09), transparent 70%),
+    radial-gradient(520px 200px at 85% 10%, rgba(37, 99, 235, 0.09), transparent 70%);
+}
+[data-theme="dark"] .guide-hero::before {
+  background:
+    radial-gradient(480px 180px at 15% 0%, rgba(244, 63, 94, 0.13), transparent 70%),
+    radial-gradient(520px 200px at 85% 10%, rgba(96, 165, 250, 0.14), transparent 70%);
+}
+.guide-hero h1 { letter-spacing: -0.025em; font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 12px 0 8px; }
+.guide-card .card-icon { background: var(--gcat-tint, var(--tint-rose)); }
+.guide-card:hover { border-color: var(--gcat, var(--brand)); }
+.guide-card:hover::after { color: var(--gcat, var(--brand)); }
+.guide-card .card-title { font-size: 1.02rem; }
+.guide-card.featured { grid-column: span 2; display: flex; gap: 18px; align-items: center; }
+.guide-card.featured > div:last-child { flex: 1; min-width: 0; }
+.guide-card.featured .card-icon { width: 60px; height: 60px; font-size: 1.9rem; flex-shrink: 0; }
+.guide-card.featured .card-title { font-size: 1.2rem; margin-top: 0; }
+.guide-card.featured .guide-meta { margin-top: 8px; }
+@media (max-width: 560px) {
+  .guide-card.featured { display: block; }
+  .guide-card.featured .card-icon { width: 52px; height: 52px; margin-bottom: 10px; }
+}
+.guide-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; font-size: 0.78rem; color: var(--muted); }
+.guide-cat {
+  font-weight: 800; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--gcat, var(--brand)); background: var(--gcat-tint, var(--tint-rose));
+  border-radius: 6px; padding: 2px 8px;
+}
+[data-gcat="How-to"] { --gcat: #1d4ed8; --gcat-tint: #dbeafe; }
+[data-gcat="Use case"] { --gcat: #047857; --gcat-tint: #d1fae5; }
+[data-gcat="Comparison"] { --gcat: #b45309; --gcat-tint: #fef3c7; }
+[data-theme="dark"] [data-gcat="How-to"] { --gcat: #60a5fa; --gcat-tint: rgba(96, 165, 250, 0.16); }
+[data-theme="dark"] [data-gcat="Use case"] { --gcat: #34d399; --gcat-tint: rgba(52, 211, 153, 0.14); }
+[data-theme="dark"] [data-gcat="Comparison"] { --gcat: #fbbf24; --gcat-tint: rgba(251, 191, 36, 0.14); }
+
+/* Article readability: comfortable measure, clear hierarchy */
+.article { max-width: 74ch; }
+.article > p { font-size: 1.02rem; }
+.article h2 { margin: 30px 0 10px; letter-spacing: -0.015em; font-size: 1.35rem; }
+.byline { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 0.85rem; }
+.byline-cat {
+  font-weight: 800; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--brand); background: var(--tint-rose); border-radius: 6px; padding: 2px 8px;
+}
+.tip-list { list-style: none; padding: 0; display: grid; gap: 8px; margin: 10px 0; }
+.tip-list li {
+  background: var(--tint-mint); border: 1px solid var(--line); border-left: 4px solid var(--ok);
+  border-radius: var(--radius-s); padding: 10px 13px; font-size: 0.94rem;
+ }
+
+/* Guide cards: exact 3-line descriptions so rows scan evenly */
+.guide-card .card-desc {
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden; min-height: 4.1em;
+}
+
+/* Anchor jumps clear the sticky header */
+.article h2[id] { scroll-margin-top: 76px; }
+
+/* Reading progress (scroll-driven; no motion when reduced) */
+.read-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 70;
+  background: var(--brand-grad); transform-origin: left; transform: scaleX(0);
+}
+
+/* Previous / next article flow */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 26px; }
+.pager a {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; text-decoration: none; color: inherit; display: grid; gap: 2px;
+  transition: border-color 0.1s ease, transform 0.1s var(--ease-out);
+}
+.pager a:hover { border-color: var(--brand); transform: translateY(-2px); }
+.pager small { color: var(--muted); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.pager strong { letter-spacing: -0.01em; }
+.page-next { text-align: right; }
+
+/* Print: guides are reference docs — clean output, full FAQs */
+@media print {
+  .topbar, .footer, .toast, .palette-overlay, .read-progress, .pager,
+  .related, .actionbar, .progress, .install-banner, .skip-link { display: none !important; }
+  body { background: #fff; }
+  .article { max-width: none; }
+  details:not([open]) > :not(summary) { display: block; }
+}
 
 /* File-first staging (homepage drop → pick a tool) */
 .stage {

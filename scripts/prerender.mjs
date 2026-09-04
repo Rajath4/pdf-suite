@@ -170,7 +170,20 @@ function toolBody(entry, meta) {
   ].join('\n');
 }
 
-function guideBody(g) {
+const guideWords = (g) =>
+  [...g.intro, ...g.sections.flatMap((s) => [s.h2, ...s.body]), ...g.steps, ...g.tips, ...g.faqs.flat()]
+    .join(' ')
+    .split(/\s+/).length;
+
+const guideMinutes = (g) => Math.max(1, Math.ceil(guideWords(g) / 200));
+
+const fmtMonth = (iso) => {
+  const m = /^(\d{4})-(\d{2})-\d{2}$/.exec(String(iso).trim());
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return m && months[Number(m[2]) - 1] ? `${months[Number(m[2]) - 1]} ${m[1]}` : String(iso);
+};
+
+function guideBody(g, prev, next) {
   const url = `${SITE}/guides/${g.slug}/`;
   const toolLinks = g.relatedTools
     .map((id) => {
@@ -188,22 +201,28 @@ function guideBody(g) {
   return [
     `<div class="wrap tool"><nav aria-label="Breadcrumb"><a href="/">All tools</a> / <a href="/guides/">Guides</a> / <span>${esc(g.category)}</span></nav>`,
     `<h1>${esc(g.h1)}</h1>`,
-    `<p><small>${esc(g.category)} · Updated ${esc(g.updated)} · Free forever</small></p>`,
+    `<p class="byline"><span class="byline-cat">${esc(g.category)}</span><span>${guideMinutes(g)} min read</span><span>${esc(fmtMonth(g.updated))}</span></p>`,
+    `<article class="article">`,
     ...g.intro.map((p) => `<p>${esc(p)}</p>`),
     `<p><strong>Try it now:</strong> ${toolLinks}</p>`,
     ...g.sections.flatMap((s) => [`<h2>${esc(s.h2)}</h2>`, ...s.body.map((p) => `<p>${esc(p)}</p>`)]),
-    `<h2>Steps</h2><ol>${g.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>`,
-    `<h2>Pro tips</h2><ul>${g.tips.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>`,
+    `<h2>Steps</h2><ol class="howto">${g.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>`,
+    `<h2>Pro tips</h2><ul class="tip-list">${g.tips.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>`,
     `<h2>Frequently asked questions</h2>`,
     g.faqs.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('\n'),
+    `</article>`,
     `<h2>Related guides</h2><p>${guideLinks}</p>`,
+    prev || next
+      ? `<nav aria-label="More guides"><p>${prev ? `<a href="/guides/${prev.slug}/">← Previous: ${esc(prev.h1.split(' — ')[0].slice(0, 44))}</a>` : ''}${prev && next ? ' · ' : ''}${next ? `<a href="/guides/${next.slug}/">Next: ${esc(next.h1.split(' — ')[0].slice(0, 44))} →</a>` : ''}</p></nav>`
+      : '',
     `<p><a href="/guides/">← All PDF guides</a> · Canonical: <a href="${url}">${url}</a></p></div>`,
   ].join('\n');
 }
 
 function guidesIndexBody() {
   const cards = GUIDES.map(
-    (g) => `<a href="/guides/${g.slug}/"><strong>${esc(g.h1.split(' — ')[0])}</strong><br><small>${esc(g.description)}</small></a>`,
+    (g) =>
+      `<a class="card guide-card" data-gcat="${esc(g.category)}" href="/guides/${g.slug}/"><div class="card-icon">${esc(g.icon || '📖')}</div><div class="card-title">${esc(g.h1.split(' — ')[0].slice(0, 60))}</div><div class="card-desc">${esc(g.description)}</div><div class="guide-meta"><span class="guide-cat">${esc(g.category)}</span><span>${guideMinutes(g)} min read</span><span>${esc(fmtMonth(g.updated))}</span></div></a>`,
   ).join('\n');
   return [
     `<div class="wrap"><h1>Free PDF Guides &amp; Tutorials</h1>`,
@@ -335,14 +354,20 @@ for (const entry of SEO.tools) {
   sitemapUrls.push({ loc: canonical, priority: '0.8' });
   console.log('prerendered /guides/');
 }
-for (const g of GUIDES) {
+for (const [gi, g] of GUIDES.entries()) {
   const canonical = `${SITE}/guides/${g.slug}/`;
   const extra = guideHead(g);
   const dir = join(DIST, 'guides', g.slug);
   mkdirSync(dir, { recursive: true });
   writeFileSync(
     join(dir, 'index.html'),
-    buildPage({ title: g.title, description: g.description, canonical, body: guideBody(g), extra }),
+    buildPage({
+      title: g.title,
+      description: g.description,
+      canonical,
+      body: guideBody(g, gi > 0 ? GUIDES[gi - 1] : null, gi < GUIDES.length - 1 ? GUIDES[gi + 1] : null),
+      extra,
+    }),
   );
   sitemapUrls.push({ loc: canonical, priority: '0.7' });
   console.log(`prerendered /guides/${g.slug}/`);

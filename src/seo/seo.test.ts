@@ -79,6 +79,7 @@ describe('SEO content library', () => {
 
 interface GuideEntry {
   slug: string;
+  icon: string;
   title: string;
   description: string;
   h1: string;
@@ -104,6 +105,8 @@ describe('Guides library (content velocity)', () => {
     for (const g of guides) {
       expect(g.slug, g.slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
       expect(g.updated, g.slug).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(g.icon?.length, `${g.slug} icon`).toBeGreaterThan(0);
+      expect(['How-to', 'Use case', 'Comparison'].includes(g.category), `${g.slug} category`).toBe(true);
     }
   });
 
