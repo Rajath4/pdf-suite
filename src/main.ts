@@ -882,11 +882,6 @@ function toolPage(id: string): HTMLElement {
   head.append(tile, el('h1', {}, current.title));
   root.append(head);
   root.append(el('p', { class: 'lede' }, current.description));
-  const chips = el('div', { class: 'meta-chips' });
-  const catChip = el('span', { class: 'meta-chip hot' }, current.category);
-  catChip.setAttribute('data-cat', current.category);
-  chips.append(catChip);
-  root.append(chips);
 
   // iLovePDF-style 3-step flow: Upload → Adjust → Download.
   const steps = el('ol', { class: 'steps' });

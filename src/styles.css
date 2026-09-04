@@ -271,12 +271,6 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
   background: var(--cat-tint); box-shadow: var(--shadow-s);
 }
 .tool-head h1 { margin: 0; letter-spacing: -0.02em; font-size: clamp(1.5rem, 3.4vw, 2.1rem); }
-.meta-chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 2px; }
-.meta-chip {
-  font-size: 0.78rem; font-weight: 700; border: 1px solid var(--line);
-  background: var(--surface); border-radius: 999px; padding: 3px 11px; color: var(--muted);
-}
-.meta-chip.hot { color: var(--cat); border-color: var(--cat); }
 
 /* Dropzone 2.0 */
 .drop {
