@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { baseName, classifyMergeFile, fmtMonth, formatBytes, isPdfName, parseProgress, pushRecent, readMinutes, withExt } from './fileUtils.js';
+import { baseName, classifyMergeFile, fileLimitBytes, fmtMonth, formatBytes, isPdfName, parseProgress, pushRecent, readMinutes, withExt } from './fileUtils.js';
 
 describe('formatBytes', () => {
   it('formats bytes, KB and MB', () => {
@@ -90,5 +90,15 @@ describe('fmtMonth', () => {
     expect(fmtMonth('2025-01-31')).toBe('Jan 2025');
     expect(fmtMonth('garbage')).toBe('garbage');
     expect(fmtMonth('2026-13-01')).toBe('2026-13-01');
+  });
+});
+
+describe('fileLimitBytes', () => {
+  // Node has no deviceMemory → unknown-device branch (250 MB base).
+  it('caps raster-heavy tools lower than shuffling tools', () => {
+    expect(fileLimitBytes('merge')).toBe(250 * 1024 * 1024);
+    expect(fileLimitBytes('compress')).toBe(200 * 1024 * 1024);
+    expect(fileLimitBytes('ocr')).toBe(200 * 1024 * 1024);
+    expect(fileLimitBytes('')).toBe(250 * 1024 * 1024);
   });
 });

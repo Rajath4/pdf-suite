@@ -108,6 +108,37 @@ export function pushRecent(list: string[], id: string, max = 5): string[] {
   return [id, ...list.filter((x) => x !== id)].slice(0, Math.max(1, max));
 }
 
+/**
+ * Why any cap exists: a PDF explodes in memory — pdf-lib's object model runs
+ * 2–5× file size in JS heap, and one 300-DPI page bitmap is ~35 MB. Mobile
+ * browsers kill tabs around 1–2 GB. No guard = frozen tab = lost work.
+ *
+ * But a flat cap punishes capable desktops, so the limit adapts two ways:
+ * device RAM (via navigator.deviceMemory) and operation cost — rasterizing
+ * tools hold full-page bitmaps and stay capped low, while page-shuffling
+ * tools (merge, split, organize…) can safely take far more.
+ */
+const MB = 1024 * 1024;
+
+/** Tools that rasterize pages into bitmaps — memory-hungry by nature. */
+const HEAVY_TOOLS = new Set(['compress', 'pdf-to-jpg', 'ocr', 'invert', 'pdf-to-pptx']);
+
+export function deviceMemoryGB(): number | null {
+  const nav =
+    typeof navigator === 'undefined'
+      ? undefined
+      : (navigator as Navigator & { deviceMemory?: number });
+  const dm = nav?.deviceMemory;
+  return typeof dm === 'number' && dm > 0 ? dm : null;
+}
+
+export function fileLimitBytes(toolId = ''): number {
+  const dm = deviceMemoryGB();
+  const baseMB = dm == null ? 250 : dm <= 2 ? 100 : dm <= 4 ? 250 : 500;
+  if (HEAVY_TOOLS.has(toolId)) return Math.min(baseMB, 200) * MB;
+  return baseMB * MB;
+}
+
 /** Editorial read-time estimate (words per minute), minimum 1 minute. */
 export function readMinutes(wordCount: number, wpm = 200): number {
   if (!Number.isFinite(wordCount) || wordCount <= 0) return 1;

@@ -33,7 +33,8 @@ batch Compress / Protect / Watermark / Page numbers / Headers / Rotate / Flatten
   Share/Copy actions, offline/airplane-mode trust copy.
 - **File-first flows** — drop a file on the homepage, pick the tool after;
   outputs chain into the next tool ("Continue in Compress") with the file
-  carried along, offline. Limits stated upfront (150 MB/file).
+  carried along, offline. Limits stated upfront and adapt to the device
+  (up to 500 MB/file on desktops; raster-heavy tools stay lower).
 
 ## Quick start
 
@@ -91,7 +92,7 @@ Principles:
 ## Privacy & limits
 
 - Everything runs in the tab via `pdf-lib`, `pdf.js`, `Tesseract.js`, `JSZip`, `mammoth`, `docx`, `xlsx`.
-- Practical limit is device RAM (~100–150 MB PDFs on desktop).
+- Practical limit adapts to device RAM and operation (up to 500 MB/file on desktops).
 - Rasterizing tools (Heavy compress, Invert) trade text-selectability for size/color — noted in UI.
 - Password tools use PDF AES encryption; decryption happens locally.
 

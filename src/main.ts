@@ -1,7 +1,7 @@
 import './styles.css';
 import { CATEGORIES, TOOLS, getTool, searchTools, toolSlug, toolIdFromSlug, nextTools } from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
-import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent, isPdfName, readMinutes, fmtMonth } from './lib/fileUtils.js';
+import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent, isPdfName, readMinutes, fmtMonth, fileLimitBytes } from './lib/fileUtils.js';
 import { UserError } from './types.js';
 import type { ToolDef } from './types.js';
 import { registerSW } from 'virtual:pwa-register';
@@ -21,9 +21,6 @@ const prefetchEngines = () => {
   loadActions().catch(() => {});
   loadRender().catch(() => {});
 };
-
-/** Enterprise guardrail: hard cap per file so a huge PDF can't OOM a tab. */
-const MAX_FILE_BYTES = 150 * 1024 * 1024;
 
 // ---------- Cross-route file handoff (file-first flows + tool chaining) ----------
 // Files live only in memory and never touch disk/network. Staged by the
@@ -952,7 +949,7 @@ function homePage(): HTMLElement {
     el('span', { class: 'stage-icon', 'aria-hidden': 'true' }, '⤓'),
     el('span', {},
       el('strong', {}, 'Drop a PDF here to start'),
-      el('span', { class: 'muted' }, ' — then pick what to do with it. Max 150 MB per file.'),
+      el('span', { class: 'muted' }, ` — then pick what to do with it. Max ${formatBytes(fileLimitBytes())} per file on this device.`),
     ),
   );
   stageZone.append(stageInput);
@@ -994,9 +991,10 @@ function homePage(): HTMLElement {
   };
   const takeStaged = (list: FileList | null | undefined) => {
     if (!list || list.length === 0) return;
+    const cap = fileLimitBytes();
     const files = [...list].filter((f) => {
-      if (f.size > MAX_FILE_BYTES) {
-        showToast(`"${f.name}" exceeds the ${formatBytes(MAX_FILE_BYTES)} limit and was skipped.`);
+      if (f.size > cap) {
+        showToast(`"${f.name}" exceeds the ${formatBytes(cap)} per-file limit on this device and was skipped.`);
         return false;
       }
       return true;
@@ -1236,7 +1234,7 @@ function homePage(): HTMLElement {
   faq.append(el('h2', {}, 'How it works'));
   const items: [string, string][] = [
     ['Are my files uploaded anywhere?', 'No. Every tool runs with JavaScript in your tab. Prove it: load any tool, then turn on airplane mode — everything still works.'],
-    ['Is there a watermark or limit?', 'No watermark, no account, no daily cap. Practical limit is your device memory (~100–150 MB PDFs on desktop).'],
+    ['Is there a watermark or limit?', 'No watermark, no account, no daily cap. Per-file size adapts to your device (up to 500 MB on desktops) to keep the tab stable.'],
     ['Which tools are included?', '36 tools: merge with page ranges and photos, split, compress to exact sizes, sign, annotate, crop, fill forms, convert to and from Word, Excel, and PowerPoint, OCR in 14 languages, protect and unlock, redact, extract text and images, compare, repair, scan — plus step-by-step guides.'],
     ['Password-protected PDFs?', 'Unlock first with Security → Unlock PDF, then use any other tool, then re-protect if needed.'],
   ];
@@ -1324,7 +1322,7 @@ function toolPage(id: string): HTMLElement {
     el('div', { class: 'drop-icon', 'aria-hidden': 'true' }, '📄'),
     el('div', { class: 'drop-title' }, current.accept ? 'Drop files here or click to browse' : 'No file needed — or optionally drop one'),
     el('div', { class: 'muted' }, current.multiple ? 'You can add several files — batch supported where noted.' : 'One file at a time for this tool.'),
-    el('div', { class: 'muted' }, `Max ${formatBytes(MAX_FILE_BYTES)} per file · Files never leave this browser.`),
+    el('div', { class: 'muted' }, `Max ${formatBytes(fileLimitBytes(current.id))} per file here · Files never leave this browser.`),
     formats,
   );
   const input = document.createElement('input');
@@ -1361,11 +1359,12 @@ function toolPage(id: string): HTMLElement {
 
   const listBox = el('div', { class: 'filelist' });
   function addFiles(next: File[]) {
+    const cap = fileLimitBytes(current.id);
     const accepted: File[] = [];
     for (const f of next) {
-      if (f.size > MAX_FILE_BYTES) {
+      if (f.size > cap) {
         setStatus(
-          `"${f.name}" is ${formatBytes(f.size)} — over the ${formatBytes(MAX_FILE_BYTES)} per-file limit. Split it first or use a desktop tool.`,
+          `"${f.name}" is ${formatBytes(f.size)} — over the ${formatBytes(cap)} per-file limit for ${current.title} on this device. Split it first, or use a desktop on larger files.`,
           'error',
         );
         continue;
