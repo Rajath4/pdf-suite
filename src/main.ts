@@ -829,6 +829,10 @@ document.addEventListener('click', (e) => {
   render();
 });
 window.addEventListener('popstate', render);
+// Version cache must live above the first render() call: footer() reaches it
+// synchronously, and a `let` declared below would throw a TDZ error that
+// aborts the whole first paint (caught by E2E on every page).
+let cachedVersion: string | null = null;
 render();
 
 // ---------- Header / footer / home ----------
@@ -865,7 +869,6 @@ function header(): HTMLElement {
   return h;
 }
 
-let cachedVersion: string | null = null;
 async function appVersion(): Promise<string> {
   if (cachedVersion) return cachedVersion;
   try {

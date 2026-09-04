@@ -112,7 +112,9 @@ export default defineConfig({
         navigateFallback: 'index.html',
         // Main bundle + pdf.js worker exceed workbox's 2 MB default.
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
-        globPatterns: ['**/*.{js,css,html,json,txt,webmanifest,png,svg,mjs}'],
+        // The qpdf engine (.wasm) lazy-loads on first encrypt/decrypt use and
+        // must be precached too, or offline-after-install breaks for it.
+        globPatterns: ['**/*.{js,css,html,json,txt,webmanifest,png,svg,mjs,wasm}'],
         runtimeCaching: [
           {
             // Tesseract.js lazily fetches its engine + language packs from CDNs

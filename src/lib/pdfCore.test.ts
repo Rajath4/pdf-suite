@@ -333,3 +333,27 @@ describe('pdf engine round-trips', () => {
     expect(skipped).toBe(1);
   });
 });
+
+describe('encrypt/decrypt round-trip (real AES-256)', () => {
+  it('produces a genuinely locked file that rejects wrong passwords', async () => {
+    const { encryptPdf, decryptPdf } = await import('./pdfCore.js');
+    const enc = await encryptPdf(await onePagePdf('secret'), 'right-pw');
+    const raw = Buffer.from(enc).toString('latin1');
+    expect(raw.includes('/Encrypt')).toBe(true);
+    await expect(decryptPdf(enc.buffer.slice(enc.byteOffset, enc.byteOffset + enc.byteLength) as ArrayBuffer, 'wrong-pw')).rejects.toThrow(/Wrong password/);
+  });
+
+  it('rejects short passwords before touching crypto', async () => {
+    const { encryptPdf } = await import('./pdfCore.js');
+    await expect(encryptPdf(await onePagePdf('x'), 'abc')).rejects.toThrow(/at least 4/);
+  });
+
+  it('unlocks with the right password into a freely-openable file', async () => {
+    const { encryptPdf, decryptPdf } = await import('./pdfCore.js');
+    const locked = await encryptPdf(await onePagePdf('secret'), 'right-pw');
+    const buf = locked.buffer.slice(locked.byteOffset, locked.byteOffset + locked.byteLength) as ArrayBuffer;
+    const out = await decryptPdf(buf, 'right-pw');
+    const reopened = await PDFDocument.load(out);
+    expect(reopened.getPageCount()).toBe(1);
+  });
+});

@@ -384,23 +384,18 @@ export async function encryptPdf(
   ownerPassword?: string,
 ): Promise<Uint8Array> {
   if (userPassword.length < 4) throw new UserError('Password must be at least 4 characters.');
-  const doc = await loadPdf(bytes);
-  return (doc.save as (opts: never) => Promise<Uint8Array>)({
-    useObjectStreams: true,
-    userPassword,
-    ownerPassword: ownerPassword || userPassword,
-  } as never);
+  // Real AES-256 via qpdf. (pdf-lib cannot write encryption — an older
+  // implementation silently produced unprotected files.)
+  const { qpdfEncrypt } = await import('./qpdf.js');
+  return qpdfEncrypt(bytes, userPassword, ownerPassword);
 }
 
 export async function decryptPdf(bytes: ArrayBuffer, password: string): Promise<Uint8Array> {
   if (!password) throw new UserError('Enter the current PDF password.');
-  let doc: PDFDocument;
-  try {
-    doc = await PDFDocument.load(bytes, { password } as never);
-  } catch {
-    throw new UserError('Wrong password or unreadable file.');
-  }
-  return doc.save({ useObjectStreams: true });
+  // qpdf enforces passwords strictly (unlike pdf-lib's loader, which opens
+  // anything) — wrong passwords reject here instead of yielding bogus files.
+  const { qpdfDecrypt } = await import('./qpdf.js');
+  return qpdfDecrypt(bytes, password);
 }
 
 export async function repairPdf(bytes: ArrayBuffer): Promise<{ data: Uint8Array; warnings: string[] }> {
