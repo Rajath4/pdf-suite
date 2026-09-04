@@ -61,8 +61,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png'],
       manifest: {
-        name: 'PDF Suite — Free Offline PDF Tools',
-        short_name: 'PDF Suite',
+        name: 'PDF Haven — Free Offline PDF Tools',
+        short_name: 'PDF Haven',
         description:
           'Merge, split, compress, convert, edit and secure PDFs entirely on your device. No upload, no watermark.',
         theme_color: '#e11d48',

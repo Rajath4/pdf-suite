@@ -56,7 +56,7 @@
     "Unlock password-protected PDFs first, then merge, then re-protect if needed.",
     "Merging many scans? Compress afterward to keep the file emailable."
    ],
-   "title": "How to Merge PDFs Free (2026 Guide) | PDF Suite",
+   "title": "How to Merge PDFs Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "⧉"
   },
@@ -116,7 +116,7 @@
     "Always keep the original — compression to tiny sizes is one-way.",
     "Need many certificates under caps? Batch mode compresses whole folders."
    ],
-   "title": "Compress PDF Under 1 MB Free (2026 Guide) | PDF Suite",
+   "title": "Compress PDF Under 1 MB Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "🗜"
   },
@@ -176,7 +176,7 @@
     "Use a transparent PNG upload for the cleanest stamp over document text.",
     "After signing contracts, Protect with a password before emailing."
    ],
-   "title": "How to Sign a PDF Free (2026 Guide) | PDF Suite",
+   "title": "How to Sign a PDF Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "✒"
   },
@@ -236,7 +236,7 @@
     "Splitting before compressing beats compressing a huge file every time.",
     "Name parts clearly — 'contract-odd-pages.pdf' beats 'split-1.pdf'."
    ],
-   "title": "How to Split a PDF Free (2026 Guide) | PDF Suite",
+   "title": "How to Split a PDF Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "✂"
   },
@@ -296,7 +296,7 @@
     "Filenames include page numbers — perfect for rebuilding catalogs.",
     "Extraction beats screenshots: no UI chrome, no scaling loss."
    ],
-   "title": "Extract Images from PDF Free (2026 Guide) | PDF Suite",
+   "title": "Extract Images from PDF Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "🖼"
   },
@@ -356,7 +356,7 @@
     "300 DPI straight scans beat phone photos of curved pages.",
     "Batch-unlock first: OCR needs readable, unprotected files."
    ],
-   "title": "How to OCR a PDF Free (2026 Guide) | PDF Suite",
+   "title": "How to OCR a PDF Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "👁"
   },
@@ -416,7 +416,7 @@
     "For tables, use PDF to Excel instead — it preserves rows and columns.",
     "Convert once, then keep the .docx as your editable master."
    ],
-   "title": "Convert PDF to Word Free (2026 Guide) | PDF Suite",
+   "title": "Convert PDF to Word Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "📝"
   },
@@ -476,7 +476,7 @@
     "Batch-protect entire folders before uploading to shared drives.",
     "After redacting, always re-protect before sending."
    ],
-   "title": "Password Protect PDF Free (2026 Guide) | PDF Suite",
+   "title": "Password Protect PDF Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "🔒"
   },
@@ -537,7 +537,7 @@
     "Re-protect immediately if the unlocked file will be shared.",
     "On shared computers, delete the unlocked copy when finished — and empty the trash."
    ],
-   "title": "Unlock PDF Free (2026 Guide) | PDF Suite",
+   "title": "Unlock PDF Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "🔓"
   },
@@ -597,7 +597,7 @@
     "Pair with Redact + Flatten for truly safe sharing of sensitive files.",
     "Set final metadata on publish-ready documents — it aids search and archiving."
    ],
-   "title": "Remove PDF Metadata Free (2026 Guide) | PDF Suite",
+   "title": "Remove PDF Metadata Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "🕵"
   },
@@ -658,7 +658,7 @@
     "For Excel → PDF round-trips, use Excel to PDF.",
     "For monthly statements, save the verified column mapping once and reuse it every cycle."
    ],
-   "title": "Convert PDF to Excel Free (2026 Guide) | PDF Suite",
+   "title": "Convert PDF to Excel Free (2026 Guide) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "📊"
   },
@@ -718,7 +718,7 @@
     "Screenshot the final sizes as proof before the deadline rush.",
     "Keep a folder of originals — never submit your only copy."
    ],
-   "title": "Compress PDFs for Job Applications (2026) | PDF Suite",
+   "title": "Compress PDFs for Job Applications (2026) | PDF Haven",
    "updated": "2026-09-04",
    "icon": "🎓"
   },
@@ -778,14 +778,14 @@
     "Test with a real sensitive file's non-sensitive twin first.",
     "Bookmark the winner — and install it if it supports offline use."
    ],
-   "title": "Best Free PDF Tools Compared 2026 | PDF Suite",
+   "title": "Best Free PDF Tools Compared 2026 | PDF Haven",
    "updated": "2026-09-04",
    "icon": "⚖️"
   },
   {
    "slug": "why-is-my-pdf-so-big",
    "icon": "🔍",
-   "title": "Why Is My PDF So Big? Shrink It Free (2026 Guide) | PDF Suite",
+   "title": "Why Is My PDF So Big? Shrink It Free (2026 Guide) | PDF Haven",
    "description": "Two-page PDF weighing 9 MB? Diagnose KB-per-page, fix phone scans, decks, and fonts, then compress free. No signup.",
    "h1": "Why Is My PDF So Big? (And How to Actually Shrink It)",
    "category": "How-to",
@@ -852,7 +852,7 @@
   {
    "slug": "send-giant-pdf-email",
    "icon": "📦",
-   "title": "Send a Giant PDF by Email (2026 Guide) | PDF Suite",
+   "title": "Send a Giant PDF by Email (2026 Guide) | PDF Haven",
    "description": "Gmail bounces PDFs over 25 MB and office servers often cap at 10 MB. Split giant PDFs into email-size chunks and rejoin them byte-identical — offline, no signup.",
    "h1": "How to Send a Giant PDF by Email Without Bounces",
    "category": "Use case",
@@ -927,7 +927,7 @@
   {
    "slug": "shrink-huge-pdf-no-crash",
    "icon": "🗜",
-   "title": "Shrink a Huge PDF Without Crashing (2026) | PDF Suite",
+   "title": "Shrink a Huge PDF Without Crashing (2026) | PDF Haven",
    "description": "Big PDFs freeze tabs because browsers cap memory per tab. Shrink huge PDFs with page-by-page streaming into batched files up to ~1 GB — free, private, no uploads.",
    "h1": "How to Shrink a Huge PDF Without Crashing Your Browser",
    "category": "How-to",

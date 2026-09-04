@@ -1,4 +1,4 @@
-# Contributing to PDF Suite
+# Contributing to PDF Haven
 
 Thanks for helping — the most valuable contribution is a **well-written bug report**. Code welcome too.
 
@@ -6,7 +6,7 @@ Thanks for helping — the most valuable contribution is a **well-written bug re
 
 ```bash
 git clone https://github.com/Rajath4/pdf-suite.git
-cd pdf-suite
+cd pdf-haven
 npm install
 npm run dev      # http://localhost:5173
 npm test         # must stay green

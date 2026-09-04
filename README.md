@@ -1,4 +1,4 @@
-# PDF Suite — Open-Source Enterprise PDF Platform
+# PDF Haven — Open-Source Enterprise PDF Platform
 
 [![CI](https://github.com/Rajath4/pdf-suite/actions/workflows/ci.yml/badge.svg)](https://github.com/Rajath4/pdf-suite/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Rajath4/pdf-suite/blob/main/LICENSE)
@@ -73,7 +73,7 @@ Docker + hardened nginx; strict CSP; CI; signed build stamps.
 
 ```bash
 git clone https://github.com/Rajath4/pdf-suite.git
-cd pdf-suite
+cd pdf-haven
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # outputs static dist/

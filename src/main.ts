@@ -141,7 +141,7 @@ function isEngaged(): boolean {
 function maybeSuggestInstall(): void {
   if (isInstalled() || installDismissed()) return;
   if (deferredInstall) {
-    showToast('Like it? Install PDF Suite for 1-tap offline access.', 'Install', () => {
+    showToast('Like it? Install PDF Haven for 1-tap offline access.', 'Install', () => {
       void promptInstall();
     });
   } else {
@@ -163,7 +163,7 @@ window.addEventListener('appinstalled', () => {
   document.querySelectorAll<HTMLButtonElement>('.install-btn').forEach((b) => {
     b.hidden = true;
   });
-  showToast('Installed — find PDF Suite on your home screen or app list.');
+  showToast('Installed — find PDF Haven on your home screen or app list.');
 });
 
 async function promptInstall(): Promise<void> {
@@ -498,7 +498,7 @@ async function syncRouteMeta(route: Route): Promise<void> {
         document.title = entry.title;
         document.querySelector('meta[name="description"]')?.setAttribute('content', entry.description);
       } else if (route.kind === 'guides') {
-        document.title = 'Free PDF Guides & Tutorials | PDF Suite';
+        document.title = 'Free PDF Guides & Tutorials | PDF Haven';
         document.querySelector('meta[name="description"]')?.setAttribute(
           'content',
           'Step-by-step PDF guides: merge, compress, sign, OCR, convert and more. Free, private, no signup.',
@@ -841,7 +841,7 @@ function header(): HTMLElement {
   const h = el('header', { class: 'topbar' });
   const inner = el('div', { class: 'wrap topbar-inner' });
   const logo = el('a', { class: 'logo', href: '/' });
-  logo.append(el('span', { class: 'logo-mark' }, 'PDF'), el('span', {}, 'PDF Suite'));
+  logo.append(el('span', { class: 'logo-mark' }, 'PDF'), el('span', {}, 'PDF Haven'));
   const nav = el('nav', { class: 'topnav' });
   const paletteBtn = el('button', { class: 'btn small palette-btn', type: 'button', title: 'Jump to any tool (Ctrl/⌘ K)' }, '🔍 Tools');
   const kbd = el('kbd', { class: 'kbd' }, '⌘K');
@@ -940,7 +940,7 @@ function homePage(): HTMLElement {
   const h1 = el('h1', {});
   h1.append('Every PDF tool you need. ', el('span', { class: 'grad' }, 'Private by design.'));
   hero.append(
-    el('div', { class: 'hero-eyebrow' }, '✦ 36 free tools · no signup · no watermark'),
+    el('div', { class: 'hero-eyebrow' }, '✦ 37 free tools · no signup · no watermark'),
     h1,
     el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, nothing is tracked, and it installs for offline use.'),
   );
@@ -1067,7 +1067,7 @@ function homePage(): HTMLElement {
   if (isEngaged() && !installDismissed() && !isInstalled()) {
     const installBanner = el('div', { class: 'install-banner' });
     installBanner.append(
-      el('span', {}, '📲 Install PDF Suite for offline use — works like a native app, no app store needed.'),
+      el('span', {}, '📲 Install PDF Haven for offline use — works like a native app, no app store needed.'),
     );
     const installCta = el('button', { class: 'btn primary small', type: 'button' }, 'Install app');
     installCta.addEventListener('click', () => {
@@ -1183,12 +1183,12 @@ function homePage(): HTMLElement {
       const points = (SEO as unknown as { home: { points: [string, string, string][] } }).home.points;
       if (!points?.length) return;
       const section = el('section', { class: 'trust' });
-      section.append(el('h2', {}, 'Why PDF Suite instead of typical online tools'));
+      section.append(el('h2', {}, 'Why PDF Haven instead of typical online tools'));
       section.append(el('p', { class: 'muted' }, 'No accounts to leak, no servers to breach, no counters to hit — the difference is architectural, not promotional.'));
       const table = document.createElement('table');
       const thead = document.createElement('thead');
       const headRow = document.createElement('tr');
-      for (const h of ['', 'Typical online tools', 'PDF Suite']) {
+      for (const h of ['', 'Typical online tools', 'PDF Haven']) {
         const th = document.createElement('th');
         th.textContent = h;
         headRow.append(th);

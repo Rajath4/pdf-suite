@@ -1,4 +1,4 @@
-# Deploying PDF Suite
+# Deploying PDF Haven
 
 Any static host works — the build output is `dist/` (no server code).
 HTTPS is **required** in production (service workers and installability only
@@ -11,7 +11,7 @@ Each of the 37 tools is prerendered at build time to a real landing page
 FAQ/HowTo/Breadcrumb schema, and a sitemap — hash URLs are legacy-redirected.
 
 1. **Set your domain:** `SITE_URL=https://yourdomain.com npm run build`
-   (default `https://pdfsuite.app`). It bakes canonicals, sitemap, and OG tags.
+   (default `https://pdfhaven.app`). It bakes canonicals, sitemap, and OG tags.
 2. **Serve at the domain root.** The build uses absolute paths; subpath hosting
    (e.g. `example.com/app/`) needs a `base` change in `vite.config.ts` + rebuild.
 3. **Google Search Console:** add the property, submit `/sitemap.xml`, then use
@@ -25,8 +25,8 @@ FAQ/HowTo/Breadcrumb schema, and a sitemap — hash URLs are legacy-redirected.
 ## Option A — Docker (recommended for enterprise/VPS)
 
 ```bash
-docker build -t pdf-suite .
-docker run -p 8080:80 pdf-suite
+docker build -t pdf-haven .
+docker run -p 8080:80 pdf-haven
 # → http://localhost:8080
 ```
 

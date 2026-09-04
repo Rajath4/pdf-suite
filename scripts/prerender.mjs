@@ -7,7 +7,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const SITE = (process.env.SITE_URL || 'https://pdfsuite.app').replace(/\/+$/, '');
+const SITE = (process.env.SITE_URL || 'https://pdfhaven.app').replace(/\/+$/, '');
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
 const SEO = JSON.parse(readFileSync(join(ROOT, 'src', 'seo', 'content.json'), 'utf8'));
@@ -114,14 +114,14 @@ function headTags({ title, description, canonical, faqs, breadcrumbs, howto, art
       datePublished: article.updated,
       dateModified: article.updated,
       mainEntityOfPage: article.url,
-      author: { '@type': 'Organization', name: 'PDF Suite' },
+      author: { '@type': 'Organization', name: 'PDF Haven' },
     });
   }
   return [
     `<link rel="canonical" href="${canonical}" />`,
     `<meta name="robots" content="index, follow" />`,
     `<meta property="og:type" content="website" />`,
-    `<meta property="og:site_name" content="PDF Suite" />`,
+    `<meta property="og:site_name" content="PDF Haven" />`,
     `<meta property="og:title" content="${esc(title)}" />`,
     `<meta property="og:description" content="${esc(description)}" />`,
     `<meta property="og:url" content="${canonical}" />`,
@@ -240,7 +240,7 @@ function guideHead(g) {
     canonical,
     faqs: g.faqs,
     breadcrumbs: [
-      { name: 'PDF Suite', url: `${SITE}/` },
+      { name: 'PDF Haven', url: `${SITE}/` },
       { name: 'Guides', url: `${SITE}/guides/` },
       { name: g.h1.split(' — ')[0].slice(0, 60), url: canonical },
     ],
@@ -264,8 +264,8 @@ function homeBody() {
     `<p>${esc(SEO.home.intro)}</p>`,
     `<h2>All free PDF tools</h2><div>${cards}</div>`,
     `<h2>Popular PDF guides</h2><p>${GUIDES.slice(0, 6).map((g) => `<a href="/guides/${g.slug}/">${esc(g.h1.split(' — ')[0].slice(0, 44))}</a>`).join(' · ')} · <a href="/guides/">All guides →</a></p>`,
-    `<h2>Why PDF Suite instead of typical online tools</h2>`,
-    `<table><thead><tr><th></th><th>Typical online tools</th><th>PDF Suite</th></tr></thead><tbody>${rows}</tbody></table>`,
+    `<h2>Why PDF Haven instead of typical online tools</h2>`,
+    `<table><thead><tr><th></th><th>Typical online tools</th><th>PDF Haven</th></tr></thead><tbody>${rows}</tbody></table>`,
     `<h2>Frequently asked questions</h2>`,
     SEO.home.faqs.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('\n'),
     `</div>`,
@@ -295,7 +295,7 @@ const sitemapUrls = [{ loc: `${SITE}/`, priority: '1.0' }];
     description: SEO.home.description,
     canonical,
     faqs: SEO.home.faqs,
-    breadcrumbs: [{ name: 'PDF Suite', url: canonical }],
+    breadcrumbs: [{ name: 'PDF Haven', url: canonical }],
   });
   writeFileSync(join(DIST, 'index.html'), buildPage({ title: SEO.home.title, description: SEO.home.description, canonical, body: homeBody(), extra }));
   console.log('prerendered /');
@@ -311,7 +311,7 @@ for (const entry of SEO.tools) {
     canonical,
     faqs: entry.faqs,
     breadcrumbs: [
-      { name: 'PDF Suite', url: `${SITE}/` },
+      { name: 'PDF Haven', url: `${SITE}/` },
       { name: meta.title, url: canonical },
     ],
     howto: { name: `How to use ${meta.title}`, steps: entry.steps },
@@ -330,12 +330,12 @@ for (const entry of SEO.tools) {
 {
   const canonical = `${SITE}/guides/`;
   const extra = headTags({
-    title: 'Free PDF Guides & Tutorials | PDF Suite',
+    title: 'Free PDF Guides & Tutorials | PDF Haven',
     description:
       'Step-by-step PDF guides: merge, compress, sign, OCR, convert and more. Free, private, no signup.',
     canonical,
     breadcrumbs: [
-      { name: 'PDF Suite', url: `${SITE}/` },
+      { name: 'PDF Haven', url: `${SITE}/` },
       { name: 'Guides', url: canonical },
     ],
   });
@@ -344,7 +344,7 @@ for (const entry of SEO.tools) {
   writeFileSync(
     join(dir, 'index.html'),
     buildPage({
-      title: 'Free PDF Guides & Tutorials | PDF Suite',
+      title: 'Free PDF Guides & Tutorials | PDF Haven',
       description: 'Step-by-step PDF guides.',
       canonical,
       body: guidesIndexBody(),

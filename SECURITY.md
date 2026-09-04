@@ -2,7 +2,7 @@
 
 ## Architecture: secure by design
 
-PDF Suite is a **static, frontend-only app**. There is no backend, no database,
+PDF Haven is a **static, frontend-only app**. There is no backend, no database,
 no telemetry, and no file upload — every byte of every document is processed
 in the visitor's own browser tab (pdf-lib, pdf.js, qpdf-wasm, Tesseract.js) and never
 leaves the device. The only runtime network requests are:

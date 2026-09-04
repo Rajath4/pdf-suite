@@ -1,9 +1,9 @@
 {
  "home": {
-  "description": "36 free PDF tools that run 100% in your browser: merge, sign, compress, convert, OCR and more. No upload, no watermark, no signup. Installs for offline use.",
+  "description": "37 free PDF tools that run 100% in your browser: merge, sign, compress, convert, OCR and more. No upload, no watermark, no signup. Installs for offline use.",
   "faqs": [
    [
-    "Is PDF Suite really free?",
+    "Is PDF Haven really free?",
     "Yes. Every tool is free with no watermark, no account, and no daily limits. Processing happens on your device, so there is no per-use server cost to pass on to you."
    ],
    [
@@ -11,14 +11,14 @@
     "No. Open any tool, then turn on airplane mode — everything still works. Your documents never leave your browser tab."
    ],
    [
-    "Can I use PDF Suite offline?",
+    "Can I use PDF Haven offline?",
     "Yes. After your first visit, install the app and all 37 tools work without internet — on planes, in offices with strict firewalls, anywhere."
    ]
   ],
   "h1": "Free Online PDF Tools — Private, Unlimited, No Signup",
   "intro": "Merge, sign, compress, convert, redact and secure PDFs entirely in your browser. No uploads, no watermarks, no accounts, no daily caps — and every tool installs for offline use.",
   "slug": "",
-  "title": "Free PDF Tools Online — Merge, Sign, Compress | PDF Suite",
+  "title": "Free PDF Tools Online — Merge, Sign, Compress | PDF Haven",
   "points": [
    [
     "Sign-up or account",
@@ -91,7 +91,7 @@
     "Arrange the order, then click Run",
     "Verify the preview and keep the download"
    ],
-   "title": "Merge PDF Online Free — No Watermark | PDF Suite"
+   "title": "Merge PDF Online Free — No Watermark | PDF Haven"
   },
   {
    "description": "Split a PDF into ranges, chunks, odd/even sets, or files under a size limit. Free, private, no signup.",
@@ -127,7 +127,7 @@
     "Set pages, chunk size, or the MB target",
     "Click Run and download your files"
    ],
-   "title": "Split PDF Online Free — Extract Pages | PDF Suite"
+   "title": "Split PDF Online Free — Extract Pages | PDF Haven"
   },
   {
    "description": "Reduce PDF size with presets, or hit an exact target like 1 MB for upload portals. Free, unlimited, private.",
@@ -167,7 +167,7 @@
     "For portals, enter the MB limit (e.g. 1)",
     "Click Run and check the before/after sizes"
    ],
-   "title": "Compress PDF Online Free — Shrink to Any Size | PDF Suite"
+   "title": "Compress PDF Online Free — Shrink to Any Size | PDF Haven"
   },
   {
    "description": "Turn PDF pages into crisp JPG or PNG images up to ~600 DPI, or grab every page as a ZIP. Free, no watermark.",
@@ -195,7 +195,7 @@
     "Click Run — single pages download directly",
     "Multi-page PDFs arrive as a ZIP"
    ],
-   "title": "Convert PDF to JPG Online Free — HD Images | PDF Suite"
+   "title": "Convert PDF to JPG Online Free — HD Images | PDF Haven"
   },
   {
    "description": "Pull embedded photos and graphics out of any PDF as JPG or PNG files. Original quality, free, no upload.",
@@ -223,7 +223,7 @@
     "Download one image directly, or many as a ZIP",
     "Check the note for any skipped image types"
    ],
-   "title": "Extract Images from PDF Free Online | PDF Suite"
+   "title": "Extract Images from PDF Free Online | PDF Haven"
   },
   {
    "description": "Turn JPG, PNG, or WebP photos into a single PDF. Batch convert, A4 or fit-to-image. Free and private.",
@@ -259,7 +259,7 @@
     "Reorder with the arrow buttons if needed",
     "Click Run and download the PDF"
    ],
-   "title": "Convert JPG to PDF Free Online | PDF Suite"
+   "title": "Convert JPG to PDF Free Online | PDF Haven"
   },
   {
    "description": "Reorder, rotate, and delete PDF pages with live thumbnails. The visual way to fix any document. Free.",
@@ -287,7 +287,7 @@
     "Restore anything with one click if needed",
     "Click Run and download the reorganized file"
    ],
-   "title": "Organize PDF Pages Free — Reorder & Delete | PDF Suite"
+   "title": "Organize PDF Pages Free — Reorder & Delete | PDF Haven"
   },
   {
    "description": "Draw, type, or upload your signature and stamp it anywhere on a PDF. Saved in your browser only. Free.",
@@ -323,7 +323,7 @@
     "Add placements: page, position, size",
     "Click Run and download the signed PDF"
    ],
-   "title": "Sign PDF Online Free — E-Signature | PDF Suite"
+   "title": "Sign PDF Online Free — E-Signature | PDF Haven"
   },
   {
    "description": "Add text, yellow highlights, and image stamps to any PDF page. Simple markup without heavy software. Free.",
@@ -351,7 +351,7 @@
     "Set page, position, size, and color",
     "Click Run and download the marked-up PDF"
    ],
-   "title": "Edit PDF Online Free — Text & Annotations | PDF Suite"
+   "title": "Edit PDF Online Free — Text & Annotations | PDF Haven"
   },
   {
    "description": "Trim PDF margins on all pages or selected pages. Clean up scans and slides. Free, no signup. No signup, no watermark — clean margins in seconds.",
@@ -379,7 +379,7 @@
     "Optionally limit to page ranges",
     "Click Run and download the cropped file"
    ],
-   "title": "Crop PDF Online Free — Trim Margins | PDF Suite"
+   "title": "Crop PDF Online Free — Trim Margins | PDF Haven"
   },
   {
    "description": "Fill interactive PDF forms in your browser, then flatten to lock them. Perfect for HR, applications, taxes.",
@@ -407,7 +407,7 @@
     "Choose whether to flatten (lock) the result",
     "Click Run and download the completed form"
    ],
-   "title": "Fill PDF Forms Online Free | PDF Suite"
+   "title": "Fill PDF Forms Online Free | PDF Haven"
   },
   {
    "description": "Rotate all pages or selected pages 90°, 180°, or 270°. Fix sideways scans instantly. Batch supported.",
@@ -435,7 +435,7 @@
     "Limit to page ranges if needed",
     "Click Run and download"
    ],
-   "title": "Rotate PDF Online Free — Fix Sideways Pages | PDF Suite"
+   "title": "Rotate PDF Online Free — Fix Sideways Pages | PDF Haven"
   },
   {
    "description": "Stamp text or your logo across PDF pages — single center or tiled pattern, with opacity control. Batch supported.",
@@ -463,7 +463,7 @@
     "Pick single-center or tiled layout",
     "Click Run and download"
    ],
-   "title": "Add Watermark to PDF Free Online | PDF Suite"
+   "title": "Add Watermark to PDF Free Online | PDF Haven"
   },
   {
    "description": "Number PDF pages automatically with positions, formats, and custom start numbers. Batch supported. Free for unlimited files, right in your browser.",
@@ -491,7 +491,7 @@
     "Click Run",
     "Download the paginated file"
    ],
-   "title": "Add Page Numbers to PDF Free Online | PDF Suite"
+   "title": "Add Page Numbers to PDF Free Online | PDF Haven"
   },
   {
    "description": "Add running headers and footers with automatic page counters to every page. Free, batch supported. Page counters update automatically on every page.",
@@ -519,7 +519,7 @@
     "Set the font size",
     "Click Run and download"
    ],
-   "title": "Add Header and Footer to PDF Free | PDF Suite"
+   "title": "Add Header and Footer to PDF Free | PDF Haven"
   },
   {
    "description": "Black out sensitive text regions permanently before sharing contracts and records. Free and offline.",
@@ -547,7 +547,7 @@
     "Review the placement list",
     "Click Run (then Flatten) and download"
    ],
-   "title": "Redact PDF Online Free — Remove Sensitive Data | PDF Suite"
+   "title": "Redact PDF Online Free — Remove Sensitive Data | PDF Haven"
   },
   {
    "description": "Extract PDF text to TXT, or structured Markdown with headings and lists. Free, instant, private. Your documents never leave your device.",
@@ -575,7 +575,7 @@
     "Click Run and preview the result",
     "Download, copy, or share the text"
    ],
-   "title": "Extract Text from PDF Free — TXT & Markdown | PDF Suite"
+   "title": "Extract Text from PDF Free — TXT & Markdown | PDF Haven"
   },
   {
    "description": "Turn scans into selectable text with on-device OCR in 14 languages. No upload, free, unlimited. Language packs cache for offline use after first run.",
@@ -611,7 +611,7 @@
     "Click Run and wait for recognition",
     "Download the text, the PDF, or both"
    ],
-   "title": "OCR PDF Online Free — 14 Languages | PDF Suite"
+   "title": "OCR PDF Online Free — 14 Languages | PDF Haven"
   },
   {
    "description": "Lock PDFs with AES password encryption in your browser. Passwords never leave your device. Batch supported.",
@@ -647,7 +647,7 @@
     "Optionally set a separate owner password",
     "Click Run and download the locked file"
    ],
-   "title": "Protect PDF with Password Free (AES) | PDF Suite"
+   "title": "Protect PDF with Password Free (AES) | PDF Haven"
   },
   {
    "description": "Remove the password from PDFs you own. Decryption happens locally — nothing uploads. Free. The password is never stored or transmitted.",
@@ -675,7 +675,7 @@
     "Click Run",
     "Download the unlocked file"
    ],
-   "title": "Unlock PDF Online Free — Remove Password | PDF Suite"
+   "title": "Unlock PDF Online Free — Remove Password | PDF Haven"
   },
   {
    "description": "Bake form fields and annotations into static pages so PDFs can't be edited further. Batch supported.",
@@ -703,7 +703,7 @@
     "Download the locked, static file",
     "Share it knowing it can't be altered"
    ],
-   "title": "Flatten PDF Online Free | PDF Suite"
+   "title": "Flatten PDF Online Free | PDF Haven"
   },
   {
    "description": "Find hidden author names and metadata, then edit or strip them before sharing. Privacy-first and free.",
@@ -731,7 +731,7 @@
     "Choose Edit attribution or Strip everything",
     "Download the clean file"
    ],
-   "title": "Remove PDF Metadata Free — Privacy Cleaner | PDF Suite"
+   "title": "Remove PDF Metadata Free — Privacy Cleaner | PDF Haven"
   },
   {
    "description": "Convert PDF to editable Word (.docx) with text extracted per page. Private, free, no watermark. No watermarks, no page limits, no account needed.",
@@ -767,7 +767,7 @@
     "Download the editable .docx",
     "Polish formatting in Word"
    ],
-   "title": "Convert PDF to Word Free Online (DOCX) | PDF Suite"
+   "title": "Convert PDF to Word Free Online (DOCX) | PDF Haven"
   },
   {
    "description": "Convert Word (.docx) to PDF with headings preserved. Fast, free, and fully private. Output is clean, print-ready, and watermark-free.",
@@ -795,7 +795,7 @@
     "Preview the extracted text",
     "Download the PDF"
    ],
-   "title": "Convert Word to PDF Free Online | PDF Suite"
+   "title": "Convert Word to PDF Free Online | PDF Haven"
   },
   {
    "description": "Extract PDF text tables into editable CSV and Excel files. Runs locally, free, no upload. You get both CSV and XLSX in a single run.",
@@ -823,7 +823,7 @@
     "Download the .csv, the .xlsx, or both",
     "Verify figures in Excel"
    ],
-   "title": "Convert PDF to Excel Free Online | PDF Suite"
+   "title": "Convert PDF to Excel Free Online | PDF Haven"
   },
   {
    "description": "Render CSV and Excel sheets as clean, paginated PDF tables. Headers detected automatically. Free. Tables paginate cleanly onto A4 pages automatically.",
@@ -851,7 +851,7 @@
     "Click Run",
     "Download the formatted PDF"
    ],
-   "title": "Convert Excel to PDF Free Online | PDF Suite"
+   "title": "Convert Excel to PDF Free Online | PDF Haven"
   },
   {
    "description": "Convert each PDF page into an editable PowerPoint slide (.pptx). Perfect for reusing content in decks.",
@@ -879,7 +879,7 @@
     "Download the .pptx deck",
     "Rearrange and present in PowerPoint"
    ],
-   "title": "Convert PDF to PowerPoint Free (PPTX) | PDF Suite"
+   "title": "Convert PDF to PowerPoint Free (PPTX) | PDF Haven"
   },
   {
    "description": "Convert PowerPoint (.pptx) slides to PDF free. Text and images preserved, offline in your browser. Ready to email, print, or archive in seconds.",
@@ -907,7 +907,7 @@
     "Check the page count note",
     "Download the PDF"
    ],
-   "title": "Convert PowerPoint to PDF Free Online | PDF Suite"
+   "title": "Convert PowerPoint to PDF Free Online | PDF Haven"
   },
   {
    "description": "Publish PDF text as a styled standalone webpage. Great for archiving content as searchable HTML. The output is a single self-contained HTML file.",
@@ -935,7 +935,7 @@
     "Preview the generated page",
     "Download the .html file"
    ],
-   "title": "Convert PDF to HTML Free Online | PDF Suite"
+   "title": "Convert PDF to HTML Free Online | PDF Haven"
   },
   {
    "description": "Give PDFs permanent dark mode, full invert, print-saving grayscale, or warm sepia. Free, offline. Rebuilt locally with original quality preserved.",
@@ -963,7 +963,7 @@
     "Click Run",
     "Download the recolored file"
    ],
-   "title": "PDF Dark Mode — Invert & Grayscale Free | PDF Suite"
+   "title": "PDF Dark Mode — Invert & Grayscale Free | PDF Haven"
   },
   {
    "description": "Write formatted documents and export clean PDFs — titles, paragraphs, and structure included. Free. Nothing is stored anywhere — write and download.",
@@ -991,7 +991,7 @@
     "Click Run",
     "Download your PDF"
    ],
-   "title": "Create PDF Online Free — No Signup | PDF Suite"
+   "title": "Create PDF Online Free — No Signup | PDF Haven"
   },
   {
    "description": "Paste Markdown and get a beautifully formatted PDF with headings, lists, and code. Free, instant. Headings, lists, and code render beautifully.",
@@ -1019,7 +1019,7 @@
     "Download the formatted PDF",
     "Print or share it anywhere"
    ],
-   "title": "Convert Markdown to PDF Free Online | PDF Suite"
+   "title": "Convert Markdown to PDF Free Online | PDF Haven"
   },
   {
    "description": "Convert HTML files or pasted code into professional PDFs. Free, private, runs in your browser. Receipts and reports become archivable PDFs.",
@@ -1047,7 +1047,7 @@
     "Click Run",
     "Download the PDF"
    ],
-   "title": "Convert HTML to PDF Free Online | PDF Suite"
+   "title": "Convert HTML to PDF Free Online | PDF Haven"
   },
   {
    "description": "Spot differences between two PDFs with synced side-by-side scrolling. Perfect for contract review. Free.",
@@ -1075,7 +1075,7 @@
     "Scroll either side — they stay synced",
     "No download needed; it is a viewer"
    ],
-   "title": "Compare Two PDFs Side by Side Free | PDF Suite"
+   "title": "Compare Two PDFs Side by Side Free | PDF Haven"
   },
   {
    "description": "Recover readable pages from damaged or truncated PDFs with a forensic rebuild engine. Free. The report tells you exactly what was recovered.",
@@ -1103,7 +1103,7 @@
     "Read the recovery report",
     "Download the repaired PDF"
    ],
-   "title": "Repair Corrupted PDF Online Free | PDF Suite"
+   "title": "Repair Corrupted PDF Online Free | PDF Haven"
   },
   {
    "description": "Turn your phone camera into a document scanner and save multi-page PDFs. No app install needed. Captures stay in your browser from lens to PDF.",
@@ -1131,7 +1131,7 @@
     "Optionally add existing photos",
     "Click Run and download the scan"
    ],
-    "title": "Scan to PDF Free — Phone Camera Scanner | PDF Suite"
+    "title": "Scan to PDF Free — Phone Camera Scanner | PDF Haven"
    },
    {
     "description": "Split giant PDFs into email-size chunks, shrink huge PDFs without loading them, and rejoin byte-identical. Streams files to 6 GB.",
@@ -1168,7 +1168,7 @@
      "Shrink: pick quality and pages per file to compress a huge PDF in batches",
      "Inspect: check header and trailer health before moving gigabytes around"
     ],
-    "title": "Split Large PDF Files Free — 6 GB Chunks | PDF Suite"
+    "title": "Split Large PDF Files Free — 6 GB Chunks | PDF Haven"
    }
   ]
 }
