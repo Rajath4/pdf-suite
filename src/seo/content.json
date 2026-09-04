@@ -18,7 +18,39 @@
   "h1": "Free Online PDF Tools — Private, Unlimited, No Signup",
   "intro": "Merge, sign, compress, convert, redact and secure PDFs entirely in your browser. No uploads, no watermarks, no accounts, no daily caps — and every tool installs for offline use.",
   "slug": "",
-  "title": "Free PDF Tools Online — Merge, Sign, Compress | PDF Suite"
+  "title": "Free PDF Tools Online — Merge, Sign, Compress | PDF Suite",
+  "points": [
+   [
+    "Sign-up or account",
+    "Required before you can download on most sites",
+    "Never — accounts don't exist here"
+   ],
+   [
+    "Watermarks on output",
+    "Added to free files to push upgrades",
+    "Never added, on any tool, ever"
+   ],
+   [
+    "Daily or hourly caps",
+    "2 tasks a day is common",
+    "Unlimited, forever"
+   ],
+   [
+    "Where your files go",
+    "Uploaded to company servers",
+    "They never leave your device"
+   ],
+   [
+    "Working offline",
+    "Impossible — tools need their servers",
+    "Install once, works on planes"
+   ],
+   [
+    "Advertising",
+    "Banners and pop-ups at download",
+    "None, anywhere, ever"
+   ]
+  ]
  },
  "tools": [
   {

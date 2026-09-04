@@ -143,10 +143,15 @@ function homeBody() {
       return `<a href="/${t.slug}/">${esc(m.icon)} <strong>${esc(m.title)}</strong><br><small>${esc(m.description)}</small></a>`;
     })
     .join('\n');
+  const rows = SEO.home.points
+    .map(([label, typical, ours]) => `<tr><td>${esc(label)}</td><td>${esc(typical)}</td><td><strong>${esc(ours)}</strong></td></tr>`)
+    .join('\n');
   return [
     `<div class="wrap"><h1>${esc(SEO.home.h1)}</h1>`,
     `<p>${esc(SEO.home.intro)}</p>`,
     `<h2>All free PDF tools</h2><div>${cards}</div>`,
+    `<h2>Why PDF Suite instead of typical online tools</h2>`,
+    `<table><thead><tr><th></th><th>Typical online tools</th><th>PDF Suite</th></tr></thead><tbody>${rows}</tbody></table>`,
     `<h2>Frequently asked questions</h2>`,
     SEO.home.faqs.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('\n'),
     `</div>`,

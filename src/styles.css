@@ -124,7 +124,6 @@ main { animation: rise 0.28s var(--ease-out); }
 .topnav { display: flex; gap: 8px; align-items: center; font-size: 0.92rem; flex-wrap: wrap; justify-content: flex-end; }
 .topnav > a { color: var(--topbar-ink); opacity: 0.8; text-decoration: none; padding: 6px 8px; border-radius: 8px; }
 .topnav > a:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
-.pill { background: #1f8a4c; color: #fff; border-radius: 999px; padding: 3px 10px; font-size: 0.76rem; font-weight: 700; white-space: nowrap; }
 .kbd {
   font-family: ui-monospace, monospace; font-size: 0.7rem; opacity: 0.8;
   border: 1px solid currentColor; border-radius: 5px; padding: 0 5px; margin-left: 6px;
@@ -275,7 +274,6 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
   background: var(--surface); border-radius: 999px; padding: 3px 11px; color: var(--muted);
 }
 .meta-chip.hot { color: var(--cat); border-color: var(--cat); }
-.pill-line { background: var(--tint-mint); border: 1px solid var(--line); padding: 8px 12px; border-radius: var(--radius-s); display: inline-block; }
 
 /* Dropzone 2.0 */
 .drop {
@@ -311,6 +309,14 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .fname small { color: var(--muted); font-weight: 400; }
 .filerow .range-inline { max-width: 200px; flex: 0 1 180px; padding: 7px 10px; font-size: 0.85rem; }
 .frow-btns, .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Sticky action bar: the primary CTA is never a scroll away on long forms. */
+.actionbar {
+  position: sticky; bottom: 12px; z-index: 5;
+  background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: 14px; padding: 10px 12px; box-shadow: var(--shadow);
+}
+.actionbar .btn.big { margin-top: 0; }
 .empty-panel {
   border: 1.5px dashed var(--line-strong); border-radius: var(--radius); padding: 22px;
   text-align: center; color: var(--muted); display: grid; gap: 4px; justify-items: center;

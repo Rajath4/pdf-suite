@@ -63,9 +63,15 @@ describe('SEO content library', () => {
   });
 
   it('has a valid home entry', () => {
-    const home = SEO.home as unknown as { title: string; description: string; h1: string; intro: string; faqs: [string, string][] };
+    const home = SEO.home as unknown as { title: string; description: string; h1: string; intro: string; faqs: [string, string][]; points: [string, string, string][] };
     expect(home.title.length).toBeLessThanOrEqual(65);
     expect(home.description.length).toBeGreaterThanOrEqual(100);
     expect(home.faqs.length).toBeGreaterThanOrEqual(3);
+    expect(home.points.length).toBeGreaterThanOrEqual(4);
+    for (const [label, typical, ours] of home.points) {
+      expect(label.length).toBeGreaterThan(3);
+      expect(typical.length).toBeGreaterThan(10);
+      expect(ours.length).toBeGreaterThan(5);
+    }
   });
 });

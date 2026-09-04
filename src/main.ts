@@ -565,7 +565,6 @@ function header(): HTMLElement {
     themeBtn,
     installBtn,
     offlineDot(),
-    el('span', { class: 'pill' }, '100% on-device'),
   );
   inner.append(logo, nav);
   h.append(inner);
@@ -786,6 +785,49 @@ function homePage(): HTMLElement {
   window.addEventListener('keydown', onKey);
   onRouteLeave(() => window.removeEventListener('keydown', onKey));
 
+  // Proof, not promises: one honest comparison table, same data as the
+  // prerendered homepage (single-sourced from content.json).
+  const trustMount = el('div', {});
+  root.append(trustMount);
+  void (async () => {
+    try {
+      const { default: SEO } = await import('./seo/content.json');
+      const points = (SEO as unknown as { home: { points: [string, string, string][] } }).home.points;
+      if (!points?.length) return;
+      const section = el('section', { class: 'trust' });
+      section.append(el('h2', {}, 'Why PDF Suite instead of typical online tools'));
+      section.append(el('p', { class: 'muted' }, 'No accounts to leak, no servers to breach, no counters to hit — the difference is architectural, not promotional.'));
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      for (const h of ['', 'Typical online tools', 'PDF Suite']) {
+        const th = document.createElement('th');
+        th.textContent = h;
+        headRow.append(th);
+      }
+      thead.append(headRow);
+      const tbody = document.createElement('tbody');
+      for (const [label, typical, ours] of points) {
+        const tr = document.createElement('tr');
+        const tdL = document.createElement('td');
+        tdL.textContent = label;
+        const tdT = document.createElement('td');
+        tdT.textContent = typical;
+        tdT.className = 'no';
+        const tdO = document.createElement('td');
+        tdO.textContent = ours;
+        tdO.className = 'yes';
+        tr.append(tdL, tdT, tdO);
+        tbody.append(tr);
+      }
+      table.append(thead, tbody);
+      section.append(table);
+      trustMount.append(section);
+    } catch {
+      /* enhancement only */
+    }
+  })();
+
   const faq = el('section', { class: 'faq' });
   faq.append(el('h2', {}, 'How it works'));
   const items: [string, string][] = [
@@ -837,12 +879,7 @@ function toolPage(id: string): HTMLElement {
   const chips = el('div', { class: 'meta-chips' });
   const catChip = el('span', { class: 'meta-chip hot' }, current.category);
   catChip.setAttribute('data-cat', current.category);
-  chips.append(
-    catChip,
-    el('span', { class: 'meta-chip' }, '🔒 100% on-device'),
-    el('span', { class: 'meta-chip' }, '⚡ Works offline'),
-    el('span', { class: 'meta-chip' }, '✓ No watermark'),
-  );
+  chips.append(catChip);
   root.append(chips);
 
   // iLovePDF-style 3-step flow: Upload → Adjust → Download.
@@ -951,6 +988,7 @@ function toolPage(id: string): HTMLElement {
         el('span', {}, 'No files yet — drop them anywhere on this page, or use the box above.'),
       );
       listBox.append(empty);
+      paintRunState();
       return;
     }
     state.files.forEach((f, i) => {
@@ -1007,6 +1045,7 @@ function toolPage(id: string): HTMLElement {
       listBox.append(row);
     });
     syncMergeRanges();
+    paintRunState();
     void annotatePageCounts();
   }
 
@@ -1067,6 +1106,21 @@ function toolPage(id: string): HTMLElement {
   const startOver = el('button', { class: 'btn', type: 'button' }, 'Start over');
   startOver.addEventListener('click', () => render());
   const results = el('div', { class: 'results' });
+  const actionBar = el('div', { class: 'row actionbar' }, runBtn, startOver);
+
+  /** Tools that can run from typed/pasted content need no upload. */
+  const needsUpload = !['create', 'markdown', 'html-to-pdf'].includes(current.id);
+  const paintRunState = () => {
+    if (!needsUpload || state.files.length > 0) runBtn.removeAttribute('disabled');
+    else runBtn.setAttribute('disabled', 'true');
+  };
+
+  const reducedMotion = () =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const scrollToResults = () => {
+    const first = results.querySelector('.result, .result-stats') as HTMLElement | null;
+    first?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+  };
 
   // Behavioral UX: determinate progress (percent-done) + elapsed time.
   // Research: dynamic feedback makes waits feel shorter and triples patience.
@@ -1226,33 +1280,56 @@ function toolPage(id: string): HTMLElement {
       const { runTool } = await loadActions();
       const batchSuffix = BATCH_SUFFIX[current.id];
       if (batchSuffix && state.files.length > 1) {
-        // Enterprise batch path: process each file identically, zip the results.
+        // Enterprise batch path: every file processed independently, so one
+        // corrupt file can never sink the whole batch. Successes zip up;
+        // failures are reported inline, per file.
         const { default: JSZip } = await import('jszip');
         const zip = new JSZip();
+        const failed: string[] = [];
         let inBytes = 0;
         let outBytes = 0;
         for (let i = 0; i < state.files.length; i++) {
           const f = state.files[i];
           feed(`Batch ${i + 1}/${state.files.length}: ${f.name}…`);
-          const outs = await runTool(
-            current.id,
-            { files: [f], opts: getOpts(), onProgress: feed },
-          );
-          zip.file(`${baseName(f.name)}-${batchSuffix}.pdf`, outs[0].blob);
-          inBytes += f.size;
-          outBytes += outs[0].blob.size;
+          try {
+            const outs = await runTool(
+              current.id,
+              { files: [f], opts: getOpts(), onProgress: feed },
+            );
+            if (!outs[0]) throw new Error('no output produced');
+            zip.file(`${baseName(f.name)}-${batchSuffix}.pdf`, outs[0].blob);
+            inBytes += f.size;
+            outBytes += outs[0].blob.size;
+          } catch (err) {
+            failed.push(`${f.name}: ${err instanceof Error ? err.message : String(err)}`);
+          }
+        }
+        if (failed.length === state.files.length) {
+          throw new UserError(`Every file failed:\n${failed.slice(0, 3).join('\n')}${failed.length > 3 ? `\n…and ${failed.length - 3} more.` : ''}`);
         }
         feed('Zipping results…');
         const blob = await zip.generateAsync({ type: 'blob' });
-        const filename = `${current.id}-batch-${state.files.length}-files.zip`;
-        setStatus(`Done — ${state.files.length} files processed.`, 'ok');
+        const filename = `${current.id}-batch-${state.files.length - failed.length}-files.zip`;
+        const okCount = state.files.length - failed.length;
+        setStatus(
+          failed.length === 0
+            ? `Done — ${okCount} files processed.`
+            : `Done with issues — ${okCount} ok, ${failed.length} failed.`,
+          failed.length === 0 ? 'ok' : 'error',
+        );
         progressDone();
         showStats(inBytes, outBytes);
         showOutputs(
-          [{ blob, filename, note: `Batch ${current.title.toLowerCase()}: ${state.files.length} files, same settings applied to each.` }],
+          [{
+            blob,
+            filename,
+            note: `Batch ${current.title.toLowerCase()}: ${okCount} files, same settings applied to each.` +
+              (failed.length > 0 ? ` Failed: ${failed.slice(0, 3).join(' · ')}${failed.length > 3 ? ` · +${failed.length - 3} more` : ''}` : ''),
+          }],
           true,
         );
         paintSteps(3);
+        scrollToResults();
         celebrate();
         return;
       }
@@ -1270,21 +1347,26 @@ function toolPage(id: string): HTMLElement {
         state.files.reduce((a, f) => a + f.size, 0),
         outs.reduce((a, o) => a + o.blob.size, 0),
       );
-      // Auto-download outputs for convenience + keep buttons for re-download.
-      showOutputs(outs, true);
+      // One file → download immediately. Several → buttons only: browsers
+      // gate multi-downloads behind scary prompts, so don't fire them blindly.
+      const single = outs.length === 1;
+      showOutputs(outs, single);
+      if (!single) setStatus(`Done — ${outs.length} files ready below. Download or share each one.`, 'ok');
       paintSteps(3);
+      scrollToResults();
       celebrate();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setStatus(msg, 'error');
       progressDone();
+      status.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
     } finally {
       runBtn.removeAttribute('disabled');
       runBtn.textContent = `Run — ${current.title}`;
     }
   });
 
-  root.append(drop, listBox, optsBox, live, el('div', { class: 'row' }, runBtn, startOver), progressWrap, status, results);
+  root.append(drop, listBox, optsBox, live, actionBar, progressWrap, status, results);
 
   // Cross-navigation: users rarely need just one tool.
   const related = TOOLS.filter((t) => t.category === current.category && t.id !== current.id).slice(0, 6);
@@ -1707,9 +1789,9 @@ function mountCompare(
   state: FileState,
   setStatus: (m: string, k?: 'info' | 'error' | 'ok') => void,
 ): void {
-  live.append(el('p', { class: 'muted' }, 'Upload exactly 2 PDFs (use the dropzone above), then scroll either side — they stay in sync.'));
+  live.append(el('p', { class: 'muted' }, 'Upload exactly 2 PDFs above — they render side by side with synced scrolling.'));
   if (state.files.length < 2) {
-    live.append(el('p', { class: 'muted' }, `Waiting for 2 files (have ${state.files.length}).`));
+    live.append(el('p', { class: 'muted' }, `Waiting for the second file (have ${state.files.length}).`));
     return;
   }
   const [a, b] = state.files;
