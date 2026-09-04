@@ -497,6 +497,7 @@ function notFoundPage(slug: string): HTMLElement {
   const guesses = searchTools(slug.replace(/-/g, ' '), 6);
   for (const t of (guesses.length > 0 ? guesses : TOOLS.slice(0, 6))) {
     const card = el('a', { class: 'card', href: toolHref(t.id) });
+    card.setAttribute('data-cat', t.category);
     card.append(
       el('div', { class: 'card-icon' }, t.icon),
       el('div', { class: 'card-title' }, t.title),
@@ -538,7 +539,8 @@ render();
 function header(): HTMLElement {
   const h = el('header', { class: 'topbar' });
   const inner = el('div', { class: 'wrap topbar-inner' });
-  const logo = el('a', { class: 'logo', href: '/' }, '📕 PDF Suite');
+  const logo = el('a', { class: 'logo', href: '/' });
+  logo.append(el('span', { class: 'logo-mark' }, 'PDF'), el('span', {}, 'PDF Suite'));
   const nav = el('nav', { class: 'topnav' });
   const paletteBtn = el('button', { class: 'btn small palette-btn', type: 'button', title: 'Jump to any tool (Ctrl/⌘ K)' }, '🔍 Tools');
   const kbd = el('kbd', { class: 'kbd' }, '⌘K');
@@ -602,8 +604,10 @@ function footer(): HTMLElement {
   f.append(
     el('div', { class: 'wrap' },
       cols,
-      el('p', {}, 'PDF Suite — free, private PDF tools. Files never leave your device. No watermark, no sign-up. ', ver),
-      el('p', { class: 'muted' }, 'Built with pdf-lib + pdf.js. Install it and use it offline.'),
+      el('div', { class: 'foot-bottom' },
+        el('p', { class: 'promise' }, 'No accounts. No ads. No uploads. No watermarks. Just tools that work. ', ver),
+        el('p', { class: 'muted' }, 'Built with pdf-lib + pdf.js. Install it and use it offline — even in airplane mode.'),
+      ),
     ),
   );
   return f;
@@ -613,11 +617,20 @@ function homePage(): HTMLElement {
   const root = el('main', { class: 'wrap', id: 'main', tabindex: '-1' });
 
   const hero = el('section', { class: 'hero' });
+  const h1 = el('h1', {});
+  h1.append('Every PDF tool you need. ', el('span', { class: 'grad' }, 'Private by design.'));
   hero.append(
-    el('div', { class: 'badges' }, '✓ No watermark   ✓ No upload   ✓ No sign-up   ✓ Works offline'),
-    el('h1', {}, 'Every PDF tool you need. Private by design.'),
+    el('div', { class: 'hero-eyebrow' }, '✦ 36 free tools · no signup · no watermark'),
+    h1,
     el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, nothing is tracked, and it installs for offline use.'),
   );
+  const stats = el('div', { class: 'hero-stats' });
+  for (const [num, label] of [['36', 'free tools'], ['0', 'uploads or accounts'], ['0', 'daily limits'], ['100%', 'offline-capable']] as [string, string][]) {
+    const s = el('div', { class: 'stat' });
+    s.append(el('span', { class: 'stat-num' }, num), el('span', { class: 'stat-label' }, label));
+    stats.append(s);
+  }
+  hero.append(stats);
   const search = textInput('', 'Search 36 tools… try “merge”, “sign”, “ppt”…  ( ⌘K )');
   search.setAttribute('type', 'search');
   search.setAttribute('aria-label', 'Search tools');
@@ -636,6 +649,7 @@ function homePage(): HTMLElement {
   for (const j of jobs) {
     const t = getTool(j.tool)!;
     const card = el('a', { class: 'job', href: toolHref(t.id) });
+    card.setAttribute('data-cat', t.category);
     card.addEventListener('pointerenter', prefetchEngines, { once: true });
     card.addEventListener('focus', prefetchEngines, { once: true });
     card.append(
@@ -672,6 +686,7 @@ function homePage(): HTMLElement {
     for (const id of recent) {
       const t = getTool(id)!;
       const card = el('a', { class: 'card', href: toolHref(t.id) });
+      card.setAttribute('data-cat', t.category);
       card.addEventListener('pointerenter', prefetchEngines, { once: true });
       card.addEventListener('focus', prefetchEngines, { once: true });
       card.append(
@@ -725,6 +740,7 @@ function homePage(): HTMLElement {
       const grid = el('div', { class: 'grid' });
       for (const t of tools) {
         const card = el('a', { class: 'card', href: toolHref(t.id) });
+        card.setAttribute('data-cat', t.category);
         // Prefetch the engine chunks on intent so the tool page feels instant.
         card.addEventListener('pointerenter', prefetchEngines, { once: true });
         card.addEventListener('focus', prefetchEngines, { once: true });
@@ -739,7 +755,20 @@ function homePage(): HTMLElement {
       gridRoot.append(section);
     }
     if (!gridRoot.children.length) {
-      gridRoot.append(el('p', { class: 'muted' }, 'No tools match your search.'));
+      const empty = el('div', { class: 'no-results' });
+      empty.append(
+        el('span', {}, `Nothing matches “${q.trim()}”. Try “merge”, “sign”, “ppt”, or “password”.`),
+      );
+      const reset = el('button', { class: 'btn', type: 'button' }, 'Show all tools');
+      reset.addEventListener('click', () => {
+        search.value = '';
+        activeCat = 'All';
+        paintPills();
+        renderGrid('');
+        search.focus();
+      });
+      empty.append(reset);
+      gridRoot.append(empty);
     }
   };
   search.addEventListener('input', () => renderGrid(search.value));
@@ -799,9 +828,22 @@ function toolPage(id: string): HTMLElement {
     el('span', { 'aria-hidden': 'true' }, ' / '),
     el('span', { 'aria-current': 'page' }, current.title),
   ));
-  root.append(el('h1', {}, `${current.icon} ${current.title}`));
+  const head = el('div', { class: 'tool-head' });
+  const tile = el('div', { class: 'tool-icon-tile', 'aria-hidden': 'true' }, current.icon);
+  tile.setAttribute('data-cat', current.category);
+  head.append(tile, el('h1', {}, current.title));
+  root.append(head);
   root.append(el('p', { class: 'lede' }, current.description));
-  root.append(el('p', { class: 'pill-line' }, '🔒 Files stay on your device — nothing is uploaded.'));
+  const chips = el('div', { class: 'meta-chips' });
+  const catChip = el('span', { class: 'meta-chip hot' }, current.category);
+  catChip.setAttribute('data-cat', current.category);
+  chips.append(
+    catChip,
+    el('span', { class: 'meta-chip' }, '🔒 100% on-device'),
+    el('span', { class: 'meta-chip' }, '⚡ Works offline'),
+    el('span', { class: 'meta-chip' }, '✓ No watermark'),
+  );
+  root.append(chips);
 
   // iLovePDF-style 3-step flow: Upload → Adjust → Download.
   const steps = el('ol', { class: 'steps' });
@@ -834,9 +876,19 @@ function toolPage(id: string): HTMLElement {
 
   // Dropzone
   const drop = el('div', { class: 'drop', tabindex: '0', role: 'button' });
+  drop.setAttribute('aria-label', current.accept ? `Upload files for ${current.title}` : `${current.title}: file upload optional`);
+  const formats = el('div', { class: 'drop-formats' });
+  if (current.accept) {
+    for (const part of current.accept.split(',').slice(0, 5)) {
+      const clean = part.trim().replace('application/', '').replace('image/*', 'images').replace(/^\./, '').toUpperCase();
+      if (clean) formats.append(el('span', {}, clean));
+    }
+  }
   drop.append(
+    el('div', { class: 'drop-icon', 'aria-hidden': 'true' }, '📄'),
     el('div', { class: 'drop-title' }, current.accept ? 'Drop files here or click to browse' : 'No file needed — or optionally drop one'),
-    el('div', { class: 'muted' }, current.accept ? `Accepted: ${current.accept}` : 'This tool can run from text alone.'),
+    el('div', { class: 'muted' }, current.multiple ? 'You can add several files — batch supported where noted.' : 'One file at a time for this tool.'),
+    formats,
   );
   const input = document.createElement('input');
   input.type = 'file';
@@ -893,7 +945,12 @@ function toolPage(id: string): HTMLElement {
   function paintFiles() {
     listBox.innerHTML = '';
     if (state.files.length === 0) {
-      listBox.append(el('p', { class: 'muted' }, 'No files yet.'));
+      const empty = el('div', { class: 'empty-panel' });
+      empty.append(
+        el('span', { class: 'big', 'aria-hidden': 'true' }, '🗂'),
+        el('span', {}, 'No files yet — drop them anywhere on this page, or use the box above.'),
+      );
+      listBox.append(empty);
       return;
     }
     state.files.forEach((f, i) => {
@@ -1572,6 +1629,10 @@ function mountOrganize(
 
       const grid = el('div', { class: ' thumbs' });
       wrap.append(el('p', { class: 'muted' }, `${n} pages. Use ← → to reorder, ⟳ to rotate, ✕ to delete.`));
+      // Skeleton shimmer while thumbnails render (perceived speed > spinners).
+      const skel = el('div', { class: 'skel-grid', 'aria-hidden': 'true' });
+      for (let s = 0; s < Math.min(6, n); s++) skel.append(el('div', { class: 'skel' }));
+      wrap.append(skel);
       wrap.append(grid);
 
       const paint = async () => {
@@ -1581,6 +1642,7 @@ function mountOrganize(
           if (deleted.has(p)) continue;
           const card = el('div', { class: 'thumb' });
           const { canvas } = await renderPage(bytes.slice(0), p + 1, 0.55);
+          skel.remove();
           canvas.className = 'thumb-canvas';
           const rot = rotations[p] ?? 0;
           canvas.style.transform = rot ? `rotate(${rot}deg)` : '';
@@ -1656,6 +1718,10 @@ function mountCompare(
   const right = el('div', { class: 'compare-col' });
   left.append(el('h3', {}, a.name));
   right.append(el('h3', {}, b.name));
+  const skelL = el('div', { class: 'skel wide', 'aria-hidden': 'true' });
+  const skelR = el('div', { class: 'skel wide', 'aria-hidden': 'true' });
+  left.append(skelL);
+  right.append(skelR);
   cols.append(left, right);
   live.append(cols);
   // Sync scroll
@@ -1679,6 +1745,8 @@ function mountCompare(
       const [ba, bb] = await Promise.all([a.arrayBuffer(), b.arrayBuffer()]);
       const [na, nb] = await Promise.all([getPageCount(ba.slice(0)), getPageCount(bb.slice(0))]);
       const pages = Math.max(na, nb);
+      skelL.remove();
+      skelR.remove();
       for (let i = 1; i <= pages; i++) {
         if (i <= na) {
           const { canvas } = await renderPage(ba.slice(0), i, 1.0);
