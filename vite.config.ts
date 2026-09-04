@@ -1,5 +1,38 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { execSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+
+/** Emits dist/version.json so the UI, support and uptime checks can report the exact build. */
+function buildMeta(): Plugin {
+  return {
+    name: 'build-meta',
+    writeBundle() {
+      // Never fail the build (e.g. Docker build without .git).
+      let commit = 'dev';
+      try {
+        commit = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
+          .toString()
+          .trim();
+      } catch {
+        /* ignore */
+      }
+      writeFileSync(
+        new URL('./dist/version.json', import.meta.url),
+        JSON.stringify(
+          {
+            // Keep in sync with package.json on release.
+            version: '1.1.0',
+            commit,
+            builtAt: new Date().toISOString(),
+          },
+          null,
+          2,
+        ),
+      );
+    },
+  };
+}
 
 export default defineConfig({
   base: './',
@@ -21,6 +54,7 @@ export default defineConfig({
     exclude: ['pdfjs-dist'],
   },
   plugins: [
+    buildMeta(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png'],
@@ -36,6 +70,16 @@ export default defineConfig({
         scope: './',
         start_url: './',
         categories: ['productivity', 'utilities'],
+        // Deep-link shortcuts + "Open with" file handling (progressive
+        // enhancement — supported browsers get native-grade integration).
+        shortcuts: [
+          { name: 'Merge PDFs', url: './#/tool/merge', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
+          { name: 'Split PDF', url: './#/tool/split', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
+          { name: 'Compress PDF', url: './#/tool/compress', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
+        ],
+        file_handlers: [
+          { action: './', accept: { 'application/pdf': ['.pdf'] } },
+        ],
         icons: [
           {
             src: 'icons/icon-192.png',
@@ -66,7 +110,7 @@ export default defineConfig({
         navigateFallback: 'index.html',
         // Main bundle + pdf.js worker exceed workbox's 2 MB default.
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
-        globPatterns: ['**/*.{js,css,html,png,svg,mjs}'],
+        globPatterns: ['**/*.{js,css,html,json,txt,webmanifest,png,svg,mjs}'],
         runtimeCaching: [
           {
             // Tesseract.js lazily fetches its WASM/core from a CDN on first OCR

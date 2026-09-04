@@ -15,11 +15,11 @@ import {
 import {
   renderAllPages, extractAllText, canvasToBlob, invertCanvas,
 } from '../lib/pdfRender.js';
-import {
-  parseCsv, workbookToTable, tableToCsv, tableToXlsxBlob,
-  docxToPlainText, textToDocxBlob, textToHtmlDoc,
-} from '../lib/convert.js';
 import { baseName, loadImageElement, readAsArrayBuffer, readAsText } from '../lib/fileUtils.js';
+
+// Office-format engines (docx / mammoth / xlsx) are heavy and rarely needed —
+// load them on demand so the main tool chunk stays lean.
+const loadOffice = () => import('../lib/convert.js');
 
 export interface Ctx {
   files: File[];
@@ -284,12 +284,15 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
       need(ctx, 1);
       ctx.onProgress('Extracting text…');
       const pages = await extractAllText(await pdfBytes(ctx.files[0]));
+      ctx.onProgress('Building Word file…');
+      const { textToDocxBlob } = await loadOffice();
       const blob = await textToDocxBlob(baseName(ctx.files[0].name), pages);
       return [{ blob, filename: `${baseName(ctx.files[0].name)}.docx` }];
     }
     case 'word-to-pdf': {
       if (ctx.files.length === 0) throw new UserError('Upload a .docx file.');
       ctx.onProgress('Converting…');
+      const { docxToPlainText } = await loadOffice();
       const text = await docxToPlainText(ctx.files[0]);
       const data = await textToPdf({ title: baseName(ctx.files[0].name), body: text, fontSize: 11, lineHeight: 1.5 });
       return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}.pdf`, previewText: text.slice(0, 4000) }];
@@ -300,6 +303,7 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
       const pages = await extractAllText(await pdfBytes(ctx.files[0]));
       const rows = pages.flatMap((p) => p.split('\n').map((l) => [l]));
       const table: TableData = { headers: ['Text'], rows };
+      const { tableToCsv, tableToXlsxBlob } = await loadOffice();
       const csv = tableToCsv(table);
       const xlsxBlob = tableToXlsxBlob(table);
       return [
@@ -310,6 +314,8 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
     case 'excel-to-pdf': {
       if (ctx.files.length === 0) throw new UserError('Upload a .csv or .xlsx file.');
       const f = ctx.files[0];
+      ctx.onProgress('Parsing spreadsheet…');
+      const { parseCsv, workbookToTable } = await loadOffice();
       let table: TableData;
       if (/\.csv$/i.test(f.name) || f.type.includes('csv')) {
         table = parseCsv(await readAsText(f));
@@ -322,6 +328,7 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
     case 'pdf-to-html': {
       need(ctx, 1);
       const pages = await extractAllText(await pdfBytes(ctx.files[0]));
+      const { textToHtmlDoc } = await loadOffice();
       const html = textToHtmlDoc(baseName(ctx.files[0].name), pages);
       return [{ blob: new Blob([html], { type: 'text/html' }), filename: `${baseName(ctx.files[0].name)}.html`, previewText: html.slice(0, 6000) }];
     }

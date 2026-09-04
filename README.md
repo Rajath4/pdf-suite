@@ -80,7 +80,22 @@ Principles:
 |---|---|
 | `npm run dev` | local dev server |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run build` | typecheck + production build |
+| `npm test` | vitest unit suite (20 tests: ranges, CSV, engine round-trips) |
+| `npm run build` | typecheck + production build + bundle-budget gate |
+| `npm run budget` | standalone perf-budget check (entry ≤150 KB, JS ≤3.5 MB) |
 | `npm run preview` | serve built app |
+
+## Performance & quality
+
+- **Code-split engines:** the homepage shell is ~30 KB; pdf-lib/pdf.js/office
+  chunks load lazily on first tool use (prefetched on card hover).
+- `npm run build` fails on budget breach (`scripts/check-budget.mjs`).
+- CI (`.github/workflows/ci.yml`) runs typecheck → tests → build on every push.
+- `dist/version.json` stamps every build (footer shows `v1.1.0 (abc1234)`).
+
+## Deploy
+
+See [DEPLOY.md](DEPLOY.md) (Docker + nginx, Netlify, S3/CDN, go-live checklist)
+and [SECURITY.md](SECURITY.md) (headers, data-handling, disclosure).
 
 MIT — build something private.

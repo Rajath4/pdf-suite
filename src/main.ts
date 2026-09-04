@@ -1,14 +1,29 @@
 import './styles.css';
 import { CATEGORIES, TOOLS, getTool } from './tools/registry.js';
-import { runTool } from './tools/actions.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
 import { downloadBlob, formatBytes } from './lib/fileUtils.js';
-import { renderPage, getPageCount } from './lib/pdfRender.js';
 import { UserError } from './types.js';
 import type { ToolDef } from './types.js';
 import { registerSW } from 'virtual:pwa-register';
 
 const app = document.getElementById('app')!;
+
+// Heavy engines (pdf-lib, pdf.js, office libs) are code-split: the homepage
+// shell stays tiny and tools load on demand. Memoized so each chunk loads once.
+let actionsPromise: Promise<typeof import('./tools/actions.js')> | null = null;
+const loadActions = (): Promise<typeof import('./tools/actions.js')> =>
+  (actionsPromise ??= import('./tools/actions.js'));
+let renderPromise: Promise<typeof import('./lib/pdfRender.js')> | null = null;
+const loadRender = (): Promise<typeof import('./lib/pdfRender.js')> =>
+  (renderPromise ??= import('./lib/pdfRender.js'));
+// Warm the engine cache when the user shows intent (hover/focus a tool card).
+const prefetchEngines = () => {
+  loadActions().catch(() => {});
+  loadRender().catch(() => {});
+};
+
+/** Enterprise guardrail: hard cap per file so a huge PDF can't OOM a tab. */
+const MAX_FILE_BYTES = 150 * 1024 * 1024;
 
 // PWA: keep the service worker fresh and surface update/offline state.
 const swUpdate = registerSW({
@@ -95,6 +110,8 @@ render();
 
 function render(): void {
   app.innerHTML = '';
+  const skip = el('a', { class: 'skip-link', href: '#main' }, 'Skip to content');
+  app.append(skip);
   app.append(header());
   const hash = location.hash || '#/';
   if (hash.startsWith('#/tool/')) {
@@ -104,6 +121,8 @@ function render(): void {
     app.append(homePage());
   }
   app.append(footer());
+  // SPA a11y: move focus to the new view so screen readers announce it.
+  document.getElementById('main')?.focus({ preventScroll: true });
   window.scrollTo({ top: 0 });
 }
 
@@ -133,11 +152,29 @@ function header(): HTMLElement {
   return h;
 }
 
+let cachedVersion: string | null = null;
+async function appVersion(): Promise<string> {
+  if (cachedVersion) return cachedVersion;
+  try {
+    const res = await fetch('version.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('no version file');
+    const data = (await res.json()) as { version?: string; commit?: string };
+    cachedVersion = `v${data.version ?? '?'} (${data.commit ?? 'dev'})`;
+  } catch {
+    cachedVersion = 'dev build';
+  }
+  return cachedVersion;
+}
+
 function footer(): HTMLElement {
   const f = el('footer', { class: 'footer' });
+  const ver = el('span', { class: 'muted' }, '…');
+  void appVersion().then((v) => {
+    ver.textContent = v;
+  });
   f.append(
     el('div', { class: 'wrap' },
-      el('p', {}, 'PDF Suite — free, private PDF tools. Files never leave your device. No watermark, no sign-up.'),
+      el('p', {}, 'PDF Suite — free, private PDF tools. Files never leave your device. No watermark, no sign-up. ', ver),
       el('p', { class: 'muted' }, 'Built with pdf-lib + pdf.js. Works offline after first load. Tip: run `npm run dev` locally or host the `dist/` folder anywhere static.'),
     ),
   );
@@ -145,7 +182,7 @@ function footer(): HTMLElement {
 }
 
 function homePage(): HTMLElement {
-  const root = el('main', { class: 'wrap' });
+  const root = el('main', { class: 'wrap', id: 'main', tabindex: '-1' });
 
   const hero = el('section', { class: 'hero' });
   hero.append(
@@ -187,6 +224,9 @@ function homePage(): HTMLElement {
       const grid = el('div', { class: 'grid' });
       for (const t of tools) {
         const card = el('a', { class: 'card', href: `#/tool/${t.id}` });
+        // Prefetch the engine chunks on intent so the tool page feels instant.
+        card.addEventListener('pointerenter', prefetchEngines, { once: true });
+        card.addEventListener('focus', prefetchEngines, { once: true });
         card.append(
           el('div', { class: 'card-icon' }, t.icon),
           el('div', { class: 'card-title' }, t.title),
@@ -203,6 +243,18 @@ function homePage(): HTMLElement {
   };
   search.addEventListener('input', () => renderGrid(search.value));
   renderGrid('');
+
+  // Press "/" anywhere on the homepage to jump to search.
+  const onKey = (e: KeyboardEvent) => {
+    const target = e.target as HTMLElement | null;
+    const typing = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+    if (e.key === '/' && !typing) {
+      e.preventDefault();
+      search.focus();
+    }
+  };
+  window.addEventListener('keydown', onKey);
+  window.addEventListener('hashchange', () => window.removeEventListener('keydown', onKey), { once: true });
 
   const faq = el('section', { class: 'faq' });
   faq.append(el('h2', {}, 'How it works'));
@@ -229,12 +281,14 @@ interface FileState {
 
 function toolPage(id: string): HTMLElement {
   const tool = getTool(id);
-  const root = el('main', { class: 'wrap tool' });
+  const root = el('main', { class: 'wrap tool', id: 'main', tabindex: '-1' });
   if (!tool) {
     root.append(el('h1', {}, 'Tool not found'), el('p', {}, 'Go back to '), el('a', { href: '#/' }, 'all tools.'));
     return root;
   }
   const current: ToolDef = tool;
+  // Warm the engine chunks as soon as a tool page opens — Run then feels instant.
+  void loadActions().catch(() => {});
 
   root.append(el('a', { class: 'back', href: '#/' }, '← All tools'));
   root.append(el('h1', {}, `${current.icon} ${current.title}`));
@@ -284,8 +338,20 @@ function toolPage(id: string): HTMLElement {
 
   const listBox = el('div', { class: 'filelist' });
   function addFiles(next: File[]) {
-    if (!current.multiple && next.length > 0) state.files = [next[0]];
-    else state.files.push(...next);
+    const accepted: File[] = [];
+    for (const f of next) {
+      if (f.size > MAX_FILE_BYTES) {
+        setStatus(
+          `"${f.name}" is ${formatBytes(f.size)} — over the ${formatBytes(MAX_FILE_BYTES)} per-file limit. Split it first or use a desktop tool.`,
+          'error',
+        );
+        continue;
+      }
+      accepted.push(f);
+    }
+    if (accepted.length === 0) return;
+    if (!current.multiple) state.files = [accepted[0]];
+    else state.files.push(...accepted);
     paintFiles();
     onFilesChanged();
   }
@@ -356,7 +422,10 @@ function toolPage(id: string): HTMLElement {
       return;
     }
     runBtn.setAttribute('disabled', 'true');
+    runBtn.textContent = 'Working…';
     try {
+      setStatus('Loading engine…', 'info');
+      const { runTool } = await loadActions();
       setStatus('Working…', 'info');
       const opts = getOpts();
       const outs = await runTool(current.id, {
@@ -365,6 +434,16 @@ function toolPage(id: string): HTMLElement {
         onProgress: (m) => setStatus(m, 'info'),
       });
       setStatus(`Done — ${outs.length} file${outs.length > 1 ? 's' : ''} ready.`, 'ok');
+      // Best-in-class touch: show input → output size for every run.
+      const inBytes = state.files.reduce((a, f) => a + f.size, 0);
+      const outBytes = outs.reduce((a, o) => a + o.blob.size, 0);
+      if (inBytes > 0 && outBytes > 0) {
+        const delta = Math.round((1 - outBytes / inBytes) * 100);
+        const verdict = delta > 0 ? `${delta}% smaller` : delta < 0 ? `${-delta}% larger` : 'same size';
+        results.append(
+          el('p', { class: 'result-stats' }, `${formatBytes(inBytes)} → ${formatBytes(outBytes)} (${verdict})`),
+        );
+      }
       for (const out of outs) {
         const card = el('div', { class: 'result' });
         const head = el('div', { class: 'result-head' });
@@ -394,6 +473,7 @@ function toolPage(id: string): HTMLElement {
       setStatus(msg, 'error');
     } finally {
       runBtn.removeAttribute('disabled');
+      runBtn.textContent = `Run — ${current.title}`;
     }
   });
 
@@ -582,6 +662,8 @@ function mountOrganize(
 
   (async () => {
     try {
+      setStatus('Loading viewer…', 'info');
+      const { renderPage, getPageCount } = await loadRender();
       setStatus('Loading thumbnails…', 'info');
       const bytes = await file.arrayBuffer();
       const n = await getPageCount(bytes.slice(0));
@@ -697,6 +779,8 @@ function mountCompare(
 
   (async () => {
     try {
+      setStatus('Loading viewer…', 'info');
+      const { renderPage, getPageCount } = await loadRender();
       setStatus('Rendering both PDFs…', 'info');
       const [ba, bb] = await Promise.all([a.arrayBuffer(), b.arrayBuffer()]);
       const [na, nb] = await Promise.all([getPageCount(ba.slice(0)), getPageCount(bb.slice(0))]);

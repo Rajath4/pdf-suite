@@ -15,13 +15,9 @@ export function parseCsv(text: string): TableData {
     cell = '';
   };
   const pushRow = () => {
-    // Skip fully-empty trailing rows
-    if (row.length > 1 || row[0]?.trim() !== '' || cell.trim() !== '') {
-      pushCell();
-      rows.push(row);
-    } else {
-      cell = '';
-    }
+    // Skip blank lines entirely.
+    pushCell();
+    if (row.some((c) => c.trim() !== '')) rows.push(row);
     row = [];
   };
   for (let i = 0; i < text.length; i++) {
@@ -40,7 +36,7 @@ export function parseCsv(text: string): TableData {
     else cell += c;
   }
   pushCell();
-  if (row.length > 1 || (row.length === 1 && row[0].trim() !== '')) rows.push(row);
+  if (row.some((c) => c.trim() !== '')) rows.push(row);
   if (rows.length === 0) throw new UserError('No rows found in CSV.');
   const width = Math.max(...rows.map((r) => r.length));
   const norm = rows.map((r) => [...r, ...Array(Math.max(0, width - r.length)).fill('')]);

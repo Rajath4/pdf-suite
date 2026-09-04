@@ -1,13 +1,15 @@
 {
   "name": "pdf-suite",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Free offline-first PDF toolkit — merge, split, compress, convert, edit, secure. 100% client-side, no upload, no watermark. Clone of ihatepdf.cv essentials.",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/check-budget.mjs",
     "preview": "vite preview --port 4173",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "budget": "node scripts/check-budget.mjs"
   },
   "keywords": [
     "pdf",
@@ -22,7 +24,6 @@
     "docx": "^8.5.0",
     "jszip": "^3.10.1",
     "mammoth": "^1.8.0",
-    "marked": "^12.0.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.2.67",
     "tesseract.js": "^5.1.0",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "typescript": "^5.4.5",
     "vite": "^5.2.0",
-    "vite-plugin-pwa": "^1.3.0"
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^2.1.0"
   }
 }
