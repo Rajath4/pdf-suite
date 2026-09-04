@@ -1,18 +1,19 @@
 # PDF Suite — Free Offline PDF Toolkit
 
 A full end-to-end working clone of the **ihatepdf.cv essentials**, at parity
-with the best of iLovePDF/Smallpdf — **35 tools, 100% client-side**. No upload,
+with the best of iLovePDF/Smallpdf — **36 tools, 100% client-side**. No upload,
 no watermark, no sign-up, no per-hour limits. Files never leave the device.
 
-## Features (35 tools, all functional offline after first load)
+## Features (36 tools, all functional offline after first load)
 
-**Essentials:** Merge PDFs · Split PDF · Compress PDF · PDF → JPG/PNG/ZIP · Images → PDF
+**Essentials:** Merge PDFs (per-file page ranges) · Split PDF (ranges, chunks, odd/even, by size) ·
+Compress PDF (presets or exact target size) · PDF → JPG/PNG/ZIP · Extract Images · Images → PDF
 **Edit & Organize:** Sign PDF (draw/type/upload) · Edit & Annotate (text, highlights, image stamps) ·
-Organize pages (reorder/rotate/delete) · Rotate · Crop · Watermark · Page numbers ·
-Headers/Footers · Fill PDF Forms · Redact · Extract Text · OCR (on-device Tesseract)
-**Security & Privacy:** Protect (AES password) · Unlock · Flatten · Privacy Scanner (inspect/strip metadata)
+Organize pages (reorder/rotate/delete) · Rotate · Crop · Watermark (text or logo) · Page numbers ·
+Headers/Footers · Fill PDF Forms · Redact · Extract Text / Markdown · OCR (14 languages, on-device)
+**Security & Privacy:** Protect (AES password) · Unlock · Flatten · Privacy Scanner (inspect/edit/strip metadata)
 **Convert & Export:** PDF → Word · Word → PDF · PDF → Excel/CSV · Excel/CSV → PDF ·
-PDF → PowerPoint · PowerPoint → PDF · PDF → HTML · Invert (dark mode)
+PDF → PowerPoint · PowerPoint → PDF · PDF → HTML · Recolor (dark/gray/sepia)
 **Create:** Create PDF · Markdown → PDF · HTML → PDF
 **Utilities:** Compare PDFs side-by-side · Repair PDF · Scan to PDF (camera)
 
@@ -86,7 +87,7 @@ Principles:
 |---|---|
 | `npm run dev` | local dev server |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | vitest unit suite (24 tests: ranges, CSV, engine round-trips, sign/annotate/crop/forms/slides) |
+| `npm test` | vitest unit suite (32 tests: ranges, CSV, engine round-trips, sign/annotate/crop/forms/slides, merge-select, split modes, metadata, markdown, image extraction, progress/recents helpers) |
 | `npm run build` | typecheck + production build + bundle-budget gate |
 | `npm run budget` | standalone perf-budget check (entry ≤150 KB, JS ≤3.8 MB) |
 | `npm run preview` | serve built app |

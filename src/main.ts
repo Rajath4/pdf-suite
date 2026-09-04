@@ -1,7 +1,7 @@
 import './styles.css';
 import { CATEGORIES, TOOLS, getTool } from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
-import { downloadBlob, formatBytes, baseName } from './lib/fileUtils.js';
+import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent } from './lib/fileUtils.js';
 import { UserError } from './types.js';
 import type { ToolDef } from './types.js';
 import { registerSW } from 'virtual:pwa-register';
@@ -44,12 +44,104 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 let deferredInstall: BeforeInstallPromptEvent | null = null;
+
+const INSTALL_DISMISSED_KEY = 'pdfsuite.install-dismissed';
+const ENGAGED_KEY = 'pdfsuite.engaged';
+
+/** True when running as an installed app — never promote installation then. */
+function isInstalled(): boolean {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
+function installDismissed(): boolean {
+  try {
+    return localStorage.getItem(INSTALL_DISMISSED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function dismissInstall(): void {
+  try {
+    localStorage.setItem(INSTALL_DISMISSED_KEY, '1');
+  } catch {
+    /* private mode — banner simply returns next visit */
+  }
+  document.querySelectorAll<HTMLElement>('.install-banner').forEach((b) => b.remove());
+}
+
+/** Repeat-visit behavior: users return to the same 2–3 tools. */
+const RECENT_KEY = 'pdfsuite.recent';
+const RUNS_KEY = 'pdfsuite.runs';
+
+function getRecentTools(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    const ids = raw ? (JSON.parse(raw) as string[]) : [];
+    return ids.filter((id) => getTool(id)).slice(0, 5);
+  } catch {
+    return [];
+  }
+}
+
+function recordToolVisit(id: string): void {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(pushRecent(getRecentTools(), id)));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Counts completed runs (post-conversion signal for the install nudge). */
+function bumpRuns(): number {
+  try {
+    const n = Number(localStorage.getItem(RUNS_KEY) ?? 0) + 1;
+    localStorage.setItem(RUNS_KEY, String(n));
+    return n;
+  } catch {
+    return 0;
+  }
+}
+/** Engagement signal: only promote installation after value is delivered. */
+function markEngaged(): void {
+  try {
+    localStorage.setItem(ENGAGED_KEY, '1');
+  } catch {
+    /* ignore */
+  }
+}
+
+function isEngaged(): boolean {
+  try {
+    return localStorage.getItem(ENGAGED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Post-conversion nudge (research: ask after value, never on first paint). */
+function maybeSuggestInstall(): void {
+  if (isInstalled() || installDismissed()) return;
+  if (deferredInstall) {
+    showToast('Like it? Install PDF Suite for 1-tap offline access.', 'Install', () => {
+      void promptInstall();
+    });
+  } else {
+    showToast('Tip: you can install this app — Share → “Add to Home Screen”.');
+  }
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstall = e as BeforeInstallPromptEvent;
-  document.querySelectorAll<HTMLButtonElement>('.install-btn').forEach((b) => {
-    b.hidden = false;
-  });
+  if (!isInstalled()) {
+    document.querySelectorAll<HTMLButtonElement>('.install-btn').forEach((b) => {
+      b.hidden = false;
+    });
+  }
 });
 window.addEventListener('appinstalled', () => {
   deferredInstall = null;
@@ -134,7 +226,7 @@ function header(): HTMLElement {
   const logo = el('a', { class: 'logo', href: '#/' }, '📕 PDF Suite');
   const nav = el('nav', { class: 'topnav' });
   const installBtn = el('button', { class: 'btn small install-btn', type: 'button' }, '⤓ Install');
-  installBtn.hidden = !deferredInstall;
+  installBtn.hidden = !deferredInstall || isInstalled();
   installBtn.addEventListener('click', () => {
     void promptInstall();
   });
@@ -194,17 +286,44 @@ function homePage(): HTMLElement {
   search.setAttribute('type', 'search');
   search.setAttribute('aria-label', 'Search tools');
   hero.append(search);
-  const installBanner = el('div', { class: 'install-banner' });
-  installBanner.append(
-    el('span', {}, '📲 Install PDF Suite for offline use — works like a native app, no app store needed.'),
-  );
-  const installCta = el('button', { class: 'btn primary small', type: 'button' }, 'Install app');
-  installCta.addEventListener('click', () => {
-    void promptInstall();
-  });
-  installBanner.append(installCta);
-  hero.append(installBanner);
+  // Install banner only after engagement (never on first paint), dismissible,
+  // and never inside the installed app. Header button covers the rest.
+  if (isEngaged() && !installDismissed() && !isInstalled()) {
+    const installBanner = el('div', { class: 'install-banner' });
+    installBanner.append(
+      el('span', {}, '📲 Install PDF Suite for offline use — works like a native app, no app store needed.'),
+    );
+    const installCta = el('button', { class: 'btn primary small', type: 'button' }, 'Install app');
+    installCta.addEventListener('click', () => {
+      void promptInstall();
+    });
+    const noThanks = el('button', { class: 'btn small', type: 'button' }, 'Not now');
+    noThanks.addEventListener('click', dismissInstall);
+    installBanner.append(el('div', { class: 'row' }, installCta, noThanks));
+    hero.append(installBanner);
+  }
   root.append(hero);
+
+  const recent = getRecentTools();
+  if (recent.length > 0) {
+    const section = el('section', { class: 'cat recent' });
+    section.append(el('h2', {}, 'Recently used'));
+    const grid = el('div', { class: 'grid' });
+    for (const id of recent) {
+      const t = getTool(id)!;
+      const card = el('a', { class: 'card', href: `#/tool/${t.id}` });
+      card.addEventListener('pointerenter', prefetchEngines, { once: true });
+      card.addEventListener('focus', prefetchEngines, { once: true });
+      card.append(
+        el('div', { class: 'card-icon' }, t.icon),
+        el('div', { class: 'card-title' }, t.title),
+        el('div', { class: 'card-desc' }, t.description),
+      );
+      grid.append(card);
+    }
+    section.append(grid);
+    root.append(section);
+  }
 
   const gridRoot = el('div', { id: 'tool-grid' });
   root.append(gridRoot);
@@ -259,7 +378,7 @@ function homePage(): HTMLElement {
   const faq = el('section', { class: 'faq' });
   faq.append(el('h2', {}, 'How it works'));
   const items: [string, string][] = [
-    ['Are my files uploaded anywhere?', 'No. Every tool runs with JavaScript/WASM in your tab. Disconnect the internet after load and everything still works.'],
+    ['Are my files uploaded anywhere?', 'No. Every tool runs with JavaScript in your tab. Prove it: load any tool, then turn on airplane mode — everything still works.'],
     ['Is there a watermark or limit?', 'No watermark, no account, no daily cap. Practical limit is your device memory (~100–150 MB PDFs on desktop).'],
     ['Which tools are included?', 'Merge, split, compress, images↔PDF, rotate, organize, watermark, page numbers, headers, redact, extract text, OCR, protect/unlock, flatten, privacy scan, PDF↔Word, PDF↔Excel, PDF→HTML, invert, create/Markdown/HTML→PDF, compare, repair, camera scan.'],
     ['Password-protected PDFs?', 'Unlock first with Security → Unlock PDF, then use any other tool, then re-protect if needed.'],
@@ -287,6 +406,7 @@ function toolPage(id: string): HTMLElement {
     return root;
   }
   const current: ToolDef = tool;
+  recordToolVisit(current.id);
   // Warm the engine chunks as soon as a tool page opens — Run then feels instant.
   void loadActions().catch(() => {});
 
@@ -310,6 +430,19 @@ function toolPage(id: string): HTMLElement {
 
   const state: FileState = { files: [] };
   const { box: status, set: setStatus } = statusBox();
+
+  // Merge: per-file page ranges ("1-3, 5", blank = whole file), kept in sync
+  // with the file list order. Surfaced to actions via [data-opt-key].
+  const mergeRanges: string[] = [];
+  const mergeAnchor = el('div', {});
+  mergeAnchor.setAttribute('data-opt-key', 'mergeRanges');
+  mergeAnchor.setAttribute('data-opt-value', '[]');
+  if (current.id === 'merge') root.append(mergeAnchor);
+  const syncMergeRanges = () => {
+    while (mergeRanges.length < state.files.length) mergeRanges.push('');
+    mergeRanges.length = state.files.length;
+    mergeAnchor.setAttribute('data-opt-value', JSON.stringify(mergeRanges));
+  };
 
   // Dropzone
   const drop = el('div', { class: 'drop', tabindex: '0', role: 'button' });
@@ -377,7 +510,21 @@ function toolPage(id: string): HTMLElement {
     }
     state.files.forEach((f, i) => {
       const row = el('div', { class: 'filerow' });
-      row.append(el('span', { class: 'fname' }, `${i + 1}. ${f.name} (${formatBytes(f.size)})`));
+      const nameSpan = el('span', { class: 'fname' }, `${i + 1}. ${f.name} (${formatBytes(f.size)})`);
+      row.append(nameSpan);
+      if (current.id === 'merge') {
+        const range = document.createElement('input');
+        range.type = 'text';
+        range.className = 'input range-inline';
+        range.placeholder = 'All pages (e.g. 1-3, 5)';
+        range.value = mergeRanges[i] ?? '';
+        range.setAttribute('aria-label', `Pages to take from ${f.name}`);
+        range.addEventListener('input', () => {
+          mergeRanges[i] = range.value;
+          syncMergeRanges();
+        });
+        row.append(range);
+      }
       const btns = el('span', { class: 'frow-btns' });
       if (current.multiple && state.files.length > 1) {
         const up = el('button', { class: 'btn small', type: 'button' }, '↑');
@@ -385,6 +532,8 @@ function toolPage(id: string): HTMLElement {
         up.addEventListener('click', () => {
           if (i === 0) return;
           [state.files[i - 1], state.files[i]] = [state.files[i], state.files[i - 1]];
+          [mergeRanges[i - 1], mergeRanges[i]] = [mergeRanges[i], mergeRanges[i - 1]];
+          syncMergeRanges();
           paintFiles();
           onFilesChanged();
         });
@@ -393,6 +542,8 @@ function toolPage(id: string): HTMLElement {
         down.addEventListener('click', () => {
           if (i === state.files.length - 1) return;
           [state.files[i + 1], state.files[i]] = [state.files[i], state.files[i + 1]];
+          [mergeRanges[i + 1], mergeRanges[i]] = [mergeRanges[i], mergeRanges[i + 1]];
+          syncMergeRanges();
           paintFiles();
           onFilesChanged();
         });
@@ -401,6 +552,8 @@ function toolPage(id: string): HTMLElement {
       const rm = el('button', { class: 'btn small danger', type: 'button' }, 'Remove');
       rm.addEventListener('click', () => {
         state.files.splice(i, 1);
+        mergeRanges.splice(i, 1);
+        syncMergeRanges();
         paintFiles();
         onFilesChanged();
       });
@@ -408,6 +561,41 @@ function toolPage(id: string): HTMLElement {
       row.append(btns);
       listBox.append(row);
     });
+    syncMergeRanges();
+    void annotatePageCounts();
+  }
+
+  // Intuitiveness: show "· N pages" on PDF rows so range inputs are guess-free.
+  // Best-effort and async — never blocks the UI or fails the flow.
+  let countToken = 0;
+  async function annotatePageCounts(): Promise<void> {
+    if (!current.accept.includes('pdf') || state.files.length === 0) return;
+    const token = ++countToken;
+    const snapshot = [...state.files];
+    let render: typeof import('./lib/pdfRender.js') | null = null;
+    try {
+      render = await loadRender();
+    } catch {
+      return;
+    }
+    if (token !== countToken) return;
+    const rows = [...listBox.querySelectorAll('.filerow .fname')];
+    for (let i = 0; i < snapshot.length; i++) {
+      if (token !== countToken || state.files[i] !== snapshot[i]) return;
+      const f = snapshot[i];
+      if (!/\.pdf$/i.test(f.name) && f.type !== 'application/pdf') continue;
+      try {
+        const n = await render.getPageCount(await f.arrayBuffer());
+        if (token !== countToken || state.files[i] !== snapshot[i]) return;
+        const span = rows[i] as HTMLElement | undefined;
+        if (span && !span.dataset['counted']) {
+          span.dataset['counted'] = '1';
+          span.textContent = `${span.textContent} · ${n} page${n === 1 ? '' : 's'}`;
+        }
+      } catch {
+        /* locked or unreadable here — the tool itself will explain on Run */
+      }
+    }
   }
 
   // Options per tool
@@ -425,6 +613,7 @@ function toolPage(id: string): HTMLElement {
     else if (current.id === 'sign') mountSign(live, setStatus);
     else if (current.id === 'annotate') mountAnnotate(live, setStatus);
     else if (current.id === 'fill-forms') mountFormFill(live, state, setStatus);
+    else if (current.id === 'watermark') mountWatermarkPicker(live, setStatus);
   }
 
   if (current.id === 'scan') mountScanner(live, state, paintFiles, setStatus);
@@ -433,6 +622,62 @@ function toolPage(id: string): HTMLElement {
   const startOver = el('button', { class: 'btn', type: 'button' }, 'Start over');
   startOver.addEventListener('click', () => render());
   const results = el('div', { class: 'results' });
+
+  // Behavioral UX: determinate progress (percent-done) + elapsed time.
+  // Research: dynamic feedback makes waits feel shorter and triples patience.
+  const progressWrap = el('div', { class: 'progress', hidden: '' });
+  const progressTrack = el('div', { class: 'progress-track' });
+  progressTrack.setAttribute('role', 'progressbar');
+  progressTrack.setAttribute('aria-label', 'Processing progress');
+  progressTrack.setAttribute('aria-valuemin', '0');
+  progressTrack.setAttribute('aria-valuemax', '100');
+  const progressFill = el('div', { class: 'progress-fill indet' });
+  progressTrack.append(progressFill);
+  const progressLabel = el('span', { class: 'progress-label' }, '');
+  progressWrap.append(progressTrack, progressLabel);
+  let runStarted = 0;
+  let lastProgressMsg = '';
+  let progressTimer: number | null = null;
+  const paintElapsed = () => {
+    const s = Math.max(0, Math.floor((Date.now() - runStarted) / 1000));
+    progressLabel.textContent = s > 1 ? `${lastProgressMsg} · ${s}s` : lastProgressMsg;
+  };
+  const progressStart = () => {
+    runStarted = Date.now();
+    lastProgressMsg = 'Starting…';
+    progressWrap.hidden = false;
+    progressFill.className = 'progress-fill indet';
+    progressTrack.setAttribute('aria-valuenow', '0');
+    paintElapsed();
+    if (progressTimer !== null) window.clearInterval(progressTimer);
+    progressTimer = window.setInterval(paintElapsed, 500);
+  };
+  const progressFeed = (msg: string) => {
+    lastProgressMsg = msg;
+    const p = parseProgress(msg);
+    if (p) {
+      const pct = Math.round((p.done / p.total) * 100);
+      progressFill.className = 'progress-fill';
+      progressFill.style.width = `${pct}%`;
+      progressTrack.setAttribute('aria-valuenow', String(pct));
+    } else {
+      progressFill.className = 'progress-fill indet';
+    }
+    paintElapsed();
+  };
+  const progressDone = () => {
+    if (progressTimer !== null) {
+      window.clearInterval(progressTimer);
+      progressTimer = null;
+    }
+    progressFill.className = 'progress-fill';
+    progressFill.style.width = '100%';
+    progressTrack.setAttribute('aria-valuenow', '100');
+    window.setTimeout(() => {
+      progressWrap.hidden = true;
+      progressFill.style.width = '0%';
+    }, 800);
+  };
 
   /** Batchable tools: same operation applied to every file, delivered as one ZIP. */
   const BATCH_SUFFIX: Record<string, string> = {
@@ -466,6 +711,34 @@ function toolPage(id: string): HTMLElement {
       const dl = el('button', { class: 'btn primary', type: 'button' }, 'Download');
       dl.addEventListener('click', () => downloadBlob(out.blob, out.filename));
       head.append(dl);
+      // Behavior: on phones users share more than they download…
+      try {
+        const file = new File([out.blob], out.filename, { type: out.blob.type || 'application/octet-stream' });
+        if (typeof navigator.share === 'function' && navigator.canShare?.({ files: [file] })) {
+          const share = el('button', { class: 'btn', type: 'button' }, 'Share');
+          share.addEventListener('click', () => {
+            void navigator.share({ files: [file], title: out.filename }).catch(() => {
+              /* user dismissed — not an error */
+            });
+          });
+          head.append(share);
+        }
+      } catch {
+        /* File constructor / canShare unsupported — download covers it */
+      }
+      // …and for text outputs they copy more than they save.
+      if (out.previewText && navigator.clipboard) {
+        const copy = el('button', { class: 'btn', type: 'button' }, 'Copy');
+        copy.addEventListener('click', () => {
+          void navigator.clipboard
+            .writeText(out.previewText!.slice(0, 100000))
+            .then(
+              () => setStatus('Copied to clipboard.', 'ok'),
+              () => setStatus('Copy blocked by the browser — select the text manually.', 'error'),
+            );
+        });
+        head.append(copy);
+      }
       card.append(head);
       if (out.note) card.append(el('p', { class: 'muted' }, out.note));
       if (out.previewText) {
@@ -492,6 +765,17 @@ function toolPage(id: string): HTMLElement {
     }
     runBtn.setAttribute('disabled', 'true');
     runBtn.textContent = 'Working…';
+    progressStart();
+    const feed = (m: string) => {
+      setStatus(m, 'info');
+      progressFeed(m);
+    };
+    const celebrate = () => {
+      // Post-conversion moment: the user got value — count it, then (once
+      // ever) suggest installation. Never on first paint, never when installed.
+      markEngaged();
+      if (bumpRuns() === 1) maybeSuggestInstall();
+    };
     try {
       setStatus('Loading engine…', 'info');
       const { runTool } = await loadActions();
@@ -504,35 +788,38 @@ function toolPage(id: string): HTMLElement {
         let outBytes = 0;
         for (let i = 0; i < state.files.length; i++) {
           const f = state.files[i];
-          setStatus(`Batch ${i + 1}/${state.files.length}: ${f.name}…`, 'info');
+          feed(`Batch ${i + 1}/${state.files.length}: ${f.name}…`);
           const outs = await runTool(
             current.id,
-            { files: [f], opts: getOpts(), onProgress: () => {} },
+            { files: [f], opts: getOpts(), onProgress: feed },
           );
           zip.file(`${baseName(f.name)}-${batchSuffix}.pdf`, outs[0].blob);
           inBytes += f.size;
           outBytes += outs[0].blob.size;
         }
-        setStatus('Zipping results…', 'info');
+        feed('Zipping results…');
         const blob = await zip.generateAsync({ type: 'blob' });
         const filename = `${current.id}-batch-${state.files.length}-files.zip`;
         setStatus(`Done — ${state.files.length} files processed.`, 'ok');
+        progressDone();
         showStats(inBytes, outBytes);
         showOutputs(
           [{ blob, filename, note: `Batch ${current.title.toLowerCase()}: ${state.files.length} files, same settings applied to each.` }],
           true,
         );
         paintSteps(3);
+        celebrate();
         return;
       }
-      setStatus('Working…', 'info');
+      feed('Working…');
       const opts = getOpts();
       const outs = await runTool(current.id, {
         files: [...state.files],
         opts,
-        onProgress: (m) => setStatus(m, 'info'),
+        onProgress: feed,
       });
       setStatus(`Done — ${outs.length} file${outs.length > 1 ? 's' : ''} ready.`, 'ok');
+      progressDone();
       // Best-in-class touch: show input → output size for every run.
       showStats(
         state.files.reduce((a, f) => a + f.size, 0),
@@ -541,16 +828,53 @@ function toolPage(id: string): HTMLElement {
       // Auto-download outputs for convenience + keep buttons for re-download.
       showOutputs(outs, true);
       paintSteps(3);
+      celebrate();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setStatus(msg, 'error');
+      progressDone();
     } finally {
       runBtn.removeAttribute('disabled');
       runBtn.textContent = `Run — ${current.title}`;
     }
   });
 
-  root.append(drop, listBox, optsBox, live, el('div', { class: 'row' }, runBtn, startOver), status, results);
+  root.append(drop, listBox, optsBox, live, el('div', { class: 'row' }, runBtn, startOver), progressWrap, status, results);
+
+  // Behavior guards: Cmd/Ctrl+Enter runs; a stray drop anywhere loads files
+  // instead of navigating away and vaporizing state; leaving with loaded
+  // files asks first. All torn down when the route changes.
+  const onToolKey = (e: KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      if (!runBtn.hasAttribute('disabled')) runBtn.click();
+    }
+  };
+  const onWinDragOver = (e: DragEvent) => {
+    e.preventDefault();
+  };
+  const onWinDrop = (e: DragEvent) => {
+    e.preventDefault();
+    const list = e.dataTransfer?.files;
+    if (list && list.length > 0) addFiles([...list]);
+  };
+  const onBeforeUnload = (e: BeforeUnloadEvent) => {
+    if (state.files.length > 0) e.preventDefault();
+  };
+  window.addEventListener('keydown', onToolKey);
+  window.addEventListener('dragover', onWinDragOver);
+  window.addEventListener('drop', onWinDrop);
+  window.addEventListener('beforeunload', onBeforeUnload);
+  window.addEventListener(
+    'hashchange',
+    () => {
+      window.removeEventListener('keydown', onToolKey);
+      window.removeEventListener('dragover', onWinDragOver);
+      window.removeEventListener('drop', onWinDrop);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    },
+    { once: true },
+  );
 
   const tips = el('details', { class: 'tips' });
   tips.append(el('summary', {}, 'Tips & limits'), el('p', {},
@@ -585,16 +909,23 @@ function buildOptions(
         { value: 'ranges', label: 'Extract range (one PDF)' },
         { value: 'keep', label: 'Keep only these pages (one PDF)' },
         { value: 'each', label: 'Every page as its own PDF (ZIP)' },
+        { value: 'chunks', label: 'Every N pages → separate files (ZIP)' },
+        { value: 'oddeven', label: 'Odd pages + even pages (2 files)' },
+        { value: 'bysize', label: 'Split by file size (email-friendly ZIP)' },
       ], 'ranges'));
       add('Pages (e.g. 1-3, 5)', 'ranges', textInput('1-3, 5'));
+      add('Pages per file (chunks mode)', 'size', textInput('5', '', 'number'));
+      add('Target MB per file (by-size mode)', 'targetMB', textInput('5', '', 'number'));
       break;
     case 'compress':
       add('Preset', 'preset', selectInput([
         { value: 'light', label: 'Light — best quality' },
         { value: 'medium', label: 'Medium — balanced (recommended)' },
         { value: 'heavy', label: 'Heavy — smallest file' },
+        { value: 'target', label: 'Target size — e.g. under 1 MB for portals' },
         { value: 'lossless', label: 'Lossless — re-save only (keeps text sharp)' },
       ], 'medium'));
+      add('Target MB (target-size mode)', 'targetMB', textInput('1', '', 'number'));
       break;
     case 'pdf-to-jpg':
       add('Image format', 'format', selectInput([
@@ -623,10 +954,15 @@ function buildOptions(
       add('Pages (blank = all, e.g. 1-2, 5)', 'pages', textInput('', '1-3, 5'));
       break;
     case 'watermark':
+      add('Kind', 'wmmode', selectInput([
+        { value: 'text', label: 'Text watermark' },
+        { value: 'image', label: 'Logo / image watermark' },
+      ], 'text'));
       add('Text', 'text', textInput('CONFIDENTIAL'));
       add('Opacity (0.05–0.6)', 'opacity', textInput('0.25', '', 'number'));
-      add('Font size', 'size', textInput('48', '', 'number'));
-      add('Rotation degrees', 'rotation', textInput('-45', '', 'number'));
+      add('Font size (text mode)', 'size', textInput('48', '', 'number'));
+      add('Rotation degrees (text mode)', 'rotation', textInput('-45', '', 'number'));
+      add('Logo width % (image mode)', 'wmwidth', textInput('22', '', 'number'));
       add('Tiled pattern?', 'tile', selectInput([{ value: 'no', label: 'Single center' }, { value: 'yes', label: 'Tiled' }], 'no'));
       break;
     case 'page-numbers':
@@ -689,8 +1025,13 @@ function buildOptions(
     case 'privacy':
       add('Action', 'action', selectInput([
         { value: 'inspect', label: 'Inspect metadata only' },
+        { value: 'edit', label: 'Edit title/author/subject/keywords' },
         { value: 'strip', label: 'Strip metadata + download clean PDF' },
       ], 'inspect'));
+      add('Title (edit mode)', 'title', textInput(''));
+      add('Author (edit mode)', 'author', textInput(''));
+      add('Subject (edit mode)', 'subject', textInput(''));
+      add('Keywords, comma-separated (edit mode)', 'keywords', textInput(''));
       break;
     case 'create':
       add('Title', 'title', textInput('My document'));
@@ -711,11 +1052,8 @@ function buildOptions(
     case 'compare':
     case 'scan':
     case 'merge':
-    case 'extract-text':
-    case 'ocr':
     case 'flatten':
     case 'repair':
-    case 'invert':
     case 'pdf-to-word':
     case 'word-to-pdf':
     case 'pdf-to-excel':
@@ -723,6 +1061,31 @@ function buildOptions(
     case 'pdf-to-pptx':
     case 'pptx-to-pdf':
       box.append(el('p', { class: 'muted' }, 'No extra settings — upload and Run.'));
+      break;
+    case 'extract-text':
+      add('Output format', 'format', selectInput([
+        { value: 'txt', label: 'Plain text (.txt)' },
+        { value: 'md', label: 'Markdown (.md) — headings + lists' },
+      ], 'txt'));
+      break;
+    case 'ocr': {
+      const langs: [string, string][] = [
+        ['eng', 'English'], ['spa', 'Spanish'], ['fra', 'French'], ['deu', 'German'],
+        ['ita', 'Italian'], ['por', 'Portuguese'], ['nld', 'Dutch'], ['rus', 'Russian'],
+        ['ara', 'Arabic'], ['hin', 'Hindi'], ['chi_sim', 'Chinese (Simplified)'],
+        ['jpn', 'Japanese'], ['kor', 'Korean'], ['tur', 'Turkish'],
+      ];
+      add('Recognition language', 'lang', selectInput(langs.map(([value, label]) => ({ value, label })), 'eng'));
+      box.append(el('p', { class: 'muted' }, 'First use downloads the language pack (cached for offline after).'));
+      break;
+    }
+    case 'invert':
+      add('Style', 'recolor', selectInput([
+        { value: 'dark', label: 'Dark mode (recommended)' },
+        { value: 'invert', label: 'Full invert' },
+        { value: 'grayscale', label: 'Grayscale (print-friendly)' },
+        { value: 'sepia', label: 'Sepia' },
+      ], 'dark'));
       break;
     default:
       break;
@@ -1336,6 +1699,36 @@ function mountFormFill(
       setStatus(err instanceof Error ? err.message : String(err), 'error');
     }
   })();
+}
+
+/** Logo picker for image watermarks (text mode needs nothing extra). */
+function mountWatermarkPicker(
+  live: HTMLElement,
+  setStatus: (m: string, k?: 'info' | 'error' | 'ok') => void,
+): void {
+  const store = el('div', {});
+  store.setAttribute('data-opt-key', 'wmImage');
+  store.setAttribute('data-opt-value', '');
+  const label = el('p', { class: 'muted' }, 'Image mode only: upload a logo, then Run.');
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.hidden = true;
+  input.addEventListener('change', () => {
+    const f = input.files?.[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      store.setAttribute('data-opt-value', String(r.result));
+      label.textContent = `Logo ready: ${f.name}.`;
+      setStatus('Logo loaded.', 'ok');
+    };
+    r.readAsDataURL(f);
+    input.value = '';
+  });
+  const btn = el('button', { class: 'btn', type: 'button' }, 'Upload logo image');
+  btn.addEventListener('click', () => input.click());
+  live.append(label, el('div', { class: 'row' }, btn), input, store);
 }
 
 function mountScanner(

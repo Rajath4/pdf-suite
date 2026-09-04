@@ -113,13 +113,13 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,json,txt,webmanifest,png,svg,mjs}'],
         runtimeCaching: [
           {
-            // Tesseract.js lazily fetches its WASM/core from a CDN on first OCR
-            // use — cache it so OCR keeps working offline afterwards.
-            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
+            // Tesseract.js lazily fetches its engine + language packs from CDNs
+            // on first OCR use — cache them so OCR keeps working offline afterwards.
+            urlPattern: /^https:\/\/(cdn\.jsdelivr\.net|tessdata\.projectnaptha\.com)\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'tesseract-cdn',
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 30 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

@@ -6,15 +6,17 @@ import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
 import { UserError } from '../types.js';
 import {
-  mergePdfs, splitPdf, rotatePdf, organizePdf, losslessResave,
+  mergePdfs, mergeSelected, splitPdf, splitEvery, splitOddEven, splitBySize,
+  rotatePdf, organizePdf, losslessResave,
   imagesToPdf, addTextWatermark, addPageNumbers, addHeaderFooter,
-  redactPdf, flattenPdf, readMetadata, stripMetadata,
+  redactPdf, flattenPdf, readMetadata, stripMetadata, setMetadata,
   encryptPdf, decryptPdf, repairPdf, textToPdf, markdownToPdf,
   tableToPdf, placeImages, annotatePdf, cropPages, fillFormFields,
-  slidesToPdf, type TableData,
+  slidesToPdf, styledToMarkdown, extractRawImages, loadPdf,
+  type TableData,
 } from '../lib/pdfCore.js';
 import {
-  renderAllPages, extractAllText, canvasToBlob, invertCanvas,
+  renderAllPages, extractAllText, extractStyledLines, canvasToBlob, invertCanvas, tintCanvas,
 } from '../lib/pdfRender.js';
 import { baseName, loadImageElement, readAsArrayBuffer, readAsText } from '../lib/fileUtils.js';
 
@@ -50,21 +52,117 @@ async function pdfBytes(f: File): Promise<ArrayBuffer> {
   return readAsArrayBuffer(f);
 }
 
+async function zipParts(
+  sourceName: string,
+  parts: { data: Uint8Array; filenameSuffix: string }[],
+  note: string,
+): Promise<ActionOut[]> {
+  const zip = new JSZip();
+  parts.forEach((p) => zip.file(`${baseName(sourceName)}-${p.filenameSuffix}.pdf`, p.data));
+  const blob = await zip.generateAsync({ type: 'blob' });
+  return [{ blob, filename: `${baseName(sourceName)}-split.zip`, note }];
+}
+
+function downscale(src: HTMLCanvasElement, factor: number): HTMLCanvasElement {
+  const out = document.createElement('canvas');
+  out.width = Math.max(1, Math.floor(src.width * factor));
+  out.height = Math.max(1, Math.floor(src.height * factor));
+  out.getContext('2d')!.drawImage(src, 0, 0, out.width, out.height);
+  return out;
+}
+
+/**
+ * Compress-to-size (portal-friendly): render once at high scale, then iterate
+ * JPEG quality + downscale steps until under the target — students uploading
+ * to 1 MB / 100 KB-capped portals asked for exactly this.
+ */
+async function compressToSize(ctx: Ctx, bytes: ArrayBuffer): Promise<ActionOut[]> {
+  const targetMB = Number(ctx.opts.targetMB ?? 1) || 1;
+  if (targetMB < 0.1 || targetMB > 100) {
+    throw new UserError('Target size must be between 0.1 and 100 MB.');
+  }
+  const target = targetMB * 1024 * 1024;
+  ctx.onProgress('Rendering pages…');
+  let canvases = await renderAllPages(bytes, 2.0, (d, t) => ctx.onProgress(`Rendering ${d}/${t}…`));
+
+  const build = async (quality: number): Promise<Uint8Array> => {
+    const doc = await PDFDocument.create();
+    for (const c of canvases) {
+      const blob = await canvasToBlob(c, 'image/jpeg', quality);
+      const img = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+      const page = doc.addPage([img.width, img.height]);
+      page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+    }
+    return doc.save({ useObjectStreams: true });
+  };
+
+  let best: Uint8Array | null = null;
+  let scale = 1;
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const quality = [0.82, 0.7, 0.6, 0.5, 0.4, 0.3][attempt % 6];
+    ctx.onProgress(`Trying quality ${Math.round(quality * 100)}%${scale < 1 ? ` at ${Math.round(scale * 100)}% size` : ''}…`);
+    const data = await build(quality);
+    if (!best || data.length < best.length) best = data;
+    if (data.length <= target) {
+      return [{
+        blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }),
+        filename: `${baseName(ctx.files[0].name)}-${targetMB}mb.pdf`,
+        note: `Hit ${targetMB} MB target. Rasterized output: text is not selectable.`,
+      }];
+    }
+    if (attempt % 6 === 5) {
+      scale *= 0.75;
+      canvases = canvases.map((c) => downscale(c, 0.75));
+    }
+  }
+  return [{
+    blob: new Blob([best! as unknown as BlobPart], { type: 'application/pdf' }),
+    filename: `${baseName(ctx.files[0].name)}-${targetMB}mb.pdf`,
+    note: `Could not reach ${targetMB} MB without destroying readability — this is the smallest usable version (${(best!.length / 1024 / 1024).toFixed(2)} MB).`,
+  }];
+}
+
 export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
   switch (id) {
     case 'merge': {
       need(ctx, 2);
       ctx.onProgress('Merging…');
-      const parts = await Promise.all(ctx.files.map(pdfBytes));
-      const data = await mergePdfs(parts);
+      // Per-file page ranges ('' = whole file), aligned with upload order.
+      const ranges = JSON.parse(ctx.opts.mergeRanges || '[]') as string[];
+      const parts = await Promise.all(
+        ctx.files.map(async (f, i) => ({ bytes: await pdfBytes(f), ranges: ranges[i] ?? '' })),
+      );
+      const data = await mergeSelected(parts);
       return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: 'merged.pdf' }];
     }
     case 'split': {
       need(ctx, 1);
-      const mode = (ctx.opts.mode ?? 'ranges') as 'ranges' | 'each' | 'keep';
+      const mode = (ctx.opts.mode ?? 'ranges') as 'ranges' | 'each' | 'keep' | 'chunks' | 'oddeven' | 'bysize';
       const ranges = ctx.opts.ranges ?? '1-3';
       ctx.onProgress('Splitting…');
       const bytes = await pdfBytes(ctx.files[0]);
+      if (mode === 'chunks') {
+        const parts = await splitEvery(bytes, Number(ctx.opts.size ?? 3) || 3);
+        return zipParts(ctx.files[0].name, parts, `${parts.length} chunks of ${ctx.opts.size ?? 3} pages.`);
+      }
+      if (mode === 'oddeven') {
+        const parts = await splitOddEven(bytes);
+        return parts.map((p) => ({
+          blob: new Blob([p.data as unknown as BlobPart], { type: 'application/pdf' }),
+          filename: `${baseName(ctx.files[0].name)}-${p.filenameSuffix}.pdf`,
+        }));
+      }
+      if (mode === 'bysize') {
+        const parts = await splitBySize(bytes, Number(ctx.opts.targetMB ?? 5) || 5);
+        if (parts.length === 1) {
+          return [{
+            blob: new Blob([parts[0].data as unknown as BlobPart], { type: 'application/pdf' }),
+            filename: `${baseName(ctx.files[0].name)}-${parts[0].filenameSuffix}.pdf`,
+            note: 'Already under the target — single file.',
+          }];
+        }
+        return zipParts(ctx.files[0].name, parts, `${parts.length} files, each under ~${ctx.opts.targetMB ?? 5} MB.`);
+      }
       const parts = await splitPdf(bytes, mode, ranges);
       if (mode === 'each' && parts.length > 1) {
         const zip = new JSZip();
@@ -85,6 +183,9 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
         ctx.onProgress('Re-saving with object streams…');
         const data = await losslessResave(bytes);
         return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-compressed.pdf` }];
+      }
+      if (preset === 'target') {
+        return compressToSize(ctx, bytes);
       }
       // Lossy: rasterize at preset scale/quality then rebuild.
       const cfg = preset === 'light' ? { scale: 2.0, q: 0.85 }
@@ -164,6 +265,39 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
     }
     case 'watermark': {
       need(ctx, 1);
+      const mode = (ctx.opts.wmmode ?? 'text') as 'text' | 'image';
+      if (mode === 'image') {
+        const imgUrl = ctx.opts.wmImage ?? '';
+        if (!imgUrl.startsWith('data:image/')) {
+          throw new UserError('Upload a logo/image below first (Watermark → Image mode).');
+        }
+        ctx.onProgress('Stamping logo…');
+        const img = await dataUrlToBytes(imgUrl);
+        const opacity = Math.min(0.9, Math.max(0.05, Number(ctx.opts.opacity ?? 0.3) || 0.3));
+        const wPct = Math.min(60, Math.max(5, Number(ctx.opts.wmwidth ?? 22) || 22));
+        const tile = (ctx.opts.tile ?? 'no') === 'yes';
+        const doc = await loadPdf(await pdfBytes(ctx.files[0]));
+        const items: { pageIndex: number; img: Uint8Array; xPct: number; yPct: number; wPct: number; opacity: number }[] = [];
+        doc.getPages().forEach((page, pi) => {
+          if (tile) {
+            // 3×3 grid across the page.
+            for (const gy of [12, 42, 72]) {
+              for (const gx of [8, 38, 68]) {
+                items.push({ pageIndex: pi, img, xPct: gx, yPct: gy, wPct: wPct * 0.8, opacity: Math.min(0.4, opacity) });
+              }
+            }
+          } else {
+            items.push({ pageIndex: pi, img, xPct: 50 - wPct / 2, yPct: 42, wPct, opacity });
+          }
+        });
+        // placeImages reloads from bytes; export current state first.
+        const flat = await doc.save({ useObjectStreams: true });
+        const stamped = await placeImages(
+          flat.buffer.slice(flat.byteOffset, flat.byteOffset + flat.byteLength) as ArrayBuffer,
+          items,
+        );
+        return [{ blob: new Blob([stamped as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-watermarked.pdf` }];
+      }
       const data = await addTextWatermark(await pdfBytes(ctx.files[0]), {
         text: ctx.opts.text ?? 'CONFIDENTIAL',
         opacity: Number(ctx.opts.opacity ?? 0.25),
@@ -204,18 +338,81 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
     }
     case 'extract-text': {
       need(ctx, 1);
+      const format = (ctx.opts.format ?? 'txt') as 'txt' | 'md';
+      if (format === 'md') {
+        ctx.onProgress('Extracting structured text…');
+        const styled = await extractStyledLines(await pdfBytes(ctx.files[0]), (d, t) => ctx.onProgress(`Page ${d}/${t}…`));
+        const md = styledToMarkdown(styled);
+        if (!md.trim().replace(/[#\-*]/g, '')) {
+          throw new UserError('No embedded text found. This looks like a scanned PDF — try OCR instead.');
+        }
+        return [{ blob: new Blob([md], { type: 'text/markdown' }), filename: `${baseName(ctx.files[0].name)}.md`, previewText: md.slice(0, 6000) }];
+      }
       ctx.onProgress('Extracting text…');
       const pages = await extractAllText(await pdfBytes(ctx.files[0]), (d, t) => ctx.onProgress(`Page ${d}/${t}…`));
       const full = pages.map((t, i) => `===== Page ${i + 1} =====\n${t}`).join('\n\n');
       if (!full.trim()) throw new UserError('No embedded text found. This looks like a scanned PDF — try OCR instead.');
       return [{ blob: new Blob([full], { type: 'text/plain' }), filename: `${baseName(ctx.files[0].name)}.txt`, previewText: full.slice(0, 6000) }];
     }
+    case 'extract-images': {
+      need(ctx, 1);
+      ctx.onProgress('Scanning for embedded images…');
+      const { images, skipped } = await extractRawImages(await pdfBytes(ctx.files[0]));
+      if (images.length === 0) {
+        throw new UserError(
+          skipped > 0
+            ? 'Only unsupported image types found (masks/CMYK). Render the pages instead with PDF to JPG.'
+            : 'No embedded images found in this PDF.',
+        );
+      }
+      const files: { name: string; blob: Blob }[] = [];
+      for (let i = 0; i < images.length; i++) {
+        const im = images[i];
+        if (im.kind === 'jpeg') {
+          files.push({
+            name: `${baseName(ctx.files[0].name)}-p${im.pageIndex + 1}-img${i + 1}.jpg`,
+            blob: new Blob([im.data as unknown as BlobPart], { type: 'image/jpeg' }),
+          });
+        } else {
+          // Inflate raw RGB/gray pixels through canvas → PNG.
+          const canvas = document.createElement('canvas');
+          canvas.width = im.width;
+          canvas.height = im.height;
+          const c2d = canvas.getContext('2d')!;
+          const out = c2d.createImageData(im.width, im.height);
+          for (let p = 0; p < im.width * im.height; p++) {
+            if (im.components === 3) {
+              out.data[p * 4] = im.data[p * 3];
+              out.data[p * 4 + 1] = im.data[p * 3 + 1];
+              out.data[p * 4 + 2] = im.data[p * 3 + 2];
+              out.data[p * 4 + 3] = 255;
+            } else {
+              out.data[p * 4] = out.data[p * 4 + 1] = out.data[p * 4 + 2] = im.data[p];
+              out.data[p * 4 + 3] = 255;
+            }
+          }
+          c2d.putImageData(out, 0, 0);
+          files.push({
+            name: `${baseName(ctx.files[0].name)}-p${im.pageIndex + 1}-img${i + 1}.png`,
+            blob: await canvasToBlob(canvas, 'image/png'),
+          });
+        }
+      }
+      const note = skipped > 0 ? `${images.length} extracted, ${skipped} skipped (unsupported type).` : `${images.length} images extracted byte-identical where possible.`;
+      if (files.length === 1) {
+        return [{ blob: files[0].blob, filename: files[0].name, note }];
+      }
+      const zip = new JSZip();
+      files.forEach((f) => zip.file(f.name, f.blob));
+      return [{ blob: await zip.generateAsync({ type: 'blob' }), filename: `${baseName(ctx.files[0].name)}-images.zip`, note }];
+    }
     case 'ocr': {
       if (ctx.files.length === 0) throw new UserError('Upload a PDF or image.');
       const f = ctx.files[0];
+      const lang = ctx.opts.lang ?? 'eng';
       const { createWorker } = await import('tesseract.js');
       ctx.onProgress('Loading OCR engine…');
-      const worker = await createWorker('eng');
+      const worker = await createWorker(lang);
       try {
         let images: HTMLCanvasElement[];
         if (f.type.startsWith('image/')) {
@@ -285,6 +482,15 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
       if (action === 'inspect') {
         return [{ blob: new Blob([summary], { type: 'text/plain' }), filename: `${baseName(ctx.files[0].name)}-metadata.txt`, previewText: summary, note: 'Choose “Strip metadata” and run again to clean the file.' }];
       }
+      if (action === 'edit') {
+        const data = await setMetadata(bytes, {
+          title: ctx.opts.title ?? '',
+          author: ctx.opts.author ?? '',
+          subject: ctx.opts.subject ?? '',
+          keywords: ctx.opts.keywords ?? '',
+        });
+        return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-tagged.pdf`, note: 'Metadata updated.' }];
+      }
       const data = await stripMetadata(bytes);
       return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-clean.pdf`, previewText: summary, note: 'Metadata stripped. Original dates replaced with now.' }];
     }
@@ -342,18 +548,31 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
     }
     case 'invert': {
       need(ctx, 1);
+      const mode = (ctx.opts.recolor ?? 'dark') as 'dark' | 'invert' | 'grayscale' | 'sepia';
+      const filters: Record<string, string> = {
+        dark: 'invert(1) hue-rotate(180deg)',
+        invert: 'invert(1)',
+        grayscale: 'grayscale(1)',
+        sepia: 'sepia(1)',
+      };
+      const labels: Record<string, string> = {
+        dark: 'dark-mode',
+        invert: 'inverted',
+        grayscale: 'grayscale',
+        sepia: 'sepia',
+      };
       ctx.onProgress('Rendering…');
       const canvases = await renderAllPages(await pdfBytes(ctx.files[0]), 1.6, (d, t) => ctx.onProgress(`Page ${d}/${t}…`));
       const doc = await PDFDocument.create();
       for (const c of canvases) {
-        const inv = invertCanvas(c);
+        const inv = mode === 'dark' ? invertCanvas(c) : tintCanvas(c, filters[mode]);
         const blob = await canvasToBlob(inv, 'image/jpeg', 0.85);
         const img = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
         const page = doc.addPage([img.width, img.height]);
         page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
       }
       const data = await doc.save({ useObjectStreams: true });
-      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-dark.pdf`, note: 'Rasterized output: colors inverted, text not selectable.' }];
+      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-${labels[mode]}.pdf`, note: 'Rasterized output: colors changed, text not selectable.' }];
     }
     case 'create': {
       const data = await textToPdf({

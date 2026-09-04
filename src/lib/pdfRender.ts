@@ -105,19 +105,67 @@ export async function extractAllText(
   }
 }
 
+export interface StyledLine {
+  text: string;
+  size: number;
+  bold: boolean;
+}
+
+/** Like extractAllText, but keeps font size/weight per line for Markdown export. */
+export async function extractStyledLines(
+  bytes: ArrayBuffer,
+  onProgress?: (done: number, total: number) => void,
+  password?: string,
+): Promise<StyledLine[][]> {
+  const doc = await openDoc(bytes, password);
+  const pages: StyledLine[][] = [];
+  try {
+    for (let i = 1; i <= doc.numPages; i++) {
+      const page = await doc.getPage(i);
+      const tc = await page.getTextContent();
+      const lines = new Map<number, { parts: string[]; size: number; bold: boolean }>();
+      for (const item of tc.items as Array<{ str: string; transform: number[]; fontName?: string }>) {
+        if (!('str' in item) || !item.str) continue;
+        const y = Math.round(item.transform[5]);
+        const size = Math.abs(item.transform[0]) || 0;
+        const bold = /bold|black|heavy|demi/i.test(item.fontName ?? '');
+        if (!lines.has(y)) lines.set(y, { parts: [], size: 0, bold: false });
+        const line = lines.get(y)!;
+        line.parts.push(item.str);
+        line.size = Math.max(line.size, size);
+        line.bold = line.bold || bold;
+      }
+      pages.push(
+        [...lines.entries()]
+          .sort((a, b) => b[0] - a[0])
+          .map(([, l]) => ({ text: l.parts.join(' '), size: l.size, bold: l.bold })),
+      );
+      onProgress?.(i, doc.numPages);
+    }
+    return pages;
+  } finally {
+    await doc.destroy();
+  }
+}
+
 export function canvasToBlob(canvas: HTMLCanvasElement, type: 'image/jpeg' | 'image/png', quality = 0.92): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Image export failed.'))), type, quality);
   });
 }
 
-export function invertCanvas(src: HTMLCanvasElement): HTMLCanvasElement {
+/** Recolors a rendered page via canvas filters (dark mode, gray, sepia…). */
+export function tintCanvas(src: HTMLCanvasElement, filter: string): HTMLCanvasElement {
   const out = document.createElement('canvas');
   out.width = src.width;
   out.height = src.height;
   const ctx = out.getContext('2d');
   if (!ctx) throw new Error('Canvas not supported.');
-  ctx.filter = 'invert(1) hue-rotate(180deg)';
+  ctx.filter = filter;
   ctx.drawImage(src, 0, 0);
   return out;
+}
+
+export function invertCanvas(src: HTMLCanvasElement): HTMLCanvasElement {
+  return tintCanvas(src, 'invert(1) hue-rotate(180deg)');
 }

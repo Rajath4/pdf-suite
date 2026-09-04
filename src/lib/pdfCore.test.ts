@@ -1,19 +1,27 @@
 import { describe, expect, it } from 'vitest';
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { PDFDict, PDFDocument, PDFName, PDFRawStream, StandardFonts } from 'pdf-lib';
 import {
   annotatePdf,
   cropPages,
+  extractRawImages,
   fillFormFields,
   listFormFields,
   losslessResave,
   markdownToPdf,
   mergePdfs,
+  mergeSelected,
   organizePdf,
   parseRanges,
   placeImages,
   rotatePdf,
+  setMetadata,
+  readMetadata,
   slidesToPdf,
+  splitBySize,
+  splitEvery,
+  splitOddEven,
   splitPdf,
+  styledToMarkdown,
   tableToPdf,
   textToPdf,
 } from './pdfCore.js';
@@ -169,5 +177,159 @@ describe('pdf engine round-trips', () => {
     expect(doc.getPageCount()).toBe(2);
     expect(doc.getPage(0).getSize().width).toBeGreaterThan(doc.getPage(0).getSize().height);
     await expect(slidesToPdf([], 'empty')).rejects.toThrow(UserError);
+  });
+
+  it('merges cherry-picked page ranges per file', async () => {
+    const a = await onePagePdf('a1');
+    const b = await mergePdfs([await onePagePdf('b1'), await onePagePdf('b2'), await onePagePdf('b3')]);
+    const bCopy = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) as ArrayBuffer;
+    const out = await mergeSelected([
+      { bytes: a, ranges: '' },
+      { bytes: bCopy, ranges: '3, 1' },
+    ]);
+    expect((await PDFDocument.load(out)).getPageCount()).toBe(3);
+    await expect(
+      mergeSelected([{ bytes: a, ranges: '' }]),
+    ).rejects.toThrow(UserError);
+    await expect(
+      mergeSelected([
+        { bytes: a, ranges: '' },
+        { bytes: bCopy, ranges: '99' },
+      ]),
+    ).rejects.toThrow(UserError);
+  });
+
+  it('splits every-N, odd/even and by-size', async () => {
+    const parts = [1, 2, 3, 4, 5, 6, 7].map((i) => onePagePdf(`p${i}`));
+    const seven = await mergePdfs(await Promise.all(parts));
+    const copy = seven.buffer.slice(seven.byteOffset, seven.byteOffset + seven.byteLength) as ArrayBuffer;
+
+    const chunks = await splitEvery(copy, 3);
+    expect(chunks.map((c) => c.filenameSuffix)).toEqual(['part-1-p1-3', 'part-2-p4-6', 'part-3-p7-7']);
+    for (const c of chunks) {
+      expect((await PDFDocument.load(c.data)).getPageCount()).toBeLessThanOrEqual(3);
+    }
+    await expect(splitEvery(copy, 0)).rejects.toThrow(UserError);
+
+    const [odd, even] = await splitOddEven(copy);
+    expect((await PDFDocument.load(odd.data)).getPageCount()).toBe(4);
+    expect((await PDFDocument.load(even.data)).getPageCount()).toBe(3);
+
+    const one = await splitBySize(copy, 50);
+    expect(one).toHaveLength(1);
+    // Heavy pages (~5 KB each) so a 0.5 MB target forces multiple parts.
+    const heavyDoc = await PDFDocument.create();
+    const heavyFont = await heavyDoc.embedFont(StandardFonts.Helvetica);
+    for (let p = 0; p < 120; p++) {
+      const pg = heavyDoc.addPage([595, 842]);
+      for (let i = 0; i < 250; i++) {
+        pg.drawText(`Page ${p} line ${i} lorem ipsum dolor sit amet consectetur adipiscing elit`, {
+          x: 40, y: 800 - (i % 150) * 5, size: 10, font: heavyFont,
+        });
+      }
+    }
+    const heavySaved = await heavyDoc.save();
+    const heavy = heavySaved.buffer.slice(heavySaved.byteOffset, heavySaved.byteOffset + heavySaved.byteLength) as ArrayBuffer;
+    const many = await splitBySize(heavy, 0.5);
+    expect(many.length).toBeGreaterThan(1);
+    const total = (
+      await Promise.all(many.map((m) => PDFDocument.load(m.data).then((d) => d.getPageCount())))
+    ).reduce((a, b) => a + b, 0);
+    expect(total).toBe(120);
+    await expect(splitBySize(copy, 0.01)).rejects.toThrow(UserError);
+  });
+
+  it('writes and reads metadata back', async () => {
+    const src = await onePagePdf('meta');
+    const out = await setMetadata(src, {
+      title: 'Annual Report',
+      author: 'Finance Team',
+      subject: 'FY26',
+      keywords: 'finance',
+    });
+    const meta = await readMetadata(
+      out.buffer.slice(out.byteOffset, out.byteOffset + out.byteLength) as ArrayBuffer,
+    );
+    expect(meta.title).toBe('Annual Report');
+    expect(meta.author).toBe('Finance Team');
+    expect(meta.subject).toBe('FY26');
+    expect(meta.keywords).toContain('finance');
+  });
+
+  it('converts styled lines to Markdown', () => {
+    const md = styledToMarkdown([
+      [
+        { text: 'Big Title', size: 24, bold: true },
+        { text: 'Intro paragraph here.', size: 12, bold: false },
+        { text: '• first point', size: 12, bold: false },
+        { text: 'Key term', size: 12, bold: true },
+      ],
+      [{ text: 'Second page', size: 20, bold: true }],
+    ]);
+    expect(md).toContain('## Big Title');
+    expect(md).toContain('- first point');
+    expect(md).toContain('**Key term**');
+    expect(md).toContain('---');
+    expect(() => styledToMarkdown([[]])).toThrow(UserError);
+  });
+
+  it('extracts embedded images (DCT passthrough + Flate RGB)', async () => {
+    const doc = await PDFDocument.create();
+    const page = doc.addPage([200, 200]);
+    const res = doc.context.obj({});
+    page.node.set(PDFName.of('Resources'), doc.context.obj({ XObject: res }));
+
+    // Fake-but-plausibly-structured JPEG bytes: extraction passes them through untouched.
+    const jpeg = new Uint8Array([0xff, 0xd8, 0xaa, 0xbb, 0xff, 0xd9]);
+    const dctDict = doc.context.obj({
+      Type: PDFName.of('XObject'),
+      Subtype: PDFName.of('Image'),
+      Width: 10,
+      Height: 10,
+      ColorSpace: PDFName.of('DeviceRGB'),
+      BitsPerComponent: 8,
+      Filter: PDFName.of('DCTDecode'),
+    });
+    const dctRef = doc.context.register(PDFRawStream.of(dctDict as PDFDict, jpeg));
+    (res as PDFDict).set(PDFName.of('ImJpg'), dctRef);
+
+    // 2x1 RGB Flate image: [red, green].
+    const raw = new Uint8Array([255, 0, 0, 0, 255, 0]);
+    const { deflateSync } = await import('node:zlib');
+    const flateDict = doc.context.obj({
+      Type: PDFName.of('XObject'),
+      Subtype: PDFName.of('Image'),
+      Width: 2,
+      Height: 1,
+      ColorSpace: PDFName.of('DeviceRGB'),
+      BitsPerComponent: 8,
+      Filter: PDFName.of('FlateDecode'),
+    });
+    const flateRef = doc.context.register(PDFRawStream.of(flateDict as PDFDict, deflateSync(raw)));
+    (res as PDFDict).set(PDFName.of('ImRaw'), flateRef);
+
+    // A stencil mask must be skipped, not crash.
+    const maskDict = doc.context.obj({
+      Type: PDFName.of('XObject'),
+      Subtype: PDFName.of('Image'),
+      Width: 2,
+      Height: 2,
+      BitsPerComponent: 1,
+      ImageMask: true,
+    });
+    const maskRef = doc.context.register(PDFRawStream.of(maskDict as PDFDict, new Uint8Array([0])));
+    (res as PDFDict).set(PDFName.of('ImMask'), maskRef);
+
+    const saved = await doc.save();
+    const bytes = saved.buffer.slice(saved.byteOffset, saved.byteOffset + saved.byteLength) as ArrayBuffer;
+    const { images, skipped } = await extractRawImages(bytes);
+    expect(images).toHaveLength(2);
+    const jpg = images.find((i) => i.kind === 'jpeg')!;
+    expect([...jpg.data]).toEqual([...jpeg]);
+    expect(jpg.pageIndex).toBe(0);
+    const rgb = images.find((i) => i.kind === 'raw')!;
+    expect(rgb.components).toBe(3);
+    expect([...rgb.data]).toEqual([...raw]);
+    expect(skipped).toBe(1);
   });
 });

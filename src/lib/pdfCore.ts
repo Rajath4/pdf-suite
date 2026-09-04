@@ -4,8 +4,11 @@
  * UI code lives elsewhere.
  */
 import {
+  PDFArray,
+  PDFDict,
   PDFDocument,
   PDFName,
+  PDFRawStream,
   StandardFonts,
   degrees,
   rgb,
@@ -895,4 +898,252 @@ export async function slidesToPdf(slides: SlideData[], title: string): Promise<U
   }
   doc.setTitle(title || 'Presentation');
   return doc.save({ useObjectStreams: true });
+}
+
+// ---------- Selective merge (per-file page ranges) ----------
+
+export interface MergePart {
+  bytes: ArrayBuffer;
+  /** e.g. "1-3, 5". Empty = whole file. */
+  ranges: string;
+}
+
+/** Merges files, optionally cherry-picking pages from each. Powers Merge PDF. */
+export async function mergeSelected(parts: MergePart[]): Promise<Uint8Array> {
+  if (parts.length < 2) throw new UserError('Select at least 2 PDFs to merge.');
+  const out = await PDFDocument.create();
+  for (const part of parts) {
+    const src = await loadPdf(part.bytes);
+    const n = src.getPageCount();
+    const indices = part.ranges.trim() ? parseRanges(part.ranges, n) : src.getPageIndices();
+    if (indices.length === 0) throw new UserError('One file contributes zero pages — check its range.');
+    const pages = await out.copyPages(src, indices);
+    pages.forEach((p) => out.addPage(p));
+  }
+  return out.save({ useObjectStreams: true });
+}
+
+// ---------- Advanced split: chunks, odd/even, by size ----------
+
+export interface SplitPart {
+  data: Uint8Array;
+  filenameSuffix: string;
+}
+
+async function docOf(src: PDFDocument, indices: number[]): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  const pages = await doc.copyPages(src, indices);
+  pages.forEach((p) => doc.addPage(p));
+  return doc.save({ useObjectStreams: true });
+}
+
+/** Every N pages → its own file. */
+export async function splitEvery(bytes: ArrayBuffer, perFile: number): Promise<SplitPart[]> {
+  if (!Number.isInteger(perFile) || perFile < 1 || perFile > 500) {
+    throw new UserError('Pages per file must be between 1 and 500.');
+  }
+  const src = await loadPdf(bytes);
+  const n = src.getPageCount();
+  const out: SplitPart[] = [];
+  for (let s = 0; s < n; s += perFile) {
+    const idx = Array.from({ length: Math.min(perFile, n - s) }, (_, k) => s + k);
+    out.push({
+      data: await docOf(src, idx),
+      filenameSuffix: `part-${out.length + 1}-p${s + 1}-${s + idx.length}`,
+    });
+  }
+  return out;
+}
+
+/** Odd pages and even pages → two files. */
+export async function splitOddEven(bytes: ArrayBuffer): Promise<SplitPart[]> {
+  const src = await loadPdf(bytes);
+  const n = src.getPageCount();
+  if (n < 2) throw new UserError('Need at least 2 pages to split odd/even.');
+  const odd = Array.from({ length: Math.ceil(n / 2) }, (_, k) => k * 2);
+  const even = Array.from({ length: Math.floor(n / 2) }, (_, k) => k * 2 + 1);
+  return [
+    { data: await docOf(src, odd), filenameSuffix: 'odd-pages' },
+    { data: await docOf(src, even), filenameSuffix: 'even-pages' },
+  ];
+}
+
+/** Greedily packs pages so no file exceeds ~targetMB (email-portal friendly). */
+export async function splitBySize(bytes: ArrayBuffer, targetMB: number): Promise<SplitPart[]> {
+  if (!Number.isFinite(targetMB) || targetMB < 0.5 || targetMB > 100) {
+    throw new UserError('Target size must be between 0.5 and 100 MB.');
+  }
+  const src = await loadPdf(bytes);
+  const n = src.getPageCount();
+  const target = targetMB * 1024 * 1024;
+  // Estimate each page's weight by saving it alone once.
+  const weights: number[] = [];
+  for (let i = 0; i < n; i++) weights.push((await docOf(src, [i])).length);
+  const packs: number[][] = [[]];
+  let running = 0;
+  for (let i = 0; i < n; i++) {
+    if (packs[packs.length - 1].length > 0 && running + weights[i] > target) {
+      if (packs.length >= 100) throw new UserError('That target would create 100+ files — raise it.');
+      packs.push([]);
+      running = 0;
+    }
+    packs[packs.length - 1].push(i);
+    running += weights[i];
+  }
+  const out: SplitPart[] = [];
+  for (const pack of packs) {
+    out.push({ data: await docOf(src, pack), filenameSuffix: `under-${targetMB}mb-${out.length + 1}` });
+  }
+  return out;
+}
+
+// ---------- Metadata read/write ----------
+
+export interface MetadataEdit {
+  title: string;
+  author: string;
+  subject: string;
+  keywords: string;
+}
+
+/** Sets document info metadata (visible in readers, indexed by search). */
+export async function setMetadata(bytes: ArrayBuffer, meta: MetadataEdit): Promise<Uint8Array> {
+  const doc = await loadPdf(bytes);
+  doc.setTitle(meta.title);
+  doc.setAuthor(meta.author);
+  doc.setSubject(meta.subject);
+  doc.setKeywords(meta.keywords.split(/[,;]/).map((s) => s.trim()).filter(Boolean));
+  doc.setModificationDate(new Date());
+  return doc.save({ useObjectStreams: true });
+}
+
+// ---------- Markdown export ----------
+
+export interface StyledLine {
+  text: string;
+  size: number;
+  bold: boolean;
+}
+
+/** Turns styled lines (from pdf.js) into Markdown: headings, lists, emphasis. */
+export function styledToMarkdown(pages: StyledLine[][]): string {
+  const sizes = pages
+    .flatMap((p) => p.map((l) => l.size))
+    .filter((s) => s > 0)
+    .sort((a, b) => a - b);
+  if (sizes.length === 0) throw new UserError('No text found — try OCR for scanned PDFs.');
+  const body = sizes[Math.floor(sizes.length / 2)];
+  const out: string[] = [];
+  pages.forEach((lines, pi) => {
+    if (pi > 0) out.push('\n---\n');
+    for (const line of lines) {
+      const t = line.text.trim().replace(/\s+/g, ' ');
+      if (!t) continue;
+      const list = t.match(/^([•\-*▪◦>]|\d+[.)])\s+(.*)$/);
+      if (list) {
+        out.push(`- ${list[2]}`);
+      } else if (line.size >= body * 1.4) {
+        out.push(`\n## ${t}\n`);
+      } else if (line.size >= body * 1.15 && (line.bold || t.length <= 80)) {
+        out.push(`\n### ${t}\n`);
+      } else if (line.bold && t.length <= 60) {
+        out.push(`**${t}**`);
+      } else {
+        out.push(t);
+      }
+    }
+  });
+  return `${out.join('\n')}\n`;
+}
+
+// ---------- Embedded image extraction ----------
+
+export interface RawImage {
+  /** JPEG bytes pass through untouched; raw pixels are inflated RGB/gray. */
+  data: Uint8Array;
+  kind: 'jpeg' | 'raw';
+  width: number;
+  height: number;
+  /** 3 = RGB, 1 = gray (raw only). */
+  components: number;
+  pageIndex: number;
+}
+
+export interface ImageExtraction {
+  images: RawImage[];
+  /** Images we could not decode (masks, CMYK, predictors). */
+  skipped: number;
+}
+
+async function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
+  const ds = new DecompressionStream('deflate');
+  const stream = new Blob([data as unknown as BlobPart]).stream().pipeThrough(ds);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+/**
+ * Pulls embedded raster images out of page resources. JPEGs (the common
+ * case: scans, photos) pass through byte-identical; plain RGB/gray Flate
+ * images are inflated for PNG re-encoding by the caller.
+ */
+export async function extractRawImages(bytes: ArrayBuffer): Promise<ImageExtraction> {
+  const doc = await loadPdf(bytes);
+  const images: RawImage[] = [];
+  let skipped = 0;
+  const seen = new Set<string>();
+
+  for (let pi = 0; pi < doc.getPageCount(); pi++) {
+    const res = doc.getPage(pi).node.Resources();
+    if (!res) continue;
+    const xobj = res.lookup(PDFName.of('XObject'));
+    if (!(xobj instanceof PDFDict)) continue;
+    for (const key of xobj.keys()) {
+      const raw = xobj.get(key);
+      const id = raw?.toString() ?? `${pi}:${key.toString()}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      const img = doc.context.lookup(raw);
+      if (!(img instanceof PDFRawStream)) continue;
+      const dict = img.dict;
+      if (dict.lookup(PDFName.of('Subtype'))?.toString() !== '/Image') continue;
+      const w = Number(dict.lookup(PDFName.of('Width'))?.toString() ?? 0);
+      const h = Number(dict.lookup(PDFName.of('Height'))?.toString() ?? 0);
+      if (!w || !h || w * h > 100_000_000) {
+        skipped++;
+        continue;
+      }
+      const filterObj = dict.lookup(PDFName.of('Filter'));
+      const filters: string[] = [];
+      if (filterObj instanceof PDFName) filters.push(filterObj.toString());
+      else if (filterObj instanceof PDFArray) {
+        for (let i = 0; i < filterObj.size(); i++) {
+          const f = filterObj.lookup(i);
+          if (f instanceof PDFName) filters.push(f.toString());
+        }
+      }
+      const contents = Uint8Array.from(img.getContents());
+      if (filters.includes('/DCTDecode')) {
+        images.push({ data: contents, kind: 'jpeg', width: w, height: h, components: 0, pageIndex: pi });
+        continue;
+      }
+      if (filters.includes('/FlateDecode') || filters.length === 0) {
+        const cs = dict.lookup(PDFName.of('ColorSpace'))?.toString() ?? '';
+        const comps = /RGB/i.test(cs) ? 3 : /Gray/i.test(cs) ? 1 : 0;
+        const bpc = Number(dict.lookup(PDFName.of('BitsPerComponent'))?.toString() ?? 0);
+        if (comps > 0 && bpc === 8) {
+          try {
+            const inflated = await inflateRaw(contents);
+            if (inflated.length === w * h * comps) {
+              images.push({ data: inflated, kind: 'raw', width: w, height: h, components: comps, pageIndex: pi });
+              continue;
+            }
+          } catch {
+            /* fall through to skipped */
+          }
+        }
+      }
+      skipped++;
+    }
+  }
+  return { images, skipped };
 }
