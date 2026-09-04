@@ -10,7 +10,8 @@ import {
   imagesToPdf, addTextWatermark, addPageNumbers, addHeaderFooter,
   redactPdf, flattenPdf, readMetadata, stripMetadata,
   encryptPdf, decryptPdf, repairPdf, textToPdf, markdownToPdf,
-  tableToPdf, type TableData,
+  tableToPdf, placeImages, annotatePdf, cropPages, fillFormFields,
+  slidesToPdf, type TableData,
 } from '../lib/pdfCore.js';
 import {
   renderAllPages, extractAllText, canvasToBlob, invertCanvas,
@@ -20,6 +21,13 @@ import { baseName, loadImageElement, readAsArrayBuffer, readAsText } from '../li
 // Office-format engines (docx / mammoth / xlsx) are heavy and rarely needed —
 // load them on demand so the main tool chunk stays lean.
 const loadOffice = () => import('../lib/convert.js');
+// Presentation engine (pptxgenjs) loads only for PDF → PowerPoint.
+const loadPptx = () => import('pptxgenjs');
+
+async function dataUrlToBytes(dataUrl: string): Promise<Uint8Array> {
+  const res = await fetch(dataUrl);
+  return new Uint8Array(await res.arrayBuffer());
+}
 
 export interface Ctx {
   files: File[];
@@ -374,6 +382,128 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
     }
     case 'compare': {
       throw new UserError('Compare runs directly in the viewer below — upload both PDFs there. No file to download.');
+    }
+    case 'sign': {
+      need(ctx, 1);
+      const sig = ctx.opts.sig ?? '';
+      if (!sig.startsWith('data:image/')) {
+        throw new UserError('Create your signature first (draw, type or upload) in the panel below.');
+      }
+      const items = JSON.parse(ctx.opts.items || '[]') as {
+        pageIndex: number; xPct: number; yPct: number; wPct: number;
+      }[];
+      if (items.length === 0) throw new UserError('Add at least one placement (page + position).');
+      ctx.onProgress('Baking signature…');
+      const img = await dataUrlToBytes(sig);
+      const data = await placeImages(await pdfBytes(ctx.files[0]), items.map((it) => ({ ...it, img })));
+      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-signed.pdf` }];
+    }
+    case 'annotate': {
+      need(ctx, 1);
+      const anns = JSON.parse(ctx.opts.anns || '[]') as {
+        kind: 'text' | 'highlight' | 'image';
+        pageIndex: number; xPct: number; yPct: number;
+        text: string; size: number; color: string; bold: boolean; wPct: number;
+      }[];
+      if (anns.length === 0) throw new UserError('Add at least one annotation below.');
+      ctx.onProgress('Applying annotations…');
+      let bytes = await pdfBytes(ctx.files[0]);
+      const hex = (h: string): { r: number; g: number; b: number } => {
+        const m = h.replace('#', '');
+        const v = m.length === 3 ? m.split('').map((c) => c + c).join('') : m;
+        const n = parseInt(v || '000000', 16);
+        return { r: ((n >> 16) & 255) / 255, g: ((n >> 8) & 255) / 255, b: (n & 255) / 255 };
+      };
+      const texts = anns
+        .filter((a) => a.kind !== 'image')
+        .map((a) => ({
+          pageIndex: a.pageIndex,
+          xPct: a.xPct,
+          yPct: a.yPct,
+          text: a.kind === 'highlight' && !a.text.trim() ? ' ' : a.text,
+          size: Number(a.size) || 14,
+          color: hex(a.color || '#111111'),
+          bold: !!a.bold,
+          highlight: a.kind === 'highlight',
+        }));
+      if (texts.length > 0) {
+        const out = await annotatePdf(bytes, texts);
+        bytes = out.buffer.slice(out.byteOffset, out.byteOffset + out.byteLength) as ArrayBuffer;
+      }
+      const imageAnns = anns.filter((a) => a.kind === 'image');
+      if (imageAnns.length > 0) {
+        const stamp = ctx.opts.stamp ?? '';
+        if (!stamp.startsWith('data:image/')) {
+          throw new UserError('Image annotations need a stamp image — upload one in the panel below.');
+        }
+        const img = await dataUrlToBytes(stamp);
+        const out = await placeImages(
+          bytes,
+          imageAnns.map((a) => ({ pageIndex: a.pageIndex, img, xPct: a.xPct, yPct: a.yPct, wPct: a.wPct || 20 })),
+        );
+        bytes = out.buffer.slice(out.byteOffset, out.byteOffset + out.byteLength) as ArrayBuffer;
+      }
+      return [{ blob: new Blob([bytes], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-annotated.pdf` }];
+    }
+    case 'crop': {
+      need(ctx, 1);
+      const num = (k: string) => Number(ctx.opts[k] ?? 0) || 0;
+      const data = await cropPages(
+        await pdfBytes(ctx.files[0]),
+        { top: num('top'), bottom: num('bottom'), left: num('left'), right: num('right') },
+        ctx.opts.pages ?? '',
+      );
+      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-cropped.pdf` }];
+    }
+    case 'fill-forms': {
+      need(ctx, 1);
+      const values = JSON.parse(ctx.opts.values || '{}') as Record<string, string>;
+      const data = await fillFormFields(
+        await pdfBytes(ctx.files[0]),
+        values,
+        (ctx.opts.flatten ?? 'yes') === 'yes',
+      );
+      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-filled.pdf` }];
+    }
+    case 'pdf-to-pptx': {
+      need(ctx, 1);
+      ctx.onProgress('Rendering slides…');
+      const canvases = await renderAllPages(
+        await pdfBytes(ctx.files[0]), 2.0, (d, t) => ctx.onProgress(`Page ${d}/${t}…`),
+      );
+      ctx.onProgress('Building presentation…');
+      const { default: PptxGenJS } = await loadPptx();
+      const pptx = new PptxGenJS();
+      pptx.layout = 'LAYOUT_WIDE';
+      for (const c of canvases) {
+        const blob = await canvasToBlob(c, 'image/jpeg', 0.9);
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(String(r.result));
+          r.onerror = () => reject(new Error('Image encoding failed.'));
+          r.readAsDataURL(blob);
+        });
+        const slide = pptx.addSlide();
+        slide.background = { color: 'FFFFFF' };
+        slide.addImage({ data: dataUrl, x: 0, y: 0, w: '100%', h: '100%', sizing: { type: 'contain', w: '100%', h: '100%' } });
+      }
+      const out = (await pptx.write({ outputType: 'blob' })) as Blob | string;
+      const blob =
+        out instanceof Blob
+          ? out
+          : new Blob([Uint8Array.from(atob(out), (ch) => ch.charCodeAt(0))], {
+              type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            });
+      return [{ blob, filename: `${baseName(ctx.files[0].name)}.pptx`, note: `${canvases.length} slides, one per page.` }];
+    }
+    case 'pptx-to-pdf': {
+      if (ctx.files.length === 0) throw new UserError('Upload a .pptx file.');
+      ctx.onProgress('Reading presentation…');
+      const { pptxToSlides } = await loadOffice();
+      const slides = await pptxToSlides(ctx.files[0]);
+      ctx.onProgress('Building PDF…');
+      const data = await slidesToPdf(slides, baseName(ctx.files[0].name));
+      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}.pdf`, note: `${slides.length} slides converted (text + images; exact slide layout simplified).` }];
     }
     case 'repair': {
       need(ctx, 1);

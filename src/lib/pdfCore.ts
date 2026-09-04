@@ -5,6 +5,7 @@
  */
 import {
   PDFDocument,
+  PDFName,
   StandardFonts,
   degrees,
   rgb,
@@ -613,4 +614,285 @@ function copyFirstMetadata(src: PDFDocument, dest: PDFDocument): void {
     const t = src.getTitle();
     if (t) dest.setTitle(t);
   } catch { /* ignore */ }
+}
+
+// ---------- Signatures & image stamps ----------
+
+export interface ImagePlacement {
+  pageIndex: number; // zero-based
+  img: Uint8Array; // PNG or JPEG bytes
+  xPct: number; // left edge, % of page width
+  yPct: number; // bottom edge, % of page height
+  wPct: number; // width, % of page width (height follows aspect ratio)
+  opacity?: number;
+}
+
+async function embedAnyImage(doc: PDFDocument, bytes: Uint8Array) {
+  try {
+    return await doc.embedPng(bytes);
+  } catch {
+    return await doc.embedJpg(bytes);
+  }
+}
+
+/** Bakes image stamps (signatures, logos) onto pages. Powers Sign PDF. */
+export async function placeImages(bytes: ArrayBuffer, items: ImagePlacement[]): Promise<Uint8Array> {
+  if (items.length === 0) throw new UserError('Add at least one placement.');
+  const doc = await loadPdf(bytes);
+  for (const it of items) {
+    if (it.pageIndex < 0 || it.pageIndex >= doc.getPageCount()) {
+      throw new UserError(`Placement targets page ${it.pageIndex + 1}, but the PDF has ${doc.getPageCount()} pages.`);
+    }
+    const page = doc.getPage(it.pageIndex);
+    const { width, height } = page.getSize();
+    const img = await embedAnyImage(doc, it.img);
+    const w = (Math.min(90, Math.max(2, it.wPct)) / 100) * width;
+    const h = (w * img.height) / img.width;
+    page.drawImage(img, {
+      x: (it.xPct / 100) * width,
+      y: (it.yPct / 100) * height,
+      width: w,
+      height: h,
+      opacity: it.opacity ?? 1,
+    });
+  }
+  return doc.save({ useObjectStreams: true });
+}
+
+// ---------- Text annotations & highlights ----------
+
+export interface TextAnnotation {
+  pageIndex: number;
+  xPct: number;
+  yPct: number; // baseline of first line, from bottom
+  text: string;
+  size: number;
+  color: { r: number; g: number; b: number };
+  bold: boolean;
+  /** Yellow marker wash behind the text instead of plain text. */
+  highlight: boolean;
+}
+
+/** Adds user-placed text and highlights. Powers Edit & Annotate. */
+export async function annotatePdf(bytes: ArrayBuffer, anns: TextAnnotation[]): Promise<Uint8Array> {
+  if (anns.length === 0) throw new UserError('Add at least one annotation.');
+  const doc = await loadPdf(bytes);
+  const regular = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  for (const a of anns) {
+    if (!a.text.trim()) continue;
+    if (a.pageIndex < 0 || a.pageIndex >= doc.getPageCount()) {
+      throw new UserError(`Annotation targets page ${a.pageIndex + 1}, but the PDF has ${doc.getPageCount()} pages.`);
+    }
+    const page = doc.getPage(a.pageIndex);
+    const { width } = page.getSize();
+    const font = a.bold ? bold : regular;
+    const size = Math.min(72, Math.max(6, a.size));
+    const x = (a.xPct / 100) * width;
+    let y = (a.yPct / 100) * page.getSize().height;
+    for (const line of a.text.split('\n').slice(0, 20)) {
+      const tw = Math.min(font.widthOfTextAtSize(line, size), width - x - 8);
+      if (a.highlight) {
+        page.drawRectangle({
+          x: x - 2,
+          y: y - size * 0.25,
+          width: tw + 4,
+          height: size * 1.2,
+          color: rgb(1, 0.95, 0.4),
+          opacity: 0.55,
+        });
+      }
+      page.drawText(line, {
+        x,
+        y,
+        size,
+        font,
+        color: rgb(a.color.r, a.color.g, a.color.b),
+      });
+      y -= size * 1.35;
+    }
+  }
+  return doc.save({ useObjectStreams: true });
+}
+
+// ---------- Crop ----------
+
+export interface CropMargins {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+} // all in percent of page dimensions
+
+/** Trims page boxes (margins) on selected pages. Powers Crop PDF. */
+export async function cropPages(
+  bytes: ArrayBuffer,
+  margins: CropMargins,
+  pagesInput: string,
+): Promise<Uint8Array> {
+  for (const [k, v] of Object.entries(margins)) {
+    if (!Number.isFinite(v) || v < 0 || v > 90) {
+      throw new UserError(`Margin "${k}" must be between 0 and 90%.`);
+    }
+  }
+  if (margins.top + margins.bottom >= 96 || margins.left + margins.right >= 96) {
+    throw new UserError('Margins are too large — almost nothing would remain of the page.');
+  }
+  const doc = await loadPdf(bytes);
+  const n = doc.getPageCount();
+  const targets = pagesInput.trim() ? parseRanges(pagesInput, n) : Array.from({ length: n }, (_, i) => i);
+  for (const i of targets) {
+    const page = doc.getPage(i);
+    const { width, height } = page.getSize();
+    const x0 = (width * margins.left) / 100;
+    const x1 = width - (width * margins.right) / 100;
+    const y0 = (height * margins.bottom) / 100;
+    const y1 = height - (height * margins.top) / 100;
+    if (x1 - x0 < 36 || y1 - y0 < 36) {
+      throw new UserError('Margins are too large — almost nothing would remain of the page.');
+    }
+    const box = doc.context.obj([x0, y0, x1, y1]);
+    page.node.set(PDFName.of('CropBox'), box);
+    page.node.set(PDFName.of('TrimBox'), box);
+  }
+  return doc.save({ useObjectStreams: true });
+}
+
+// ---------- Fillable forms ----------
+
+export interface FormFieldInfo {
+  name: string;
+  type: 'text' | 'checkbox' | 'dropdown' | 'unsupported';
+  value: string;
+  options?: string[];
+}
+
+export async function listFormFields(bytes: ArrayBuffer): Promise<FormFieldInfo[]> {
+  const doc = await loadPdf(bytes.slice(0));
+  let form;
+  try {
+    form = doc.getForm();
+  } catch {
+    return [];
+  }
+  const out: FormFieldInfo[] = [];
+  for (const f of form.getFields()) {
+    const name = f.getName();
+    const ctor = f.constructor.name;
+    if (ctor === 'PDFTextField') {
+      const t = f as import('pdf-lib').PDFTextField;
+      out.push({ name, type: 'text', value: t.getText() ?? '' });
+    } else if (ctor === 'PDFCheckBox') {
+      const c = f as import('pdf-lib').PDFCheckBox;
+      out.push({ name, type: 'checkbox', value: c.isChecked() ? 'yes' : 'no' });
+    } else if (ctor === 'PDFDropdown') {
+      const d = f as import('pdf-lib').PDFDropdown;
+      out.push({ name, type: 'dropdown', value: d.getSelected()[0] ?? '', options: d.getOptions() });
+    } else {
+      out.push({ name, type: 'unsupported', value: '' });
+    }
+  }
+  return out;
+}
+
+export async function fillFormFields(
+  bytes: ArrayBuffer,
+  values: Record<string, string>,
+  flatten: boolean,
+): Promise<Uint8Array> {
+  const doc = await loadPdf(bytes);
+  let form;
+  try {
+    form = doc.getForm();
+  } catch {
+    throw new UserError('This PDF has no fillable form fields.');
+  }
+  const fields = form.getFields();
+  if (fields.length === 0) throw new UserError('This PDF has no fillable form fields.');
+  for (const f of fields) {
+    const v = values[f.getName()];
+    if (v === undefined) continue;
+    const ctor = f.constructor.name;
+    try {
+      if (ctor === 'PDFTextField') (f as import('pdf-lib').PDFTextField).setText(v);
+      else if (ctor === 'PDFCheckBox') {
+        const c = f as import('pdf-lib').PDFCheckBox;
+        if (v === 'yes') c.check();
+        else c.uncheck();
+      } else if (ctor === 'PDFDropdown' && v) (f as import('pdf-lib').PDFDropdown).select(v);
+    } catch {
+      /* leave fields we cannot set untouched */
+    }
+  }
+  if (flatten) {
+    try {
+      form.flatten();
+    } catch { /* ignore */ }
+  }
+  return doc.save({ useObjectStreams: true });
+}
+
+// ---------- Slides (PowerPoint bridge) ----------
+
+export interface SlideData {
+  texts: string[];
+  images: { data: Uint8Array; isPng: boolean }[];
+}
+
+/** Renders parsed slide content (from PPTX) as a landscape PDF. */
+export async function slidesToPdf(slides: SlideData[], title: string): Promise<Uint8Array> {
+  if (slides.length === 0) throw new UserError('No slides found in the presentation.');
+  const doc = await PDFDocument.create();
+  const regular = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const W = 960;
+  const H = 540;
+  const margin = 48;
+
+  for (const slide of slides) {
+    const page = doc.addPage([W, H]);
+    let y = H - margin;
+    const lines = slide.texts.filter((t) => t.trim()).slice(0, 40);
+    lines.forEach((raw, idx) => {
+      const text = raw.slice(0, 220);
+      const f = idx === 0 ? bold : regular;
+      const size = idx === 0 ? 20 : 12;
+      const maxW = W - margin * 2 - (slide.images.length > 0 ? 220 : 0);
+      let line = '';
+      const flush = () => {
+        if (!line || y < margin + 10) return;
+        page.drawText(line, { x: margin, y, size, font: f, color: rgb(0.12, 0.12, 0.12) });
+        y -= size * 1.5;
+        line = '';
+      };
+      for (const word of text.split(/\s+/)) {
+        const trial = line ? `${line} ${word}` : word;
+        if (f.widthOfTextAtSize(trial, size) > maxW && line) {
+          flush();
+          line = word;
+        } else line = trial;
+      }
+      flush();
+      if (idx === 0) y -= 10;
+    });
+    // Images docked on the right, scaled to fit.
+    let iy = H - margin;
+    for (const im of slide.images.slice(0, 4)) {
+      try {
+        const embedded = im.isPng ? await doc.embedPng(im.data) : await doc.embedJpg(im.data);
+        const boxW = 200;
+        const boxH = 150;
+        const scale = Math.min(boxW / embedded.width, boxH / embedded.height);
+        const w = embedded.width * scale;
+        const h = embedded.height * scale;
+        if (iy - h < margin) break;
+        page.drawImage(embedded, { x: W - margin - w, y: iy - h, width: w, height: h });
+        iy -= h + 12;
+      } catch {
+        /* skip undecodable media */
+      }
+    }
+  }
+  doc.setTitle(title || 'Presentation');
+  return doc.save({ useObjectStreams: true });
 }

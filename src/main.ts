@@ -1,7 +1,7 @@
 import './styles.css';
 import { CATEGORIES, TOOLS, getTool } from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
-import { downloadBlob, formatBytes } from './lib/fileUtils.js';
+import { downloadBlob, formatBytes, baseName } from './lib/fileUtils.js';
 import { UserError } from './types.js';
 import type { ToolDef } from './types.js';
 import { registerSW } from 'virtual:pwa-register';
@@ -295,6 +295,19 @@ function toolPage(id: string): HTMLElement {
   root.append(el('p', { class: 'lede' }, current.description));
   root.append(el('p', { class: 'pill-line' }, '🔒 Files stay on your device — nothing is uploaded.'));
 
+  // iLovePDF-style 3-step flow: Upload → Adjust → Download.
+  const steps = el('ol', { class: 'steps' });
+  const stepEls = [el('li', {}, '1 · Upload'), el('li', {}, '2 · Adjust'), el('li', {}, '3 · Download')];
+  steps.append(...stepEls);
+  const paintSteps = (stage: 1 | 2 | 3) => {
+    stepEls.forEach((s, i) => {
+      s.classList.toggle('done', i + 1 < stage);
+      s.classList.toggle('now', i + 1 === stage);
+    });
+  };
+  paintSteps(1);
+  root.append(steps);
+
   const state: FileState = { files: [] };
   const { box: status, set: setStatus } = statusBox();
 
@@ -353,6 +366,7 @@ function toolPage(id: string): HTMLElement {
     if (!current.multiple) state.files = [accepted[0]];
     else state.files.push(...accepted);
     paintFiles();
+    paintSteps(2);
     onFilesChanged();
   }
   function paintFiles() {
@@ -408,12 +422,67 @@ function toolPage(id: string): HTMLElement {
     if (current.id === 'organize') mountOrganize(live, state, setStatus);
     else if (current.id === 'compare') mountCompare(live, state, setStatus);
     else if (current.id === 'redact') mountRedact(live, state, setStatus);
+    else if (current.id === 'sign') mountSign(live, setStatus);
+    else if (current.id === 'annotate') mountAnnotate(live, setStatus);
+    else if (current.id === 'fill-forms') mountFormFill(live, state, setStatus);
   }
 
   if (current.id === 'scan') mountScanner(live, state, paintFiles, setStatus);
 
   const runBtn = el('button', { class: 'btn primary big', type: 'button' }, `Run — ${current.title}`);
+  const startOver = el('button', { class: 'btn', type: 'button' }, 'Start over');
+  startOver.addEventListener('click', () => render());
   const results = el('div', { class: 'results' });
+
+  /** Batchable tools: same operation applied to every file, delivered as one ZIP. */
+  const BATCH_SUFFIX: Record<string, string> = {
+    compress: 'compressed',
+    encrypt: 'protected',
+    watermark: 'watermarked',
+    'page-numbers': 'numbered',
+    'header-footer': 'header-footer',
+    rotate: 'rotated',
+    flatten: 'flat',
+  };
+
+  const showStats = (inBytes: number, outBytes: number) => {
+    if (inBytes > 0 && outBytes > 0) {
+      const delta = Math.round((1 - outBytes / inBytes) * 100);
+      const verdict = delta > 0 ? `${delta}% smaller` : delta < 0 ? `${-delta}% larger` : 'same size';
+      results.append(
+        el('p', { class: 'result-stats' }, `${formatBytes(inBytes)} → ${formatBytes(outBytes)} (${verdict})`),
+      );
+    }
+  };
+
+  const showOutputs = (
+    outs: { blob: Blob; filename: string; note?: string; previewText?: string }[],
+    autoDownload: boolean,
+  ) => {
+    for (const out of outs) {
+      const card = el('div', { class: 'result' });
+      const head = el('div', { class: 'result-head' });
+      head.append(el('strong', {}, out.filename));
+      const dl = el('button', { class: 'btn primary', type: 'button' }, 'Download');
+      dl.addEventListener('click', () => downloadBlob(out.blob, out.filename));
+      head.append(dl);
+      card.append(head);
+      if (out.note) card.append(el('p', { class: 'muted' }, out.note));
+      if (out.previewText) {
+        card.append(el('pre', { class: 'preview-text' }, out.previewText.slice(0, 8000)));
+      }
+      if (out.blob.type === 'application/pdf') {
+        const url = URL.createObjectURL(out.blob);
+        const frame = document.createElement('iframe');
+        frame.src = url;
+        frame.className = 'preview-frame';
+        frame.title = `Preview of ${out.filename}`;
+        card.append(frame);
+      }
+      if (autoDownload) downloadBlob(out.blob, out.filename);
+      results.append(card);
+    }
+  };
 
   runBtn.addEventListener('click', async () => {
     results.innerHTML = '';
@@ -426,6 +495,36 @@ function toolPage(id: string): HTMLElement {
     try {
       setStatus('Loading engine…', 'info');
       const { runTool } = await loadActions();
+      const batchSuffix = BATCH_SUFFIX[current.id];
+      if (batchSuffix && state.files.length > 1) {
+        // Enterprise batch path: process each file identically, zip the results.
+        const { default: JSZip } = await import('jszip');
+        const zip = new JSZip();
+        let inBytes = 0;
+        let outBytes = 0;
+        for (let i = 0; i < state.files.length; i++) {
+          const f = state.files[i];
+          setStatus(`Batch ${i + 1}/${state.files.length}: ${f.name}…`, 'info');
+          const outs = await runTool(
+            current.id,
+            { files: [f], opts: getOpts(), onProgress: () => {} },
+          );
+          zip.file(`${baseName(f.name)}-${batchSuffix}.pdf`, outs[0].blob);
+          inBytes += f.size;
+          outBytes += outs[0].blob.size;
+        }
+        setStatus('Zipping results…', 'info');
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const filename = `${current.id}-batch-${state.files.length}-files.zip`;
+        setStatus(`Done — ${state.files.length} files processed.`, 'ok');
+        showStats(inBytes, outBytes);
+        showOutputs(
+          [{ blob, filename, note: `Batch ${current.title.toLowerCase()}: ${state.files.length} files, same settings applied to each.` }],
+          true,
+        );
+        paintSteps(3);
+        return;
+      }
       setStatus('Working…', 'info');
       const opts = getOpts();
       const outs = await runTool(current.id, {
@@ -435,39 +534,13 @@ function toolPage(id: string): HTMLElement {
       });
       setStatus(`Done — ${outs.length} file${outs.length > 1 ? 's' : ''} ready.`, 'ok');
       // Best-in-class touch: show input → output size for every run.
-      const inBytes = state.files.reduce((a, f) => a + f.size, 0);
-      const outBytes = outs.reduce((a, o) => a + o.blob.size, 0);
-      if (inBytes > 0 && outBytes > 0) {
-        const delta = Math.round((1 - outBytes / inBytes) * 100);
-        const verdict = delta > 0 ? `${delta}% smaller` : delta < 0 ? `${-delta}% larger` : 'same size';
-        results.append(
-          el('p', { class: 'result-stats' }, `${formatBytes(inBytes)} → ${formatBytes(outBytes)} (${verdict})`),
-        );
-      }
-      for (const out of outs) {
-        const card = el('div', { class: 'result' });
-        const head = el('div', { class: 'result-head' });
-        head.append(el('strong', {}, out.filename));
-        const dl = el('button', { class: 'btn primary', type: 'button' }, 'Download');
-        dl.addEventListener('click', () => downloadBlob(out.blob, out.filename));
-        head.append(dl);
-        card.append(head);
-        if (out.note) card.append(el('p', { class: 'muted' }, out.note));
-        if (out.previewText) {
-          card.append(el('pre', { class: 'preview-text' }, out.previewText.slice(0, 8000)));
-        }
-        if (out.blob.type === 'application/pdf') {
-          const url = URL.createObjectURL(out.blob);
-          const frame = document.createElement('iframe');
-          frame.src = url;
-          frame.className = 'preview-frame';
-          frame.title = `Preview of ${out.filename}`;
-          card.append(frame);
-        }
-        // Auto-download first output for convenience + keep button for re-download.
-        downloadBlob(out.blob, out.filename);
-        results.append(card);
-      }
+      showStats(
+        state.files.reduce((a, f) => a + f.size, 0),
+        outs.reduce((a, o) => a + o.blob.size, 0),
+      );
+      // Auto-download outputs for convenience + keep buttons for re-download.
+      showOutputs(outs, true);
+      paintSteps(3);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setStatus(msg, 'error');
@@ -477,7 +550,7 @@ function toolPage(id: string): HTMLElement {
     }
   });
 
-  root.append(drop, listBox, optsBox, live, runBtn, status, results);
+  root.append(drop, listBox, optsBox, live, el('div', { class: 'row' }, runBtn, startOver), status, results);
 
   const tips = el('details', { class: 'tips' });
   tips.append(el('summary', {}, 'Tips & limits'), el('p', {},
@@ -586,6 +659,26 @@ function buildOptions(
       box.append(el('p', { class: 'muted' }, 'Add black boxes below (percentages of page). They are baked into the PDF on Run.'));
       break;
     }
+    case 'sign':
+      box.append(el('p', { class: 'muted' }, 'Create your signature, then add placements below. Your signature is stored only in this browser.'));
+      break;
+    case 'annotate':
+      box.append(el('p', { class: 'muted' }, 'Build annotations below — text, yellow highlights, or image stamps. Positions are % of page size.'));
+      break;
+    case 'crop':
+      add('Top margin %', 'top', textInput('5', '', 'number'));
+      add('Bottom margin %', 'bottom', textInput('5', '', 'number'));
+      add('Left margin %', 'left', textInput('5', '', 'number'));
+      add('Right margin %', 'right', textInput('5', '', 'number'));
+      add('Pages (blank = all)', 'pages', textInput('', '1-3, 5'));
+      break;
+    case 'fill-forms':
+      add('Lock fields after filling? (flatten)', 'flatten', selectInput([
+        { value: 'yes', label: 'Yes — make static (recommended)' },
+        { value: 'no', label: 'No — keep editable' },
+      ], 'yes'));
+      box.append(el('p', { class: 'muted' }, 'Form fields appear below after upload. Fill them, then Run.'));
+      break;
     case 'encrypt':
       add('Password (min 4 chars)', 'password', textInput('', '••••••••', 'password'));
       add('Owner password (optional)', 'owner', textInput('', 'defaults to same', 'password'));
@@ -627,6 +720,8 @@ function buildOptions(
     case 'word-to-pdf':
     case 'pdf-to-excel':
     case 'pdf-to-html':
+    case 'pdf-to-pptx':
+    case 'pptx-to-pdf':
       box.append(el('p', { class: 'muted' }, 'No extra settings — upload and Run.'));
       break;
     default:
@@ -643,6 +738,13 @@ function buildOptions(
     if (red) out['boxes'] = red.getAttribute('data-boxes')!;
     const hiddenBoxes = document.querySelector('[data-boxes-live]');
     if (hiddenBoxes && id === 'redact') out['boxes'] = (hiddenBoxes as HTMLElement).dataset['boxesLive'] ?? '[]';
+    // Generic channel for rich mounters (sign / annotate / fill-forms):
+    // any [data-opt-key] element contributes its [data-opt-value].
+    const scope = box.parentElement ?? document;
+    scope.querySelectorAll('[data-opt-key]').forEach((elm) => {
+      const key = elm.getAttribute('data-opt-key');
+      if (key) out[key] = elm.getAttribute('data-opt-value') ?? '';
+    });
     return out;
   };
 }
@@ -878,6 +980,362 @@ function mountRedact(
   live.append(form, addBtn, list);
   void setStatus;
   sync();
+}
+
+const SIG_KEY = 'pdfsuite.signature';
+
+function sigAnchor(live: HTMLElement): HTMLElement {
+  const a = el('div', {});
+  a.setAttribute('data-opt-key', 'sig');
+  a.setAttribute('data-opt-value', localStorage.getItem(SIG_KEY) ?? '');
+  live.append(a);
+  return a;
+}
+
+function itemsAnchor(live: HTMLElement, key: string): HTMLElement {
+  const a = el('div', {});
+  a.setAttribute('data-opt-key', key);
+  a.setAttribute('data-opt-value', '[]');
+  live.append(a);
+  return a;
+}
+
+function numInput(value: string, min = '0'): HTMLInputElement {
+  const i = document.createElement('input');
+  i.type = 'number';
+  i.value = value;
+  i.min = min;
+  i.className = 'input';
+  return i;
+}
+
+/** Signature studio: draw / type / upload, persisted in this browser only. */
+function mountSign(
+  live: HTMLElement,
+  setStatus: (m: string, k?: 'info' | 'error' | 'ok') => void,
+): void {
+  const sigStore = sigAnchor(live);
+  const itemsStore = itemsAnchor(live, 'items');
+  const items: { pageIndex: number; xPct: number; yPct: number; wPct: number }[] = [];
+  const syncItems = () => itemsStore.setAttribute('data-opt-value', JSON.stringify(items));
+
+  const wrap = el('div', { class: 'scanner' });
+  wrap.append(el('h3', {}, 'Your signature'));
+  const pad = document.createElement('canvas');
+  pad.width = 520;
+  pad.height = 180;
+  pad.className = 'sig-pad';
+  const ctx = pad.getContext('2d')!;
+  const clearPad = () => {
+    ctx.clearRect(0, 0, pad.width, pad.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, pad.width, pad.height);
+  };
+  clearPad();
+
+  // Freehand drawing (mouse + touch via pointer events).
+  let drawing = false;
+  const pos = (e: PointerEvent) => {
+    const r = pad.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * pad.width, y: ((e.clientY - r.top) / r.height) * pad.height };
+  };
+  pad.addEventListener('pointerdown', (e) => {
+    drawing = true;
+    pad.setPointerCapture(e.pointerId);
+    const p = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  });
+  pad.addEventListener('pointermove', (e) => {
+    if (!drawing) return;
+    const p = pos(e);
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#111827';
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+  });
+  for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) {
+    pad.addEventListener(ev, () => {
+      drawing = false;
+    });
+  }
+
+  const preview = el('div', { class: 'muted' }, localStorage.getItem(SIG_KEY) ? 'Saved signature loaded.' : 'Draw, type, or upload — then Save signature.');
+  const row1 = el('div', { class: 'row' });
+  const clearBtn = el('button', { class: 'btn small', type: 'button' }, 'Clear pad');
+  clearBtn.addEventListener('click', clearPad);
+  const saveBtn = el('button', { class: 'btn small primary', type: 'button' }, 'Save signature');
+  saveBtn.addEventListener('click', () => {
+    const url = pad.toDataURL('image/png');
+    localStorage.setItem(SIG_KEY, url);
+    sigStore.setAttribute('data-opt-value', url);
+    preview.textContent = 'Signature saved in this browser.';
+    setStatus('Signature saved.', 'ok');
+  });
+  row1.append(clearBtn, saveBtn);
+
+  const typeInput = textInput('', 'Type your name…');
+  const fontSel = selectInput([
+    { value: "'Brush Script MT','Segoe Script',cursive", label: 'Handwriting' },
+    { value: "Georgia,'Times New Roman',serif", label: 'Elegant serif' },
+    { value: "Arial,Helvetica,sans-serif", label: 'Clean sans' },
+  ], "'Brush Script MT','Segoe Script',cursive");
+  const typeBtn = el('button', { class: 'btn small', type: 'button' }, 'Use typed');
+  typeBtn.addEventListener('click', () => {
+    if (!typeInput.value.trim()) {
+      setStatus('Type your name first.', 'error');
+      return;
+    }
+    clearPad();
+    ctx.fillStyle = '#111827';
+    ctx.font = `64px ${fontSel.value}`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(typeInput.value.trim().slice(0, 32), 24, pad.height / 2, pad.width - 48);
+  });
+
+  const upload = document.createElement('input');
+  upload.type = 'file';
+  upload.accept = 'image/*';
+  upload.hidden = true;
+  upload.addEventListener('change', () => {
+    const f = upload.files?.[0];
+    if (!f) return;
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => {
+      clearPad();
+      const scale = Math.min((pad.width - 40) / img.width, (pad.height - 40) / img.height);
+      ctx.drawImage(img, (pad.width - img.width * scale) / 2, (pad.height - img.height * scale) / 2, img.width * scale, img.height * scale);
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+    upload.value = '';
+  });
+  const uploadBtn = el('button', { class: 'btn small', type: 'button' }, 'Upload image');
+  uploadBtn.addEventListener('click', () => upload.click());
+
+  wrap.append(pad, preview, row1, el('div', { class: 'row' }, typeInput, fontSel, typeBtn, uploadBtn), upload);
+  live.append(wrap);
+
+  // Placements
+  const form = el('div', { class: 'redact-form' });
+  const pageIn = numInput('1', '1');
+  const x = numInput('60');
+  const y = numInput('10');
+  const w = numInput('25');
+  form.append(
+    el('label', {}, 'Page ', pageIn),
+    el('label', {}, 'X% (from left) ', x),
+    el('label', {}, 'Y% (from bottom) ', y),
+    el('label', {}, 'Width% ', w),
+  );
+  const list = el('div', { class: 'filelist' });
+  const paint = () => {
+    list.innerHTML = '';
+    items.forEach((it, i) => {
+      const row = el('div', { class: 'filerow' });
+      row.append(el('span', {}, `#${i + 1}: page ${it.pageIndex + 1}, x ${it.xPct}%, y ${it.yPct}%, width ${it.wPct}%`));
+      const rm = el('button', { class: 'btn small danger', type: 'button' }, 'Remove');
+      rm.addEventListener('click', () => {
+        items.splice(i, 1);
+        syncItems();
+        paint();
+      });
+      row.append(rm);
+      list.append(row);
+    });
+  };
+  const addBtn = el('button', { class: 'btn', type: 'button' }, 'Add placement');
+  addBtn.addEventListener('click', () => {
+    items.push({
+      pageIndex: Math.max(1, Number(pageIn.value) || 1) - 1,
+      xPct: Number(x.value) || 0,
+      yPct: Number(y.value) || 0,
+      wPct: Number(w.value) || 25,
+    });
+    syncItems();
+    paint();
+  });
+  live.append(form, addBtn, list);
+  syncItems();
+}
+
+/** Annotation builder: text, highlights and image stamps. */
+function mountAnnotate(
+  live: HTMLElement,
+  setStatus: (m: string, k?: 'info' | 'error' | 'ok') => void,
+): void {
+  void setStatus;
+  const annsStore = itemsAnchor(live, 'anns');
+  const stampStore = el('div', {});
+  stampStore.setAttribute('data-opt-key', 'stamp');
+  stampStore.setAttribute('data-opt-value', '');
+  live.append(stampStore);
+
+  const anns: {
+    kind: 'text' | 'highlight' | 'image';
+    pageIndex: number; xPct: number; yPct: number;
+    text: string; size: number; color: string; bold: boolean; wPct: number;
+  }[] = [];
+  const sync = () => annsStore.setAttribute('data-opt-value', JSON.stringify(anns));
+
+  const kind = selectInput([
+    { value: 'text', label: 'Text' },
+    { value: 'highlight', label: 'Highlight' },
+    { value: 'image', label: 'Image stamp' },
+  ], 'text');
+  const pageIn = numInput('1', '1');
+  const x = numInput('10');
+  const y = numInput('70');
+  const text = textInput('', 'Annotation text…');
+  const size = numInput('14', '6');
+  const color = document.createElement('input');
+  color.type = 'color';
+  color.value = '#111827';
+  color.className = 'input';
+  const bold = selectInput([{ value: 'no', label: 'Regular' }, { value: 'yes', label: 'Bold' }], 'no');
+  const w = numInput('20');
+
+  const stampUpload = document.createElement('input');
+  stampUpload.type = 'file';
+  stampUpload.accept = 'image/*';
+  stampUpload.hidden = true;
+  stampUpload.addEventListener('change', () => {
+    const f = stampUpload.files?.[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => stampStore.setAttribute('data-opt-value', String(r.result));
+    r.readAsDataURL(f);
+    stampUpload.value = '';
+  });
+  const stampBtn = el('button', { class: 'btn small', type: 'button' }, 'Upload stamp image');
+  stampBtn.addEventListener('click', () => stampUpload.click());
+
+  const form = el('div', { class: 'redact-form' });
+  form.append(
+    el('label', {}, 'Kind ', kind),
+    el('label', {}, 'Page ', pageIn),
+    el('label', {}, 'X% ', x),
+    el('label', {}, 'Y% (from bottom) ', y),
+    el('label', {}, 'Text ', text),
+    el('label', {}, 'Size ', size),
+    el('label', {}, 'Color ', color),
+    el('label', {}, 'Weight ', bold),
+    el('label', {}, 'Image width% ', w),
+  );
+  const list = el('div', { class: 'filelist' });
+  const paint = () => {
+    list.innerHTML = '';
+    anns.forEach((a, i) => {
+      const row = el('div', { class: 'filerow' });
+      const label =
+        a.kind === 'image'
+          ? `#${i + 1} image: page ${a.pageIndex + 1}, x ${a.xPct}%, y ${a.yPct}%, w ${a.wPct}%`
+          : `#${i + 1} ${a.kind}: page ${a.pageIndex + 1} — “${a.text.slice(0, 40)}”`;
+      row.append(el('span', {}, label));
+      const rm = el('button', { class: 'btn small danger', type: 'button' }, 'Remove');
+      rm.addEventListener('click', () => {
+        anns.splice(i, 1);
+        sync();
+        paint();
+      });
+      row.append(rm);
+      list.append(row);
+    });
+  };
+  const addBtn = el('button', { class: 'btn', type: 'button' }, 'Add annotation');
+  addBtn.addEventListener('click', () => {
+    anns.push({
+      kind: kind.value as 'text' | 'highlight' | 'image',
+      pageIndex: Math.max(1, Number(pageIn.value) || 1) - 1,
+      xPct: Number(x.value) || 0,
+      yPct: Number(y.value) || 0,
+      text: text.value,
+      size: Number(size.value) || 14,
+      color: color.value,
+      bold: bold.value === 'yes',
+      wPct: Number(w.value) || 20,
+    });
+    sync();
+    paint();
+  });
+  live.append(form, el('div', { class: 'row' }, addBtn, stampBtn), stampUpload, list);
+  sync();
+}
+
+/** Form filler: enumerates AcroForm fields and renders matching inputs. */
+function mountFormFill(
+  live: HTMLElement,
+  state: FileState,
+  setStatus: (m: string, k?: 'info' | 'error' | 'ok') => void,
+): void {
+  const valuesStore = itemsAnchor(live, 'values');
+  const values: Record<string, string> = {};
+  const sync = () => valuesStore.setAttribute('data-opt-value', JSON.stringify(values));
+  const file = state.files[0];
+  if (!file) return;
+
+  (async () => {
+    try {
+      setStatus('Reading form fields…', 'info');
+      const pdfCore = await import('./lib/pdfCore.js');
+      const fields = await pdfCore.listFormFields(await file.arrayBuffer());
+      if (fields.length === 0) {
+        live.append(el('p', { class: 'muted' }, 'No fillable form fields found in this PDF. It may be a flat scan — try OCR or Annotate instead.'));
+        setStatus('No form fields found.', 'error');
+        return;
+      }
+      const box = el('div', { class: 'opts' });
+      for (const f of fields) {
+        if (f.type === 'unsupported') {
+          box.append(el('p', { class: 'muted' }, `“${f.name}” is an unsupported field type — left untouched.`));
+          continue;
+        }
+        let input: HTMLElement;
+        if (f.type === 'checkbox') {
+          const sel = selectInput(
+            [
+              { value: 'no', label: 'Unchecked' },
+              { value: 'yes', label: 'Checked' },
+            ],
+            f.value,
+          );
+          sel.addEventListener('change', () => {
+            values[f.name] = sel.value;
+            sync();
+          });
+          values[f.name] = f.value;
+          input = sel;
+        } else if (f.type === 'dropdown' && f.options) {
+          const sel = selectInput(
+            [{ value: '', label: '— select —' }, ...f.options.map((o: string) => ({ value: o, label: o }))],
+            f.value,
+          );
+          sel.addEventListener('change', () => {
+            values[f.name] = sel.value;
+            sync();
+          });
+          values[f.name] = f.value;
+          input = sel;
+        } else {
+          const inp = textInput(f.value, f.name);
+          inp.addEventListener('input', () => {
+            values[f.name] = inp.value;
+            sync();
+          });
+          values[f.name] = f.value;
+          input = inp;
+        }
+        box.append(field(f.name, input));
+      }
+      live.append(box);
+      setStatus(`${fields.length} field${fields.length > 1 ? 's' : ''} found — fill and Run.`, 'ok');
+      sync();
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err), 'error');
+    }
+  })();
 }
 
 function mountScanner(

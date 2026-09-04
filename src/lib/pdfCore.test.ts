@@ -1,12 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 import {
+  annotatePdf,
+  cropPages,
+  fillFormFields,
+  listFormFields,
   losslessResave,
   markdownToPdf,
   mergePdfs,
   organizePdf,
   parseRanges,
+  placeImages,
   rotatePdf,
+  slidesToPdf,
   splitPdf,
   tableToPdf,
   textToPdf,
@@ -89,5 +95,79 @@ describe('pdf engine round-trips', () => {
       isPdf(await tableToPdf({ headers: ['A', 'B'], rows: [['1', '2']] }, 'Sheet')),
     ).toBe(true);
     await expect(markdownToPdf('   ')).rejects.toThrow(UserError);
+  });
+
+  it('stamps images and annotations without changing page count', async () => {
+    // 1x1 transparent PNG.
+    const png = new Uint8Array([
+      137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0,
+      31, 21, 196, 137, 0, 0, 0, 13, 73, 68, 65, 84, 120, 156, 99, 96, 96, 96, 96, 0, 0, 0, 5, 0, 1, 165,
+      164, 250, 81, 0, 0, 0, 0, 73, 69, 78, 68, 174, 66, 96, 130,
+    ]);
+    const src = await onePagePdf('stamp me');
+    const stamped = await placeImages(src, [{ pageIndex: 0, img: png, xPct: 60, yPct: 10, wPct: 25 }]);
+    expect((await PDFDocument.load(stamped)).getPageCount()).toBe(1);
+    await expect(placeImages(src, [])).rejects.toThrow(UserError);
+    await expect(
+      placeImages(src, [{ pageIndex: 5, img: png, xPct: 0, yPct: 0, wPct: 10 }]),
+    ).rejects.toThrow(UserError);
+
+    const annotated = await annotatePdf(src, [
+      { pageIndex: 0, xPct: 10, yPct: 70, text: 'Hello', size: 14, color: { r: 0, g: 0, b: 0 }, bold: true, highlight: false },
+      { pageIndex: 0, xPct: 10, yPct: 50, text: 'marked', size: 14, color: { r: 0, g: 0, b: 0 }, bold: false, highlight: true },
+    ]);
+    expect((await PDFDocument.load(annotated)).getPageCount()).toBe(1);
+    await expect(annotatePdf(src, [])).rejects.toThrow(UserError);
+  });
+
+  it('crops margins and rejects absurd margins', async () => {
+    const src = await onePagePdf('crop me');
+    const out = await cropPages(src, { top: 10, bottom: 10, left: 10, right: 10 }, '');
+    expect((await PDFDocument.load(out)).getPageCount()).toBe(1);
+    await expect(cropPages(src, { top: 50, bottom: 46, left: 0, right: 0 }, '')).rejects.toThrow(UserError);
+    await expect(cropPages(src, { top: -1, bottom: 0, left: 0, right: 0 }, '')).rejects.toThrow(UserError);
+  });
+
+  it('lists and fills AcroForm fields', async () => {
+    const doc = await PDFDocument.create();
+    const page = doc.addPage([595, 842]);
+    const form = doc.getForm();
+    const name = form.createTextField('fullName');
+    name.addToPage(page, { x: 50, y: 700, width: 200, height: 24 });
+    const agree = form.createCheckBox('agree');
+    agree.addToPage(page, { x: 50, y: 650, width: 15, height: 15 });
+    const saved = await doc.save();
+    const bytes = saved.buffer.slice(saved.byteOffset, saved.byteOffset + saved.byteLength) as ArrayBuffer;
+
+    const fields = await listFormFields(bytes);
+    expect(fields.map((f) => f.name).sort()).toEqual(['agree', 'fullName']);
+    expect(fields.find((f) => f.name === 'agree')?.type).toBe('checkbox');
+
+    const filled = await fillFormFields(bytes, { fullName: 'Ada Lovelace', agree: 'yes' }, false);
+    const check = await PDFDocument.load(filled);
+    expect(check.getForm().getTextField('fullName').getText()).toBe('Ada Lovelace');
+    expect(check.getForm().getCheckBox('agree').isChecked()).toBe(true);
+
+    // Flattened output stays a valid one-page PDF (fields baked in).
+    const flat = await fillFormFields(bytes, { fullName: 'Ada' }, true);
+    expect((await PDFDocument.load(flat)).getPageCount()).toBe(1);
+
+    const plain = await onePagePdf('no form here');
+    await expect(listFormFields(plain)).resolves.toEqual([]);
+    await expect(fillFormFields(plain, {}, true)).rejects.toThrow(UserError);
+  });
+
+  it('renders slides to a landscape PDF', async () => {
+    const out = await slidesToPdf(
+      [
+        { texts: ['Title', 'bullet one'], images: [] },
+        { texts: [], images: [] },
+      ],
+      'Deck',
+    );
+    const doc = await PDFDocument.load(out);
+    expect(doc.getPageCount()).toBe(2);
+    expect(doc.getPage(0).getSize().width).toBeGreaterThan(doc.getPage(0).getSize().height);
+    await expect(slidesToPdf([], 'empty')).rejects.toThrow(UserError);
   });
 });

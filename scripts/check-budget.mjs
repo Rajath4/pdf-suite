@@ -1,11 +1,12 @@
 // Performance budget gate: fails `npm run build` if the app gets too heavy.
 // Budgets target an installable PWA that loads fast on mid-range mobile:
 //   - entry chunk (homepage shell, no PDF engines) <= 150 KB raw
-//   - total JS payload                            <= 3.5 MB raw
+//   - total JS payload                            <= 3.8 MB raw
 //   - total dist                                  <= 6.0 MB
-// Note: the JS floor (~3.3 MB) is fixed third-party cost — pdf.js worker
-// (~1.4 MB) + SheetJS (~0.9 MB) + pdf-lib (~0.5 MB). They load lazily and
-// precache for offline; what matters for startup is the entry chunk.
+// Note: the JS floor (~3.6 MB) is fixed third-party cost — pdf.js worker
+// (~1.4 MB) + SheetJS (~0.9 MB) + pdf-lib (~0.5 MB) + pptxgenjs (~0.3 MB).
+// They load lazily and precache for offline; what matters for startup is
+// the entry chunk.
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -51,8 +52,8 @@ const walk = (dir) => {
   }
 };
 walk(DIST);
-console.log(`js     total ${(jsTotal / MB).toFixed(2)} MB (budget 3.5 MB)`);
-if (jsTotal > 3.5 * MB) fail('JS payload too large — split vendors or drop a dependency.');
+console.log(`js     total ${(jsTotal / MB).toFixed(2)} MB (budget 3.8 MB)`);
+if (jsTotal > 3.8 * MB) fail('JS payload too large — split vendors or drop a dependency.');
 
 // 3. Total dist.
 const total = dirSize(DIST);
