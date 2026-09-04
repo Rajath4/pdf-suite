@@ -883,6 +883,11 @@ async function appVersion(): Promise<string> {
 }
 
 function footer(): HTMLElement {
+  const REPO = 'https://github.com/Rajath4/pdf-suite';
+  const ext = (href: string, label: string) => {
+    const a = el('a', { href, target: '_blank', rel: 'noopener' }, label);
+    return a;
+  };
   const f = el('footer', { class: 'footer' });
   const ver = el('span', { class: 'muted' }, '…');
   void appVersion().then((v) => {
@@ -910,12 +915,18 @@ function footer(): HTMLElement {
     }
     cols.append(col);
   }
+  const ossCol = el('div', { class: 'foot-col' });
+  ossCol.append(el('strong', {}, 'Open source'));
+  ossCol.append(ext(`${REPO}`, 'Source code (MIT)'));
+  ossCol.append(ext(`${REPO}/issues`, 'Report a bug'));
+  ossCol.append(ext(`${REPO}/security/policy`, 'Security policy'));
+  cols.append(ossCol);
   f.append(
     el('div', { class: 'wrap' },
       cols,
       el('div', { class: 'foot-bottom' },
         el('p', { class: 'promise' }, 'No accounts. No ads. No uploads. No watermarks. Just tools that work. ', ver),
-        el('p', { class: 'muted' }, 'Built with pdf-lib + pdf.js. Install it and use it offline — even in airplane mode.'),
+        el('p', { class: 'muted' }, 'Open source (MIT) — built with pdf-lib, pdf.js, qpdf and Tesseract.js. Install it and use it offline — even in airplane mode.'),
       ),
     ),
   );
@@ -929,7 +940,7 @@ function homePage(): HTMLElement {
   const h1 = el('h1', {});
   h1.append('Every PDF tool you need. ', el('span', { class: 'grad' }, 'Private by design.'));
   hero.append(
-    el('div', { class: 'hero-eyebrow' }, '✦ 36 free tools · no signup · no watermark'),
+    el('div', { class: 'hero-eyebrow' }, '✦ 37 free tools · no signup · no watermark'),
     h1,
     el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, nothing is tracked, and it installs for offline use.'),
   );

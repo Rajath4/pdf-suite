@@ -1,0 +1,49 @@
+name: Bug report
+description: Something broken? Tell us how to reproduce it.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Do not attach real personal documents** — reproduce with a synthetic test file instead.
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Footer of any page shows e.g. v1.1.0 (abc1234).
+      placeholder: v1.1.0 (abc1234)
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser + OS
+      placeholder: Chrome 126 on macOS 14
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps, starting from which tool page.
+      placeholder: |
+        1. Open /compress-pdf/
+        2. Upload a 3-page scanned PDF (~40 MB)
+        3. Choose Heavy, click Run
+        4. Tab freezes at "Rendering 2/3…"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+      placeholder: Expected a smaller PDF; got a frozen tab and no download.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I reproduced this on the latest deployed version
+        - label: No real personal documents are attached to this report

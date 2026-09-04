@@ -1,5 +1,10 @@
 # PDF Suite — Free Offline PDF Toolkit
 
+[![CI](https://github.com/Rajath4/pdf-suite/actions/workflows/ci.yml/badge.svg)](https://github.com/Rajath4/pdf-suite/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Rajath4/pdf-suite/blob/main/LICENSE)
+
+Source: [github.com/Rajath4/pdf-suite](https://github.com/Rajath4/pdf-suite) — PRs and bug reports welcome via [issues](https://github.com/Rajath4/pdf-suite/issues) (see [CONTRIBUTING.md](CONTRIBUTING.md)). Security reports: please use [private vulnerability reporting](https://github.com/Rajath4/pdf-suite/security/advisories/new), never a public issue.
+
 A full end-to-end working clone of the **ihatepdf.cv essentials**, at parity
 with the best of iLovePDF/Smallpdf — **37 tools + 16 guides, 100% client-side**. No upload,
 no watermark, no sign-up, no per-hour limits. Files never leave the device.

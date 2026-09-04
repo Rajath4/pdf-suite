@@ -6,7 +6,7 @@ work on secure origins; `localhost` is exempt for testing).
 
 ## Domain + SEO setup (read this for Google traffic)
 
-Each of the 36 tools is prerendered at build time to a real landing page
+Each of the 37 tools is prerendered at build time to a real landing page
 (`/merge-pdf/`, `/sign-pdf/`, …) with unique titles, meta, canonicals,
 FAQ/HowTo/Breadcrumb schema, and a sitemap — hash URLs are legacy-redirected.
 

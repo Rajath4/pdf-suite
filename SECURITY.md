@@ -4,7 +4,7 @@
 
 PDF Suite is a **static, frontend-only app**. There is no backend, no database,
 no telemetry, and no file upload — every byte of every document is processed
-in the visitor's own browser tab (pdf-lib, pdf.js, Tesseract.js) and never
+in the visitor's own browser tab (pdf-lib, pdf.js, qpdf-wasm, Tesseract.js) and never
 leaves the device. The only runtime network requests are:
 
 - Same-origin static assets (JS/CSS/worker/icons).
@@ -24,7 +24,10 @@ leaves the device. The only runtime network requests are:
 
 ## Reporting a vulnerability
 
-Email the maintainer with a description, affected version (`version.json`
-`commit` field, shown in the app footer), and reproduction steps. Please allow
-reasonable time for a fix before public disclosure. Do not submit real
-personal documents in reports — use synthetic test files.
+**Do not open a public issue for security reports.** Use
+[private vulnerability reporting](https://github.com/Rajath4/pdf-suite/security/advisories/new)
+so a fix can ship before disclosure. Include a description, the affected
+version (`version.json` `commit` field, shown in the app footer), and
+reproduction steps with synthetic test files only — never real personal
+documents. General bugs (non-security) go to the
+[issue tracker](https://github.com/Rajath4/pdf-suite/issues).

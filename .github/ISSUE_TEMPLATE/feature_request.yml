@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest a tool or improvement.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What job can't you get done today?
+      description: Describe the user's goal, not the implementation.
+      placeholder: I receive 2 GB scan bundles and need a few pages out without uploading them anywhere.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      placeholder: Extend Large File Split & Join with page-range extraction for giant files.
+    validations:
+      required: true
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Fit check (our hard constraints)
+      options:
+        - label: Works 100% offline after first load
+        - label: No uploads, no accounts, no tracking
+        - label: Honest about browser limits (no 10 GB promises for a tab)
