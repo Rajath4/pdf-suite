@@ -1,5 +1,5 @@
 import './styles.css';
-import { CATEGORIES, TOOLS, getTool, searchTools, toolSlug, toolIdFromSlug } from './tools/registry.js';
+import { CATEGORIES, TOOLS, getTool, searchTools, toolSlug, toolIdFromSlug, nextTools } from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
 import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent } from './lib/fileUtils.js';
 import { UserError } from './types.js';
@@ -24,6 +24,23 @@ const prefetchEngines = () => {
 
 /** Enterprise guardrail: hard cap per file so a huge PDF can't OOM a tab. */
 const MAX_FILE_BYTES = 150 * 1024 * 1024;
+
+// ---------- Cross-route file handoff (file-first flows + tool chaining) ----------
+// Files live only in memory and never touch disk/network. Staged by the
+// homepage dropzone or a "Continue in …" button, consumed once by the next
+// tool page that mounts.
+
+let pendingFiles: File[] | null = null;
+
+function stageFilesForTool(files: File[]): void {
+  pendingFiles = files.length > 0 ? [...files] : null;
+}
+
+function takeStagedFiles(): File[] {
+  const files = pendingFiles ?? [];
+  pendingFiles = null;
+  return files;
+}
 
 // PWA: keep the service worker fresh and surface update/offline state.
 const swUpdate = registerSW({
@@ -827,6 +844,93 @@ function homePage(): HTMLElement {
   search.setAttribute('aria-label', 'Search tools');
   hero.append(search);
 
+  // File-first entry (pdfguru pattern, done smarter): drop a file, then pick
+  // what to do with it. The staged files ride along to whichever tool wins.
+  const stageZone = el('div', {
+    class: 'stage',
+    tabindex: '0',
+    role: 'button',
+    'aria-label': 'Drop a PDF or image here to start, then choose a tool',
+  });
+  const stageInput = document.createElement('input');
+  stageInput.type = 'file';
+  stageInput.accept = 'application/pdf,.pdf,image/*,.jpg,.jpeg,.png,.webp';
+  stageInput.multiple = true;
+  stageInput.hidden = true;
+  stageZone.append(
+    el('span', { class: 'stage-icon', 'aria-hidden': 'true' }, '⤓'),
+    el('span', {},
+      el('strong', {}, 'Drop a PDF here to start'),
+      el('span', { class: 'muted' }, ' — then pick what to do with it. Max 150 MB per file.'),
+    ),
+  );
+  stageZone.append(stageInput);
+  const stageCard = el('div', { class: 'stage-card', hidden: '' });
+  hero.append(stageZone, stageCard);
+
+  const QUICK_ACTIONS = ['merge', 'compress', 'split', 'sign', 'encrypt', 'pdf-to-word'];
+  const offerTools = (files: File[]) => {
+    const names = files.map((f) => f.name).join(', ');
+    stageCard.innerHTML = '';
+    stageCard.removeAttribute('hidden');
+    stageCard.append(el('strong', {}, `${files.length} file${files.length > 1 ? 's' : ''} staged: `));
+    stageCard.append(el('span', { class: 'muted' }, names.length > 90 ? `${names.slice(0, 90)}…` : names));
+    const row = el('div', { class: 'row' });
+    row.append(el('span', { class: 'muted' }, 'Do what?'));
+    for (const id of QUICK_ACTIONS) {
+      const t = getTool(id)!;
+      const b = el('button', { class: 'btn small', type: 'button' }, `${t.icon} ${t.title}`);
+      b.addEventListener('click', () => {
+        stageFilesForTool(files);
+        goTool(id);
+      });
+      row.append(b);
+    }
+    const all = el('button', { class: 'btn small', type: 'button' }, 'All 36 tools ↓');
+    all.addEventListener('click', () => {
+      stageFilesForTool(files);
+      document.getElementById('tool-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    row.append(all);
+    const clear = el('button', { class: 'btn small danger', type: 'button' }, 'Clear');
+    clear.addEventListener('click', () => {
+      stageCard.innerHTML = '';
+      stageCard.setAttribute('hidden', '');
+    });
+    row.append(clear);
+    stageCard.append(row);
+    stageCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+  const takeStaged = (list: FileList | null | undefined) => {
+    if (!list || list.length === 0) return;
+    const files = [...list].filter((f) => {
+      if (f.size > MAX_FILE_BYTES) {
+        showToast(`"${f.name}" exceeds the ${formatBytes(MAX_FILE_BYTES)} limit and was skipped.`);
+        return false;
+      }
+      return true;
+    });
+    if (files.length > 0) offerTools(files);
+  };
+  stageZone.addEventListener('click', () => stageInput.click());
+  stageZone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') stageZone.click();
+  });
+  stageZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    stageZone.classList.add('over');
+  });
+  stageZone.addEventListener('dragleave', () => stageZone.classList.remove('over'));
+  stageZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    stageZone.classList.remove('over');
+    takeStaged(e.dataTransfer?.files);
+  });
+  stageInput.addEventListener('change', () => {
+    takeStaged(stageInput.files);
+    stageInput.value = '';
+  });
+
   // Persona-driven entry points: users think in jobs, not tool names.
   // Rendered AFTER Recently used: returners get their tools first,
   // first-timers get guided discovery. Both stay one scroll away.
@@ -1151,6 +1255,7 @@ function toolPage(id: string): HTMLElement {
     el('div', { class: 'drop-icon', 'aria-hidden': 'true' }, '📄'),
     el('div', { class: 'drop-title' }, current.accept ? 'Drop files here or click to browse' : 'No file needed — or optionally drop one'),
     el('div', { class: 'muted' }, current.multiple ? 'You can add several files — batch supported where noted.' : 'One file at a time for this tool.'),
+    el('div', { class: 'muted' }, `Max ${formatBytes(MAX_FILE_BYTES)} per file · Files never leave this browser.`),
     formats,
   );
   const input = document.createElement('input');
@@ -1480,6 +1585,22 @@ function toolPage(id: string): HTMLElement {
       if (autoDownload) downloadBlob(out.blob, out.filename);
       results.append(card);
     }
+    // Productivity chaining (Smallpdf's "connect tools", but offline with the
+    // real file): carry the first PDF output straight into the next tool.
+    const firstPdf = outs.find((o) => o.blob.type === 'application/pdf');
+    if (firstPdf) {
+      const next = el('div', { class: 'related' });
+      next.append(el('span', { class: 'muted' }, 'Continue in: '));
+      for (const t of nextTools(current.id)) {
+        const b = el('button', { class: 'chip', type: 'button' }, `${t.icon} ${t.title}`);
+        b.addEventListener('click', () => {
+          stageFilesForTool([new File([firstPdf.blob], firstPdf.filename, { type: 'application/pdf' })]);
+          goTool(t.id);
+        });
+        next.append(b);
+      }
+      results.append(next);
+    }
   };
 
   runBtn.addEventListener('click', async () => {
@@ -1676,6 +1797,13 @@ function toolPage(id: string): HTMLElement {
   })();
 
   paintFiles();
+  // File-first arrival: files staged on the homepage (or chained from another
+  // tool's output) land here preloaded — adjust and Run.
+  const staged = takeStagedFiles();
+  if (staged.length > 0) {
+    addFiles(staged);
+    setStatus(`Loaded ${staged.length} file${staged.length > 1 ? 's' : ''} — adjust settings and Run.`, 'ok');
+  }
   return root;
 }
 

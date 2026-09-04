@@ -396,7 +396,8 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .related { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 20px; }
 .chip {
   border: 1px solid var(--line); background: var(--surface); color: var(--ink);
-  border-radius: 999px; padding: 7px 13px; font-size: 0.85rem; text-decoration: none; font-weight: 600;
+  border-radius: 999px; padding: 7px 13px; font: inherit; font-size: 0.85rem; text-decoration: none; font-weight: 600;
+  cursor: pointer;
   transition: all 0.1s var(--ease-out);
 }
 .chip:hover { border-color: var(--brand); color: var(--brand); transform: translateY(-1px); }
@@ -501,6 +502,26 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .palette-kind { font-size: 0.78rem; color: var(--muted); }
 .palette-empty { padding: 18px; color: var(--muted); text-align: center; }
 .palette-hints { padding: 8px 14px; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--muted); }
+
+/* File-first staging (homepage drop → pick a tool) */
+.stage {
+  border: 2px dashed var(--line-strong); border-radius: var(--radius);
+  background: var(--surface); padding: 16px 18px; margin-top: 14px;
+  display: flex; gap: 12px; align-items: center; cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.stage:hover { border-color: var(--brand); }
+.stage.over { border-color: var(--brand); background: var(--tint-rose); }
+.stage-icon {
+  font-size: 1.3rem; width: 42px; height: 42px; flex-shrink: 0;
+  display: grid; place-items: center; border-radius: 12px; background: var(--tint-rose);
+}
+.stage-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; margin-top: 10px; display: grid; gap: 10px; box-shadow: var(--shadow-s);
+  animation: rise 0.2s var(--ease-out);
+}
+.stage-card[hidden] { display: none; }
 
 /* No-results state */
 .no-results { text-align: center; padding: 28px; color: var(--muted); display: grid; gap: 10px; justify-items: center; }

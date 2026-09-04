@@ -31,6 +31,9 @@ batch Compress / Protect / Watermark / Page numbers / Headers / Rotate / Flatten
   recently-used row, popular jobs.
 - **Run feedback** — determinate progress + elapsed time, input→output stats,
   Share/Copy actions, offline/airplane-mode trust copy.
+- **File-first flows** — drop a file on the homepage, pick the tool after;
+  outputs chain into the next tool ("Continue in Compress") with the file
+  carried along, offline. Limits stated upfront (150 MB/file).
 
 ## Quick start
 

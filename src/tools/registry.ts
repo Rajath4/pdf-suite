@@ -108,6 +108,55 @@ export function toolIdFromSlug(slug: string): string | undefined {
   return Object.keys(TOOL_SLUGS).find((id) => TOOL_SLUGS[id] === slug);
 }
 
+/**
+ * Productivity chaining ("Continue in …"): the natural next tools after each
+ * operation, mirroring how Smallpdf connects tools — except our handoff
+ * carries the actual output file, offline. Validated by registry.test.ts.
+ */
+export const NEXT_TOOLS: Record<string, string[]> = {
+  merge: ['compress', 'split', 'encrypt'],
+  split: ['merge', 'compress', 'organize'],
+  compress: ['merge', 'encrypt', 'pdf-to-jpg'],
+  'pdf-to-jpg': ['images-to-pdf', 'merge'],
+  'extract-images': ['images-to-pdf', 'merge'],
+  'images-to-pdf': ['merge', 'compress'],
+  organize: ['merge', 'compress', 'rotate'],
+  sign: ['encrypt', 'flatten', 'merge'],
+  annotate: ['flatten', 'merge', 'compress'],
+  crop: ['compress', 'merge'],
+  'fill-forms': ['flatten', 'encrypt', 'sign'],
+  rotate: ['merge', 'compress'],
+  watermark: ['flatten', 'encrypt', 'merge'],
+  'page-numbers': ['merge', 'flatten'],
+  'header-footer': ['merge', 'flatten'],
+  redact: ['flatten', 'encrypt'],
+  'extract-text': ['pdf-to-word', 'pdf-to-excel'],
+  ocr: ['extract-text', 'pdf-to-word'],
+  encrypt: ['merge', 'decrypt'],
+  decrypt: ['merge', 'compress', 'encrypt'],
+  flatten: ['merge', 'encrypt'],
+  privacy: ['encrypt', 'merge'],
+  'pdf-to-word': ['word-to-pdf', 'merge'],
+  'word-to-pdf': ['merge', 'compress'],
+  'pdf-to-excel': ['excel-to-pdf', 'merge'],
+  'excel-to-pdf': ['merge', 'compress'],
+  'pdf-to-pptx': ['pptx-to-pdf', 'merge'],
+  'pptx-to-pdf': ['merge', 'compress'],
+  'pdf-to-html': ['merge'],
+  invert: ['merge', 'compress'],
+  create: ['merge'],
+  markdown: ['merge'],
+  'html-to-pdf': ['merge', 'compress'],
+  compare: ['merge'],
+  repair: ['split', 'compress'],
+  scan: ['merge', 'ocr', 'compress'],
+};
+
+export function nextTools(id: string): ToolDef[] {
+  const ids = NEXT_TOOLS[id] ?? ['merge', 'compress', 'split'];
+  return ids.filter((x) => x !== id).map((x) => getTool(x)!).filter(Boolean).slice(0, 3);
+}
+
 /** Synonyms users type that never appear in tool names ("ppt", "esign"…). */
 const SYNONYMS: Record<string, string[]> = {
   ppt: ['powerpoint', 'pptx', 'slides', 'presentation'],
