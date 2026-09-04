@@ -1721,9 +1721,16 @@ function toolPage(id: string): HTMLElement {
               { files: [f], opts: getOpts(), onProgress: feed },
             );
             if (!outs[0]) throw new Error('no output produced');
-            zip.file(`${baseName(f.name)}-${batchSuffix}.pdf`, outs[0].blob);
+            // Streaming engines can return several files per input (e.g.
+            // large-file batches) — zip every one, never silently drop extras.
+            outs.forEach((o, j) => {
+              const name = outs.length === 1
+                ? `${baseName(f.name)}-${batchSuffix}.pdf`
+                : `${baseName(f.name)}-${batchSuffix}-${j + 1}.pdf`;
+              zip.file(name, o.blob);
+              outBytes += o.blob.size;
+            });
             inBytes += f.size;
-            outBytes += outs[0].blob.size;
           } catch (err) {
             failed.push(`${f.name}: ${err instanceof Error ? err.message : String(err)}`);
           }

@@ -21,6 +21,8 @@ describe('parseChunkMB', () => {
     expect(parseChunkMB('99999')).toBe(2000);
     expect(parseChunkMB('nope')).toBe(100);
     expect(parseChunkMB(undefined)).toBe(100);
+    expect(parseChunkMB('5')).toBe(5);
+    expect(parseChunkMB('2000')).toBe(2000);
   });
 });
 
@@ -39,6 +41,12 @@ describe('planChunks', () => {
 
   it('returns a single chunk when the file fits', () => {
     expect(planChunks(50, 100)).toHaveLength(1);
+  });
+
+  it('never emits an empty trailing chunk on exact multiples', () => {
+    const plans = planChunks(200, 100);
+    expect(plans).toHaveLength(2);
+    expect(plans[1]).toMatchObject({ index: 2, start: 100, end: 200 });
   });
 
   it('rejects empty input', () => {
@@ -64,6 +72,11 @@ describe('shrink batching', () => {
     }
   });
 
+  it('handles single-batch and empty inputs', () => {
+    expect(planBatches(30, 50)).toEqual([{ index: 1, startPage: 1, endPage: 30 }]);
+    expect(planBatches(0, 50)).toEqual([]);
+  });
+
   it('maps presets to scale/quality', () => {
     expect(shrinkPresetCfg('light')).toEqual({ scale: 2.0, q: 0.85 });
     expect(shrinkPresetCfg('heavy')).toEqual({ scale: 1.0, q: 0.55 });
@@ -85,6 +98,11 @@ describe('chooseCompressPath', () => {
     expect(chooseCompressPath(500 * MB, 200 * MB, 'lossless', 1024 * MB)).toBe('reject');
     expect(chooseCompressPath(5 * 1024 * MB, 200 * MB, 'medium', 1024 * MB)).toBe('reject');
   });
+
+  it('treats exact boundaries as the cheaper tier', () => {
+    expect(chooseCompressPath(1024 * MB, 200 * MB, 'medium', 1024 * MB)).toBe('stream');
+    expect(chooseCompressPath(1024 * MB + 1, 200 * MB, 'medium', 1024 * MB)).toBe('reject');
+  });
 });
 
 describe('pdf sniffers', () => {
@@ -102,7 +120,9 @@ describe('pdf sniffers', () => {
 describe('chunk naming', () => {
   it('round-trips part names back to the original', () => {
     expect(chunkFileName('big.pdf', 2)).toBe('big.pdf.part002');
+    expect(chunkFileName('big.pdf', 12)).toBe('big.pdf.part012');
     expect(stripPartSuffix('big.pdf.part002')).toBe('big.pdf');
+    expect(stripPartSuffix('plain.pdf')).toBe('plain.pdf');
     expect(rejoinFileName('big.pdf.part001')).toBe('big-rejoined.pdf');
     expect(rejoinFileName('data.bin.part007')).toBe('data.bin-rejoined');
   });
