@@ -1,0 +1,773 @@
+{
+ "guides": [
+  {
+   "category": "How-to",
+   "description": "Merge multiple PDFs into one file free — pick pages, reorder, and download with no watermark or signup. Works offline.",
+   "faqs": [
+    [
+     "Can I merge only some pages from each PDF?",
+     "Yes. Type ranges like 1-3, 5 next to any file and only those pages are included — free, not paywalled."
+    ],
+    [
+     "Is there a file or page limit?",
+     "No artificial limits. Only your device memory caps the job, and no watermark is ever added."
+    ],
+    [
+     "Are merged PDFs uploaded anywhere?",
+     "No. The merge runs entirely in your browser via pdf-lib. You can verify in DevTools — zero file uploads."
+    ]
+   ],
+   "h1": "How to Merge PDFs Free — No Watermark, No Signup",
+   "intro": [
+    "Combining PDFs should take thirty seconds: drop your files, arrange them, download one clean document. No account, no watermark, no daily counter.",
+    "This guide shows the fastest way using a free offline-first merger, including the pro move most people miss — selecting exact pages from each file instead of merging whole documents."
+   ],
+   "relatedGuides": [
+    "how-to-split-pdf-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "merge",
+    "split",
+    "compress"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Most mergers only combine whole files. That forces an awkward dance: split first, then merge, then clean up. A merger with per-file page ranges skips the dance — take pages 1-3 from the report, page 5 from the appendix, everything from the cover letter, done in one pass."
+     ],
+     "h2": "Merge whole files or just the pages you need"
+    },
+    {
+     "body": [
+      "Open the merge tool and drop all PDFs at once — there is no file-count wall. Drag rows into your final order, or use the arrow buttons on touch screens. Type ranges where needed (blank means the whole file). One click merges everything locally; the result downloads immediately with an inline preview so you can verify the order."
+     ],
+     "h2": "The 30-second workflow"
+    }
+   ],
+   "slug": "how-to-merge-pdfs-free",
+   "steps": [
+    "Drop two or more PDFs onto the merge tool",
+    "Type page ranges per file if needed (blank = whole file)",
+    "Arrange the order, then click Run",
+    "Verify the preview and keep the download"
+   ],
+   "tips": [
+    "Unlock password-protected PDFs first, then merge, then re-protect if needed.",
+    "Merging many scans? Compress afterward to keep the file emailable."
+   ],
+   "title": "How to Merge PDFs Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Shrink a PDF under 1 MB for job portals, visa forms, and email. Target-size mode hits exact limits. Free, no signup.",
+   "faqs": [
+    [
+     "How do I get a PDF under exactly 1 MB?",
+     "Use target-size mode and enter 1. The engine iterates quality and scale until the file fits, then reports the final size."
+    ],
+    [
+     "Will a 1 MB PDF still be readable?",
+     "For on-screen reading and printing at normal sizes, yes. Tiny subscript text may soften — preview before submitting."
+    ],
+    [
+     "Why do portals reject my PDF?",
+     "Usually a hard cap (1-2 MB) or dimension rule. Compress to the cap first; if it still fails, check the portal's page-size requirements."
+    ]
+   ],
+   "h1": "How to Compress a PDF Under 1 MB (Job Portals Love This)",
+   "intro": [
+    "Job portals, visa applications, and university admissions share one annoying trait: hard file-size caps, often 1 MB. A 12 MB scan of your certificates simply bounces.",
+    "This guide shows how to hit an exact target size — not 'small-ish', but verifiably under the limit — using a free tool with a dedicated target-size mode."
+   ],
+   "relatedGuides": [
+    "how-to-merge-pdfs-free",
+    "compress-pdf-for-job-application"
+   ],
+   "relatedTools": [
+    "compress",
+    "split",
+    "images-to-pdf"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Presets (Light/Medium/Heavy) shrink by fixed amounts — great for email, useless when a portal demands ≤1.00 MB. Target-size mode instead renders once at high resolution, then walks quality and scale down through up to ten attempts until the file fits. You get the exact number the portal wants."
+     ],
+     "h2": "Why presets fail portals (and what works)"
+    },
+    {
+     "body": [
+      "If the source is 50 pages of color scans and the cap is 1 MB, even the best engine must rasterize aggressively — text becomes unselectable images of text. Mitigate by splitting: keep only required pages (often the cap counts total size), then compress the slimmed file. Two steps, dramatically better readability."
+     ],
+     "h2": "When even target mode struggles"
+    }
+   ],
+   "slug": "how-to-compress-pdf-under-1mb",
+   "steps": [
+    "Upload the PDF to the compress tool",
+    "Choose 'Target size' and enter the portal's limit (e.g. 1)",
+    "Click Run and check the before/after sizes",
+    "If it can't reach the target readably, split first, then retry"
+   ],
+   "tips": [
+    "Always keep the original — compression to tiny sizes is one-way.",
+    "Need many certificates under caps? Batch mode compresses whole folders."
+   ],
+   "title": "Compress PDF Under 1 MB Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Sign any PDF free: draw, type, or upload your signature and place it exactly. Saved in your browser only. No account.",
+   "faqs": [
+    [
+     "Is my signature uploaded to a server?",
+     "No. It is created and stored only in your browser's local storage. Nothing ever transmits it."
+    ],
+    [
+     "Can I sign multiple pages or documents?",
+     "Yes — add unlimited placements per document, and reuse your saved signature on every file."
+    ],
+    [
+     "Is this legally binding?",
+     "It is a standard electronic signature mark, accepted for most everyday agreements. Regulated filings may require certified signatures."
+    ]
+   ],
+   "h1": "How to Sign a PDF Free — Draw, Type, or Upload",
+   "intro": [
+    "Offer letters, rental agreements, freelance contracts — they all arrive as PDFs expecting ink. Printing, signing, and rescanning in 2026 is absurd.",
+    "This guide shows how to create a reusable signature once, then stamp it precisely onto any document in seconds, entirely offline."
+   ],
+   "relatedGuides": [
+    "how-to-password-protect-pdf-free",
+    "how-to-remove-pdf-metadata"
+   ],
+   "relatedTools": [
+    "sign",
+    "fill-forms",
+    "encrypt"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Draw with mouse or finger for a natural mark, type your name in a handwriting font for consistency, or upload a scan of your wet signature. Save it once — it persists in your browser for every future document."
+     ],
+     "h2": "Create your signature three ways"
+    },
+    {
+     "body": [
+      "Each placement sets page, position, and width as percentages, so signatures land identically on any screen size. Add one for the signature line, one for initials on each page — then bake everything permanently into the file on download."
+     ],
+     "h2": "Place it precisely, bake it permanently"
+    }
+   ],
+   "slug": "how-to-sign-pdf-free",
+   "steps": [
+    "Create your signature: draw, type, or upload it",
+    "Save it (kept only in this browser)",
+    "Add placements with page, position, and size",
+    "Click Run and download the signed PDF"
+   ],
+   "tips": [
+    "Use a transparent PNG upload for the cleanest stamp over document text.",
+    "After signing contracts, Protect with a password before emailing."
+   ],
+   "title": "How to Sign a PDF Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Split PDFs by range, chunks, odd/even, or file size. Extract chapters, bills, or email-sized parts. Free, no signup.",
+   "faqs": [
+    [
+     "How do I extract pages 5-10 from a PDF?",
+     "Use Extract-range mode with '5-10'. Only those pages land in the new file."
+    ],
+    [
+     "How do I split a PDF into 5-page chunks?",
+     "Use chunks mode with size 5. A 23-page file becomes five files (5+5+5+5+3) in one ZIP."
+    ],
+    [
+     "Can I split a file so each part fits email limits?",
+     "Yes — by-size mode packs pages so no file exceeds your MB target."
+    ]
+   ],
+   "h1": "How to Split a PDF Free — 5 Ways",
+   "intro": [
+    "Splitting is the most underestimated PDF skill: pull one chapter from a manual, separate invoices by month, or carve a 200 MB archive into emailable parts.",
+    "This guide covers all five split modes — ranges, every-page, chunks, odd/even, and by-size — and when each one wins."
+   ],
+   "relatedGuides": [
+    "how-to-merge-pdfs-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "split",
+    "merge",
+    "organize"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Ranges for surgical extraction ('just the appendix'), every-page for mixed scans that need sorting, chunks for even division, odd/even for booklet printing, by-size when the email server — not you — sets the rules."
+     ],
+     "h2": "Pick the right mode for the job"
+    },
+    {
+     "body": [
+      "Splitting copies pages without re-rendering, so text stays selectable and quality is pixel-identical. Splitting is also the secret pre-step to better compression: fewer pages compress smaller and stay readable."
+     ],
+     "h2": "Split first, compress second"
+    }
+   ],
+   "slug": "how-to-split-pdf-free",
+   "steps": [
+    "Upload the PDF to the split tool",
+    "Pick the mode that matches your goal",
+    "Enter ranges, chunk size, or MB target",
+    "Click Run and download the parts"
+   ],
+   "tips": [
+    "Splitting before compressing beats compressing a huge file every time.",
+    "Name parts clearly — 'contract-odd-pages.pdf' beats 'split-1.pdf'."
+   ],
+   "title": "How to Split a PDF Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Pull embedded photos and graphics out of any PDF at original quality. JPGs extract byte-identical. Free, offline.",
+   "faqs": [
+    [
+     "What quality do extracted images have?",
+     "Embedded JPEGs come out byte-identical — zero loss. Simple graphics rebuild as PNGs."
+    ],
+    [
+     "Why were some images skipped?",
+     "Masks, CMYK, and predictor-encoded images need a full renderer. The tool counts them; render those pages via PDF to JPG instead."
+    ],
+    [
+     "Can I extract images from scanned PDFs?",
+     "Scans are usually one JPEG per page — extraction returns each page as a photo. For page renders at chosen DPI, use PDF to JPG."
+    ]
+   ],
+   "h1": "How to Extract Images from a PDF Free",
+   "intro": [
+    "Catalogs, presentations, and reports lock their best photos inside PDFs. Screenshots degrade them; extraction recovers the originals.",
+    "This guide shows how to pull every embedded image at native quality — and what to do with the tricky ones."
+   ],
+   "relatedGuides": [
+    "how-to-merge-pdfs-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "extract-images",
+    "pdf-to-jpg",
+    "images-to-pdf"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The tool walks the PDF's internal image objects. JPEGs (photos, scans) pass through untouched. Plain RGB/grayscale graphics inflate to PNGs. Everything is counted: extracted vs. skipped, with reasons."
+     ],
+     "h2": "What extraction actually recovers"
+    },
+    {
+     "body": [
+      "One image downloads directly; many arrive as a ZIP named by page. Skipped counts mean exotic encodings — for those pages, render at high DPI with PDF to JPG instead of fighting the format."
+     ],
+     "h2": "Single images, ZIPs, and the skips"
+    }
+   ],
+   "slug": "how-to-extract-images-from-pdf",
+   "steps": [
+    "Upload the PDF to the extract-images tool",
+    "Click Run to scan embedded objects",
+    "Download the single image or the ZIP",
+    "Re-render skipped pages via PDF to JPG if needed"
+   ],
+   "tips": [
+    "Filenames include page numbers — perfect for rebuilding catalogs.",
+    "Extraction beats screenshots: no UI chrome, no scaling loss."
+   ],
+   "title": "Extract Images from PDF Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Turn scans into selectable, searchable text with free on-device OCR in 14 languages. Text + rebuilt PDF included.",
+   "faqs": [
+    [
+     "Which languages work?",
+     "English, Spanish, French, German, Italian, Portuguese, Dutch, Russian, Arabic, Hindi, Chinese (Simplified), Japanese, Korean, and Turkish."
+    ],
+    [
+     "Does OCR work without internet?",
+     "After the first use, the engine and language packs cache locally — then yes, fully offline."
+    ],
+    [
+     "My scan is skewed or faint. Will it work?",
+     "Clean, straight, high-contrast scans recognize far better. Re-scan crooked pages if accuracy matters."
+    ]
+   ],
+   "h1": "How to OCR a PDF Free — Scans to Searchable Text",
+   "intro": [
+    "A scanned PDF is just photos of text: unsearchable, uncopyable, invisible to Ctrl+F. OCR (optical character recognition) reads the pictures and returns real text.",
+    "This guide shows how to run OCR in 14 languages entirely on your device — no uploads, no per-page fees."
+   ],
+   "relatedGuides": [
+    "how-to-extract-images-from-pdf",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "ocr",
+    "extract-text",
+    "scan"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Pick your document's language before running — recognition quality jumps dramatically with the right language pack (especially Arabic, Hindi, and CJK scripts). First run downloads the pack; later runs are instant and offline."
+     ],
+     "h2": "Match the language, double the accuracy"
+    },
+    {
+     "body": [
+      "You receive two files: the raw recognized text and a rebuilt PDF. Proofread critical numbers — OCR confuses 0/O, 1/l, and 5/S on rough scans. For archival scans, keep the original alongside the text version."
+     ],
+     "h2": "What you get back (and proofreading)"
+    }
+   ],
+   "slug": "how-to-ocr-pdf-free",
+   "steps": [
+    "Upload the scan or photo of the document",
+    "Select the document language",
+    "Click Run and wait for recognition",
+    "Download the text file, the PDF, or both"
+   ],
+   "tips": [
+    "300 DPI straight scans beat phone photos of curved pages.",
+    "Batch-unlock first: OCR needs readable, unprotected files."
+   ],
+   "title": "How to OCR a PDF Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Convert PDF to editable Word (.docx) free. Text extracted page by page, fully private, no watermark or limits.",
+   "faqs": [
+    [
+     "How accurate is the conversion?",
+     "Body text transfers reliably, page by page. Multi-column magazine layouts simplify to flowing text — verify design-heavy docs."
+    ],
+    [
+     "Is there a page limit?",
+     "No. Only device memory caps length; hundred-page reports convert fine."
+    ],
+    [
+     "Do my documents upload?",
+     "Never. Extraction and DOCX building run entirely in your browser tab."
+    ]
+   ],
+   "h1": "How to Convert PDF to Word Free (DOCX)",
+   "intro": [
+    "You received the report as PDF; you need to edit it in Word. Retyping is not a plan.",
+    "This guide converts text PDFs to clean, editable .docx files — privately, with no page caps or watermarks."
+   ],
+   "relatedGuides": [
+    "how-to-merge-pdfs-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "pdf-to-word",
+    "word-to-pdf",
+    "extract-text"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The converter reads the PDF's text layer into paragraphs grouped by page, then builds a genuine Word document — not images pasted into .docx. Headings, lists, and emphasis structure carry over; exotic fonts fall back to Word defaults."
+     ],
+     "h2": "What transfers (and what simplifies)"
+    },
+    {
+     "body": [
+      "Scanned PDFs have no text layer — OCR them first, then convert the rebuilt file. Password-protected files need unlocking first. Always skim the .docx before sending it onward; five minutes of cleanup beats retyping five pages."
+     ],
+     "h2": "When conversion needs prep work"
+    }
+   ],
+   "slug": "how-to-convert-pdf-to-word-free",
+   "steps": [
+    "Upload the PDF to the converter",
+    "Click Run — text extracts page by page",
+    "Download the .docx file",
+    "Polish formatting in Word and save"
+   ],
+   "tips": [
+    "For tables, use PDF to Excel instead — it preserves rows and columns.",
+    "Convert once, then keep the .docx as your editable master."
+   ],
+   "title": "Convert PDF to Word Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Password-protect PDFs with AES encryption free. Same password for whole batches. Passwords never leave your device.",
+   "faqs": [
+    [
+     "What encryption protects my file?",
+     "Standard PDF AES encryption with user and owner passwords — opens in every major reader."
+    ],
+    [
+     "Can I protect many files at once?",
+     "Yes. Batch mode locks every file with one password and zips the results."
+    ],
+    [
+     "I forgot the password. Can you recover it?",
+     "No — and neither can anyone else. There is no server copy and no backdoor. Store passwords in a manager."
+    ]
+   ],
+   "h1": "How to Password Protect a PDF Free",
+   "intro": [
+    "Salary letters, bank statements, medical records — some PDFs should never travel unprotected. Password encryption takes seconds and works everywhere.",
+    "This guide locks files with AES encryption locally, so the password is never transmitted, stored, or seen by anyone but you."
+   ],
+   "relatedGuides": [
+    "how-to-unlock-pdf-free",
+    "how-to-sign-pdf-free"
+   ],
+   "relatedTools": [
+    "encrypt",
+    "decrypt",
+    "redact"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The user password gates opening; the owner password gates printing, copying, and editing. Set both for sensitive files — recipients open with one password while restrictions stay enforced by the other."
+     ],
+     "h2": "User password vs owner password"
+    },
+    {
+     "body": [
+      "Encryption is airtight only if the password is strong: 12+ characters, unique, stored in a manager. 'Company2024' protects against nothing. For files already shared widely, changing the password later does not recall distributed copies."
+     ],
+     "h2": "Strong passwords or nothing"
+    }
+   ],
+   "slug": "how-to-password-protect-pdf-free",
+   "steps": [
+    "Upload the PDF (or several for batch)",
+    "Set a strong password, min 4 characters",
+    "Optionally add a separate owner password",
+    "Click Run and download the locked file"
+   ],
+   "tips": [
+    "Batch-protect entire folders before uploading to shared drives.",
+    "After redacting, always re-protect before sending."
+   ],
+   "title": "Password Protect PDF Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Unlock PDFs you own by removing password protection locally. Password never stored or sent. Free, instant.",
+   "faqs": [
+    [
+     "Is my password stored anywhere?",
+     "No. It exists in memory for the seconds the unlock takes, then is gone."
+    ],
+    [
+     "What if I don't know the password?",
+     "Only the correct password unlocks the file. There is no cracking or bypass — by design."
+    ],
+    [
+     "What should I do after unlocking?",
+     "Edit, merge, or compress freely — then re-protect with a fresh password if the file stays sensitive."
+    ]
+   ],
+   "h1": "How to Unlock a PDF Free — Remove Password",
+   "intro": [
+    "Locked out of your own file, or need to edit a PDF whose password you legitimately hold? Unlocking takes seconds — locally.",
+    "This guide removes password protection from PDFs you own, without the file or password ever leaving your browser."
+   ],
+   "relatedGuides": [
+    "how-to-password-protect-pdf-free",
+    "how-to-merge-pdfs-free"
+   ],
+   "relatedTools": [
+    "decrypt",
+    "encrypt",
+    "merge"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The classic flow: unlock → do your work (merge, compress, convert) → re-protect. Because everything runs on-device, even entering the password exposes nothing to any network."
+     ],
+     "h2": "The unlock → work → re-protect flow"
+    },
+    {
+     "body": [
+      "Only unlock files you own or are authorized to modify. Unlocking cannot fix corruption (use Repair for that) and cannot lift certificate-based enterprise restrictions."
+     ],
+     "h2": "Limits and ground rules"
+    }
+   ],
+   "slug": "how-to-unlock-pdf-free",
+   "steps": [
+    "Upload the locked PDF",
+    "Enter its current password",
+    "Click Run",
+    "Download the unlocked file"
+   ],
+   "tips": [
+    "Forgot which password? Try variations before assuming corruption.",
+    "Re-protect immediately if the unlocked file will be shared.",
+    "On shared computers, delete the unlocked copy when finished — and empty the trash."
+   ],
+   "title": "Unlock PDF Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Find and remove hidden PDF metadata — author names, software traces, dates. Inspect, edit, or strip. Free, offline.",
+   "faqs": [
+    [
+     "What is actually hiding in my PDFs?",
+     "Author names, editing software, and creation dates — resumes and legal filings have embarrassed senders via forgotten metadata."
+    ],
+    [
+     "Should I edit or strip metadata?",
+     "Edit to publish clean attribution (title, author). Strip to share anonymously."
+    ],
+    [
+     "Does stripping change the content?",
+     "No. Pages, text, and images are untouched — only the hidden info dictionary is cleaned."
+    ]
+   ],
+   "h1": "How to Remove PDF Metadata Free",
+   "intro": [
+    "Every PDF carries a hidden info card: who made it, with what software, and when. Before sharing sensitive documents, read that card — then decide what stays.",
+    "This guide inspects, rewrites, or wipes PDF metadata entirely in your browser."
+   ],
+   "relatedGuides": [
+    "how-to-password-protect-pdf-free",
+    "how-to-sign-pdf-free"
+   ],
+   "relatedTools": [
+    "privacy",
+    "redact",
+    "flatten"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Inspect mode lists title, author, subject, keywords, creator, producer, and both timestamps. Most users are surprised twice: first that the data exists, second by what it says about old drafts."
+     ],
+     "h2": "Read the hidden card first"
+    },
+    {
+     "body": [
+      "Edit mode rewrites attribution for publishing (reports, portfolios). Strip mode wipes everything and resets dates — the right choice for anonymous sharing, whistleblowing prep, and competitive documents. Neither mode touches visible content."
+     ],
+     "h2": "Edit for publishing, strip for anonymity"
+    }
+   ],
+   "slug": "how-to-remove-pdf-metadata",
+   "steps": [
+    "Upload the PDF to the privacy scanner",
+    "Inspect what it reveals",
+    "Choose Edit attribution or Strip everything",
+    "Download the clean file"
+   ],
+   "tips": [
+    "Pair with Redact + Flatten for truly safe sharing of sensitive files.",
+    "Set final metadata on publish-ready documents — it aids search and archiving."
+   ],
+   "title": "Remove PDF Metadata Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Extract PDF tables into editable CSV and Excel files free. Both formats in one run, fully private, no upload.",
+   "faqs": [
+    [
+     "How accurate is table extraction?",
+     "Text rows transfer faithfully; merged cells and spanning headers simplify. Always verify figures before filing."
+    ],
+    [
+     "What do I get — CSV or Excel?",
+     "Both, in one run: universal .csv plus Excel-ready .xlsx."
+    ],
+    [
+     "My PDF is a scan. Will it work?",
+     "Scans need text first — run OCR, then convert the rebuilt PDF."
+    ]
+   ],
+   "h1": "How to Convert PDF to Excel Free",
+   "intro": [
+    "Bank statements, invoices, reports locked in PDF tables — and you need them in Excel. Manual retyping is error-prone and slow.",
+    "This guide extracts PDF text into editable CSV and XLSX files in one run, entirely offline."
+   ],
+   "relatedGuides": [
+    "how-to-convert-pdf-to-word-free",
+    "how-to-ocr-pdf-free"
+   ],
+   "relatedTools": [
+    "pdf-to-excel",
+    "excel-to-pdf",
+    "ocr"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The extractor reads text lines into rows and emits both formats at once: CSV for universal import (databases, Sheets, scripts) and XLSX for native Excel work with a proper sheet."
+     ],
+     "h2": "Two formats, one run, zero upload"
+    },
+    {
+     "body": [
+      "Extraction is line-based, not layout-AI: check merged headers, multi-line cells, and currency columns. For recurring statements, build the habit — extract, verify once, then trust the pattern."
+     ],
+     "h2": "Verify before you file"
+    }
+   ],
+   "slug": "how-to-convert-pdf-to-excel-free",
+   "steps": [
+    "Upload the PDF",
+    "Click Run to extract text rows",
+    "Download the .csv, the .xlsx, or both",
+    "Verify figures in Excel before filing"
+   ],
+   "tips": [
+    "Password-protected statements need unlocking first.",
+    "For Excel → PDF round-trips, use Excel to PDF.",
+    "For monthly statements, save the verified column mapping once and reuse it every cycle."
+   ],
+   "title": "Convert PDF to Excel Free (2026 Guide) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "Use case",
+   "description": "Compress certificates and resumes under portal caps (1-2 MB): keep pages, target sizes, batch whole folders. Free guide.",
+   "faqs": [
+    [
+     "What size do job portals usually require?",
+     "Most Indian government and corporate portals cap uploads at 1-2 MB per file, sometimes 100-200 KB for photos. Read the specific notice."
+    ],
+    [
+     "Should I compress or split first?",
+     "Split first: keep only required pages, then compress. Fewer pages compress smaller and stay readable."
+    ],
+    [
+     "Will my certificate still look official?",
+     "Yes for on-screen verification. Keep originals safe — compressed copies are for upload only."
+    ]
+   ],
+   "h1": "Compress PDFs for Job Applications (Caps, Photos & Batches)",
+   "intro": [
+    "A perfect application rejected by a file-size error: every job seeker knows the pain. Certificates, resumes, and photos must each squeeze under strict caps.",
+    "This playbook covers the full application pack — which pages to keep, what sizes to target, and how to batch-compress everything in one go."
+   ],
+   "relatedGuides": [
+    "how-to-compress-pdf-under-1mb",
+    "how-to-split-pdf-free"
+   ],
+   "relatedTools": [
+    "compress",
+    "split",
+    "images-to-pdf"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Read the notification first: note each document's cap (commonly 1 MB certificates, 100 KB photos). Split multi-page scans to required pages only, convert photos via Images to PDF, then compress each to its cap with target-size mode."
+     ],
+     "h2": "The application-pack playbook"
+    },
+    {
+     "body": [
+      "Upload the whole folder with batch mode and one target size — ten certificates come back as one ZIP, every file under the cap. Rename clearly (degree-certificate-1mb.pdf) so uploads go smoothly under deadline pressure."
+     ],
+     "h2": "Batch the whole application pack"
+    }
+   ],
+   "slug": "compress-pdf-for-job-application",
+   "steps": [
+    "List each document and its portal cap",
+    "Split scans to required pages only",
+    "Batch-compress everything to target sizes",
+    "Verify each file opens before uploading"
+   ],
+   "tips": [
+    "Screenshot the final sizes as proof before the deadline rush.",
+    "Keep a folder of originals — never submit your only copy."
+   ],
+   "title": "Compress PDFs for Job Applications (2026) | PDF Suite",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "Comparison",
+   "description": "Honest 2026 comparison: free limits, watermarks, uploads, and offline use across popular PDF tools. No signup needed here.",
+   "faqs": [
+    [
+     "Why do free PDF tools add watermarks?",
+     "Watermarks convert free users to paid plans. Tools without servers can't watermark even if they wanted to — there is no processing step to inject one."
+    ],
+    [
+     "Is uploading PDFs to online tools safe?",
+     "Files traverse infrastructure you don't control and persist for minutes to hours. For contracts, medical, and financial files, prefer tools that never upload."
+    ],
+    [
+     "What should I compare before choosing?",
+     "Daily caps, file-size caps, watermark policy, upload vs local processing, offline support, and whether signup walls appear mid-task."
+    ]
+   ],
+   "h1": "Best Free PDF Tools Compared (2026, Honest Edition)",
+   "intro": [
+    "Every 'free' PDF tool hides its real price somewhere: a watermark, a 2-task daily cap, a signup wall before download, or your files on someone's server.",
+    "This honest comparison lays out what the popular options actually cost you — in limits, privacy, and friction — so you can pick with eyes open."
+   ],
+   "relatedGuides": [
+    "how-to-merge-pdfs-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "merge",
+    "compress",
+    "privacy"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Typical pattern: generous-looking free tier, then caps (2 tasks/day is common), file-size ceilings (~25-100 MB), watermarks on some outputs, mandatory uploads with hour-long retention, and premium upsells ($5-12/month). Support quality varies widely."
+     ],
+     "h2": "What the popular tools really charge (it's not money)"
+    },
+    {
+     "body": [
+      "A fully local tool inverts the model: no per-use server cost means no counters, no watermarks, no accounts — and files that physically cannot leak. Compare any tool against this checklist: signup required? watermarks? daily caps? uploads? offline? The answers tell you the business model."
+     ],
+     "h2": "The business-model test"
+    }
+   ],
+   "slug": "free-pdf-tools-compared",
+   "steps": [
+    "List what you process weekly (scans? contracts? batches?)",
+    "Check each tool's caps, watermarks, and upload policy",
+    "Try your top two flows on each candidate",
+    "Pick the one with no mid-task surprises"
+   ],
+   "tips": [
+    "Test with a real sensitive file's non-sensitive twin first.",
+    "Bookmark the winner — and install it if it supports offline use."
+   ],
+   "title": "Best Free PDF Tools Compared 2026 | PDF Suite",
+   "updated": "2026-09-04"
+  }
+ ]
+}

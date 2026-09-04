@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TOOLS, TOOL_SLUGS } from '../tools/registry.js';
 import SEO from '../seo/content.json';
+import GUIDES_JSON from '../seo/guides.json';
 
 interface ToolEntry {
   id: string;
@@ -72,6 +73,83 @@ describe('SEO content library', () => {
       expect(label.length).toBeGreaterThan(3);
       expect(typical.length).toBeGreaterThan(10);
       expect(ours.length).toBeGreaterThan(5);
+    }
+  });
+});
+
+interface GuideEntry {
+  slug: string;
+  title: string;
+  description: string;
+  h1: string;
+  category: string;
+  updated: string;
+  intro: string[];
+  sections: { h2: string; body: string[] }[];
+  steps: string[];
+  tips: string[];
+  faqs: [string, string][];
+  relatedTools: string[];
+  relatedGuides: string[];
+}
+
+const guides = (GUIDES_JSON as unknown as { guides: GuideEntry[] }).guides;
+
+describe('Guides library (content velocity)', () => {
+  it('has a healthy cluster size with unique slugs/titles/descriptions', () => {
+    expect(guides.length).toBeGreaterThanOrEqual(10);
+    expect(new Set(guides.map((g) => g.slug)).size).toBe(guides.length);
+    expect(new Set(guides.map((g) => g.title)).size).toBe(guides.length);
+    expect(new Set(guides.map((g) => g.description)).size).toBe(guides.length);
+    for (const g of guides) {
+      expect(g.slug, g.slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(g.updated, g.slug).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+  });
+
+  it('keeps SERP lengths for every guide', () => {
+    for (const g of guides) {
+      expect(g.title.length, g.slug).toBeLessThanOrEqual(65);
+      expect(g.title.length, g.slug).toBeGreaterThan(20);
+      expect(g.description.length, g.slug).toBeGreaterThanOrEqual(100);
+      expect(g.description.length, g.slug).toBeLessThanOrEqual(170);
+      expect(g.h1.length, g.slug).toBeGreaterThan(15);
+    }
+  });
+
+  it('guarantees substantive bodies (anti-thin-content gate)', () => {
+    for (const g of guides) {
+      expect(g.intro.length, g.slug).toBeGreaterThanOrEqual(1);
+      expect(g.sections.length, g.slug).toBeGreaterThanOrEqual(2);
+      expect(g.steps.length, g.slug).toBeGreaterThanOrEqual(3);
+      expect(g.faqs.length, g.slug).toBeGreaterThanOrEqual(3);
+      for (const s of g.sections) {
+        expect(s.h2.length, g.slug).toBeGreaterThan(10);
+        expect(s.body.join(' ').length, g.slug).toBeGreaterThan(80);
+      }
+      for (const [q, a] of g.faqs) {
+        expect(q.endsWith('?'), `${g.slug}: ${q}`).toBe(true);
+        expect(a.length, `${g.slug}: ${q}`).toBeGreaterThanOrEqual(40);
+      }
+      const words = [...g.intro, ...g.sections.flatMap((s) => [s.h2, ...s.body]), ...g.steps, ...g.tips, ...g.faqs.flat()]
+        .join(' ')
+        .split(/\s+/).length;
+      expect(words, g.slug).toBeGreaterThanOrEqual(200);
+    }
+  });
+
+  it('cross-links only to real tools and guides (no dead ends)', () => {
+    const slugs = new Set(guides.map((g) => g.slug));
+    const toolIds = new Set(TOOLS.map((t) => t.id));
+    for (const g of guides) {
+      expect(g.relatedTools.length, g.slug).toBeGreaterThanOrEqual(2);
+      for (const id of g.relatedTools) {
+        expect(toolIds.has(id), `${g.slug} → tool ${id}`).toBe(true);
+        expect(TOOL_SLUGS[id], `${g.slug} → tool ${id}`).toBeTruthy();
+      }
+      for (const gs of g.relatedGuides) {
+        expect(slugs.has(gs), `${g.slug} → guide ${gs}`).toBe(true);
+      }
     }
   });
 });

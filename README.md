@@ -1,7 +1,7 @@
 # PDF Suite — Free Offline PDF Toolkit
 
 A full end-to-end working clone of the **ihatepdf.cv essentials**, at parity
-with the best of iLovePDF/Smallpdf — **36 tools, 100% client-side**. No upload,
+with the best of iLovePDF/Smallpdf — **36 tools + 13 guides, 100% client-side**. No upload,
 no watermark, no sign-up, no per-hour limits. Files never leave the device.
 
 ## Features (36 tools, all functional offline after first load)
@@ -98,7 +98,7 @@ Principles:
 |---|---|
 | `npm run dev` | local dev server |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | vitest unit suite (37 tests: search scoring, ranges, CSV, engine round-trips, sign/annotate/crop/forms/slides, merge-select, split modes, metadata, markdown, image extraction, progress/recents helpers) |
+| `npm test` | vitest unit suite (47 tests: search scoring, guides library, ranges, CSV, engine round-trips, sign/annotate/crop/forms/slides, merge-select, split modes, metadata, markdown, image extraction, progress/recents helpers) |
 | `npm run build` | typecheck + production build + bundle-budget gate |
 | `npm run budget` | standalone perf-budget check (entry ≤150 KB, JS ≤3.8 MB) |
 | `npm run preview` | serve built app |
@@ -113,8 +113,9 @@ Principles:
 
 ## SEO (built to rank)
 
-- **Real URLs, not hash routes:** every tool lives at `/merge-pdf/` etc.
-  (History API + click interception keeps SPA speed; legacy `#/tool/x` redirects).
+- **Real URLs, not hash routes:** every tool lives at `/merge-pdf/` etc.,
+  plus a `/guides/` hub with 13 long-tail tutorials (History API + click
+  interception keeps SPA speed; legacy `#/tool/x` redirects).
 - **Prerendered at build** (`scripts/prerender.mjs`): unique title/meta/canonical,
   H1 + how-to + FAQ content, and JSON-LD (SoftwareApplication, FAQPage,
   BreadcrumbList, HowTo) on all 37 pages — no JS required to index.

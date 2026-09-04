@@ -408,7 +408,12 @@ window.addEventListener('keydown', (e) => {
 // SEO bedrock: every tool lives at a crawlable path (/merge-pdf/) with unique
 // prerendered HTML. Legacy #/tool/<id> links redirect to the canonical path.
 
-type Route = { kind: 'home' } | { kind: 'tool'; id: string } | { kind: 'missing'; slug: string };
+type Route =
+  | { kind: 'home' }
+  | { kind: 'tool'; id: string }
+  | { kind: 'guides' }
+  | { kind: 'guide'; slug: string }
+  | { kind: 'missing'; slug: string };
 
 function slugFromPath(pathname: string): string {
   return pathname.replace(/^\/+|\/+$/g, '');
@@ -428,6 +433,12 @@ function resolveRoute(): Route {
   }
   const slug = slugFromPath(location.pathname);
   if (!slug || slug === 'index.html') return { kind: 'home' };
+  if (slug === 'guides') return { kind: 'guides' };
+  if (slug.startsWith('guides/')) {
+    const gslug = slug.slice('guides/'.length);
+    if (gslug && !gslug.includes('/')) return { kind: 'guide', slug: gslug };
+    return { kind: 'missing', slug };
+  }
   const id = toolIdFromSlug(slug);
   return id ? { kind: 'tool', id } : { kind: 'missing', slug };
 }
@@ -456,6 +467,8 @@ function render(): void {
   app.append(header());
   const route = resolveRoute();
   if (route.kind === 'tool') app.append(toolPage(route.id));
+  else if (route.kind === 'guides') app.append(guidesIndexPage());
+  else if (route.kind === 'guide') app.append(guidePage(route.slug));
   else if (route.kind === 'missing') app.append(notFoundPage(route.slug));
   else app.append(homePage());
   app.append(footer());
@@ -469,15 +482,31 @@ function render(): void {
  *  already carries the canonical SEO head for crawlers and first paint). */
 async function syncRouteMeta(route: Route): Promise<void> {
   try {
-    const { default: SEO } = await import('./seo/content.json');
-    const seo = SEO as unknown as { tools: SeoEntry[]; home: SeoEntry };
-    const entry =
-      route.kind === 'tool'
-        ? seo.tools.find((t) => t.id === route.id)
-        : seo.home;
-    if (!entry) return;
-    document.title = entry.title;
-    document.querySelector('meta[name="description"]')?.setAttribute('content', entry.description);
+    if (route.kind === 'tool' || route.kind === 'home') {
+      const { default: SEO } = await import('./seo/content.json');
+      const seo = SEO as unknown as { tools: SeoEntry[]; home: SeoEntry };
+      const entry = route.kind === 'tool' ? seo.tools.find((t) => t.id === route.id) : seo.home;
+      if (!entry) return;
+      document.title = entry.title;
+      document.querySelector('meta[name="description"]')?.setAttribute('content', entry.description);
+    } else if (route.kind === 'guide' || route.kind === 'guides') {
+      const { default: GUIDES } = await import('./seo/guides.json');
+      const all = (GUIDES as unknown as { guides: GuideEntry[] }).guides;
+      const entry =
+        route.kind === 'guide'
+          ? all.find((g) => g.slug === route.slug)
+          : null;
+      if (entry) {
+        document.title = entry.title;
+        document.querySelector('meta[name="description"]')?.setAttribute('content', entry.description);
+      } else if (route.kind === 'guides') {
+        document.title = 'Free PDF Guides & Tutorials | PDF Suite';
+        document.querySelector('meta[name="description"]')?.setAttribute(
+          'content',
+          'Step-by-step PDF guides: merge, compress, sign, OCR, convert and more. Free, private, no signup.',
+        );
+      }
+    }
   } catch {
     /* content is progressive enhancement — never break the app */
   }
@@ -492,6 +521,153 @@ interface SeoEntry {
   intro: string;
   steps?: string[];
   faqs?: [string, string][];
+}
+
+interface GuideEntry {
+  slug: string;
+  title: string;
+  description: string;
+  h1: string;
+  category: string;
+  updated: string;
+  intro: string[];
+  sections: { h2: string; body: string[] }[];
+  steps: string[];
+  tips: string[];
+  faqs: [string, string][];
+  relatedTools: string[];
+  relatedGuides: string[];
+}
+
+async function loadGuides(): Promise<GuideEntry[]> {
+  const { default: GUIDES } = await import('./seo/guides.json');
+  return (GUIDES as unknown as { guides: GuideEntry[] }).guides;
+}
+
+function guideCard(g: GuideEntry): HTMLElement {
+  const card = el('a', { class: 'card', href: `/guides/${g.slug}/` });
+  card.append(
+    el('div', { class: 'card-title' }, g.h1.replace(/ —.*$/, '').slice(0, 60)),
+    el('div', { class: 'card-desc' }, g.description),
+    el('div', { class: 'card-desc' }, `${g.category} · Updated ${g.updated}`),
+  );
+  return card;
+}
+
+function guidesIndexPage(): HTMLElement {
+  const root = el('main', { class: 'wrap tool', id: 'main', tabindex: '-1' });
+  root.append(el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
+    el('a', { href: '/' }, 'All tools'),
+    el('span', { 'aria-hidden': 'true' }, ' / '),
+    el('span', { 'aria-current': 'page' }, 'Guides'),
+  ));
+  root.append(el('h1', {}, 'Free PDF Guides & Tutorials'));
+  root.append(el('p', { class: 'lede' }, 'Step-by-step playbooks for compressing, merging, signing, and converting PDFs — written from the features above, tested against the live tools.'));
+  const grid = el('div', { class: 'grid' });
+  grid.append(el('p', { class: 'muted' }, 'Loading guides…'));
+  root.append(grid);
+  void (async () => {
+    try {
+      const guides = await loadGuides();
+      grid.innerHTML = '';
+      for (const g of guides) grid.append(guideCard(g));
+    } catch {
+      grid.innerHTML = '';
+      grid.append(el('p', { class: 'muted' }, 'Could not load guides. Check your connection and retry.'));
+    }
+  })();
+  root.append(footerNote());
+  return root;
+}
+
+function footerNote(): HTMLElement {
+  return el('p', {}, 'Or start from ', el('a', { href: '/' }, 'all tools'), '.');
+}
+
+function guidePage(slug: string): HTMLElement {
+  const root = el('main', { class: 'wrap tool', id: 'main', tabindex: '-1' });
+  root.append(el('p', { class: 'muted' }, 'Loading guide…'));
+  void (async () => {
+    try {
+      const guides = await loadGuides();
+      const g = guides.find((x) => x.slug === slug);
+      root.innerHTML = '';
+      if (!g) {
+        root.append(el('h1', {}, 'Guide not found'));
+        root.append(el('p', {}, 'That tutorial does not exist. Browse ', el('a', { href: '/guides/' }, 'all PDF guides'), '.'));
+        return;
+      }
+      root.append(el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
+        el('a', { href: '/' }, 'All tools'),
+        el('span', { 'aria-hidden': 'true' }, ' / '),
+        el('a', { href: '/guides/' }, 'Guides'),
+        el('span', { 'aria-hidden': 'true' }, ' / '),
+        el('span', { 'aria-current': 'page' }, g.category),
+      ));
+      root.append(el('h1', {}, g.h1));
+      root.append(el('p', { class: 'muted' }, `${g.category} · Updated ${g.updated} · Free forever`));
+      for (const para of g.intro) root.append(el('p', {}, para));
+      // Jump links: the tool itself first (intent → action in one screen).
+      const cta = el('div', { class: 'row' });
+      for (const id of g.relatedTools.slice(0, 2)) {
+        const t = getTool(id);
+        if (t) {
+          const b = el('a', { class: 'btn primary', href: toolHref(id) }, `${t.icon} Open ${t.title}`);
+          (b as HTMLAnchorElement).style.textDecoration = 'none';
+          cta.append(b);
+        }
+      }
+      root.append(cta);
+      const toc = el('div', { class: 'related' });
+      toc.append(el('span', { class: 'muted' }, 'On this page: '));
+      g.sections.forEach((s, i) => {
+        toc.append(el('a', { class: 'chip', href: `#section-${i}` }, s.h2));
+      });
+      root.append(toc);
+      g.sections.forEach((s, i) => {
+        const h = el('h2', { id: `section-${i}` }, s.h2);
+        root.append(h);
+        for (const para of s.body) root.append(el('p', {}, para));
+      });
+      const how = el('section', { class: 'faq' });
+      how.append(el('h2', {}, 'Steps'));
+      const ol = el('ol', { class: 'howto' });
+      for (const step of g.steps) ol.append(el('li', {}, step));
+      how.append(ol);
+      if (g.tips.length > 0) {
+        how.append(el('h2', {}, 'Pro tips'));
+        const ul = el('ul', {});
+        for (const tip of g.tips) ul.append(el('li', {}, tip));
+        how.append(ul);
+      }
+      how.append(el('h2', {}, 'Frequently asked questions'));
+      for (const [q, a] of g.faqs) {
+        const d = el('details', {});
+        d.append(el('summary', {}, q), el('p', {}, a));
+        how.append(d);
+      }
+      root.append(how);
+      const rel = el('div', { class: 'related' });
+      rel.append(el('span', { class: 'muted' }, 'Try it now: '));
+      for (const id of g.relatedTools) {
+        const t = getTool(id);
+        if (t) rel.append(el('a', { class: 'chip', href: toolHref(id) }, `${t.icon} ${t.title}`));
+      }
+      root.append(rel);
+      const more = el('div', { class: 'related' });
+      more.append(el('span', { class: 'muted' }, 'Keep reading: '));
+      for (const gs of g.relatedGuides) {
+        const rg = guides.find((x) => x.slug === gs);
+        if (rg) more.append(el('a', { class: 'chip', href: `/guides/${rg.slug}/` }, rg.h1.replace(/ —.*$/, '').slice(0, 42)));
+      }
+      root.append(more);
+      root.append(footerNote());
+    } catch {
+      root.innerHTML = '';
+      root.append(el('p', { class: 'muted' }, 'Could not load this guide. Check your connection and retry.'));
+    }
+  })();
+  return root;
 }
 
 function notFoundPage(slug: string): HTMLElement {
@@ -529,7 +705,12 @@ document.addEventListener('click', (e) => {
   }
   if (url.origin !== location.origin) return;
   const slug = slugFromPath(url.pathname);
-  const known = slug === '' || slug === 'index.html' || !!toolIdFromSlug(slug);
+  const known =
+    slug === '' ||
+    slug === 'index.html' ||
+    slug === 'guides' ||
+    slug.startsWith('guides/') ||
+    !!toolIdFromSlug(slug);
   // Unknown paths (docs, assets) get normal browser navigation.
   if (!known) return;
   e.preventDefault();
@@ -564,8 +745,8 @@ function header(): HTMLElement {
   nav.append(
     el('a', { href: '/' }, 'All tools'),
     el('a', { href: toolHref('merge') }, 'Merge'),
-    el('a', { href: toolHref('split') }, 'Split'),
     el('a', { href: toolHref('compress') }, 'Compress'),
+    el('a', { href: '/guides/' }, 'Guides'),
     paletteBtn,
     themeBtn,
     installBtn,
@@ -597,6 +778,19 @@ function footer(): HTMLElement {
     ver.textContent = v;
   });
   const cols = el('div', { class: 'foot-cols' });
+  const guidesCol = el('div', { class: 'foot-col' });
+  guidesCol.append(el('strong', {}, 'Guides'));
+  guidesCol.append(el('a', { href: '/guides/' }, 'All PDF guides'));
+  const guideLinks: [string, string][] = [
+    ['how-to-merge-pdfs-free', 'Merge PDFs'],
+    ['how-to-compress-pdf-under-1mb', 'Compress under 1 MB'],
+    ['how-to-sign-pdf-free', 'Sign a PDF'],
+    ['free-pdf-tools-compared', 'Tools compared'],
+  ];
+  for (const [slug, label] of guideLinks) {
+    guidesCol.append(el('a', { href: `/guides/${slug}/` }, label));
+  }
+  cols.append(guidesCol);
   for (const cat of CATEGORIES) {
     const col = el('div', { class: 'foot-col' });
     col.append(el('strong', {}, cat));
@@ -829,6 +1023,37 @@ function homePage(): HTMLElement {
       table.append(thead, tbody);
       section.append(table);
       trustMount.append(section);
+    } catch {
+      /* enhancement only */
+    }
+  })();
+
+  // Guides strip: content velocity made discoverable (and interlinked).
+  const guidesMount = el('div', {});
+  root.append(guidesMount);
+  void (async () => {
+    try {
+      const guides = await loadGuides();
+      const picks = [
+        'how-to-merge-pdfs-free',
+        'how-to-compress-pdf-under-1mb',
+        'how-to-sign-pdf-free',
+        'free-pdf-tools-compared',
+        'compress-pdf-for-job-application',
+        'how-to-ocr-pdf-free',
+      ];
+      const section = el('section', { class: 'cat' });
+      section.append(el('h2', {}, 'Learn · PDF guides'));
+      const grid = el('div', { class: 'grid' });
+      for (const slug of picks) {
+        const g = guides.find((x) => x.slug === slug);
+        if (g) grid.append(guideCard(g));
+      }
+      section.append(grid);
+      const more = el('p', {});
+      more.append(el('a', { href: '/guides/' }, 'Browse all PDF guides →'));
+      section.append(more);
+      guidesMount.append(section);
     } catch {
       /* enhancement only */
     }

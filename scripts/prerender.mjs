@@ -11,6 +11,7 @@ const SITE = (process.env.SITE_URL || 'https://pdfsuite.app').replace(/\/+$/, ''
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
 const SEO = JSON.parse(readFileSync(join(ROOT, 'src', 'seo', 'content.json'), 'utf8'));
+const GUIDES = JSON.parse(readFileSync(join(ROOT, 'src', 'seo', 'guides.json'), 'utf8')).guides;
 
 const esc = (s) =>
   String(s)
@@ -38,6 +39,22 @@ for (const t of SEO.tools) {
   }
 }
 
+// Guides cross-reference integrity: fail the build on dead links.
+for (const g of GUIDES) {
+  for (const id of g.relatedTools) {
+    if (!META.has(id)) {
+      console.error(`guides.json: "${g.slug}" references unknown tool "${id}"`);
+      process.exit(1);
+    }
+  }
+  for (const gs of g.relatedGuides) {
+    if (!GUIDES.some((x) => x.slug === gs)) {
+      console.error(`guides.json: "${g.slug}" references unknown guide "${gs}"`);
+      process.exit(1);
+    }
+  }
+}
+
 const shell = readFileSync(join(DIST, 'index.html'), 'utf8');
 if (!shell.includes('<div id="app"></div>')) {
   console.error('dist/index.html shell not as expected (missing <div id="app"></div>)');
@@ -46,7 +63,7 @@ if (!shell.includes('<div id="app"></div>')) {
 
 const TOP_TOOLS = new Set(['merge', 'compress', 'sign', 'split', 'pdf-to-word', 'images-to-pdf', 'protect-pdf', 'ocr']);
 
-function headTags({ title, description, canonical, faqs, breadcrumbs, howto }) {
+function headTags({ title, description, canonical, faqs, breadcrumbs, howto, article }) {
   const jsonLd = [];
   jsonLd.push({
     '@context': 'https://schema.org',
@@ -80,12 +97,24 @@ function headTags({ title, description, canonical, faqs, breadcrumbs, howto }) {
       })),
     });
   }
-  if (howto?.length) {
+  if (howto?.steps?.length) {
     jsonLd.push({
       '@context': 'https://schema.org',
       '@type': 'HowTo',
       name: howto.name,
       step: howto.steps.map((s) => ({ '@type': 'HowToStep', text: s })),
+    });
+  }
+  if (article) {
+    jsonLd.push({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: article.headline,
+      description: article.description,
+      datePublished: article.updated,
+      dateModified: article.updated,
+      mainEntityOfPage: article.url,
+      author: { '@type': 'Organization', name: 'PDF Suite' },
     });
   }
   return [
@@ -136,6 +165,66 @@ function toolBody(entry, meta) {
   ].join('\n');
 }
 
+function guideBody(g) {
+  const url = `${SITE}/guides/${g.slug}/`;
+  const toolLinks = g.relatedTools
+    .map((id) => {
+      const t = SEO.tools.find((x) => x.id === id);
+      const m = META.get(id);
+      return `<a href="/${t.slug}/">${esc(m.icon)} ${esc(m.title)}</a>`;
+    })
+    .join(' · ');
+  const guideLinks = g.relatedGuides
+    .map((gs) => {
+      const r = GUIDES.find((x) => x.slug === gs);
+      return `<a href="/guides/${r.slug}/">${esc(r.h1.split(' — ')[0].slice(0, 50))}</a>`;
+    })
+    .join(' · ');
+  return [
+    `<div class="wrap tool"><nav aria-label="Breadcrumb"><a href="/">All tools</a> / <a href="/guides/">Guides</a> / <span>${esc(g.category)}</span></nav>`,
+    `<h1>${esc(g.h1)}</h1>`,
+    `<p><small>${esc(g.category)} · Updated ${esc(g.updated)} · Free forever</small></p>`,
+    ...g.intro.map((p) => `<p>${esc(p)}</p>`),
+    `<p><strong>Try it now:</strong> ${toolLinks}</p>`,
+    ...g.sections.flatMap((s) => [`<h2>${esc(s.h2)}</h2>`, ...s.body.map((p) => `<p>${esc(p)}</p>`)]),
+    `<h2>Steps</h2><ol>${g.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>`,
+    `<h2>Pro tips</h2><ul>${g.tips.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>`,
+    `<h2>Frequently asked questions</h2>`,
+    g.faqs.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('\n'),
+    `<h2>Related guides</h2><p>${guideLinks}</p>`,
+    `<p><a href="/guides/">← All PDF guides</a> · Canonical: <a href="${url}">${url}</a></p></div>`,
+  ].join('\n');
+}
+
+function guidesIndexBody() {
+  const cards = GUIDES.map(
+    (g) => `<a href="/guides/${g.slug}/"><strong>${esc(g.h1.split(' — ')[0])}</strong><br><small>${esc(g.description)}</small></a>`,
+  ).join('\n');
+  return [
+    `<div class="wrap"><h1>Free PDF Guides &amp; Tutorials</h1>`,
+    `<p>Step-by-step playbooks for compressing, merging, signing, and converting PDFs — written from the features above and tested against the live tools.</p>`,
+    `<div>${cards}</div>`,
+    `<p><a href="/">← All 36 free PDF tools</a></p></div>`,
+  ].join('\n');
+}
+
+function guideHead(g) {
+  const canonical = `${SITE}/guides/${g.slug}/`;
+  return headTags({
+    title: g.title,
+    description: g.description,
+    canonical,
+    faqs: g.faqs,
+    breadcrumbs: [
+      { name: 'PDF Suite', url: `${SITE}/` },
+      { name: 'Guides', url: `${SITE}/guides/` },
+      { name: g.h1.split(' — ')[0].slice(0, 60), url: canonical },
+    ],
+    howto: { name: g.h1.split(' — ')[0].slice(0, 60), steps: g.steps },
+    article: { headline: g.h1, updated: g.updated, description: g.description, url: canonical },
+  });
+}
+
 function homeBody() {
   const cards = SEO.tools
     .map((t) => {
@@ -150,6 +239,7 @@ function homeBody() {
     `<div class="wrap"><h1>${esc(SEO.home.h1)}</h1>`,
     `<p>${esc(SEO.home.intro)}</p>`,
     `<h2>All free PDF tools</h2><div>${cards}</div>`,
+    `<h2>Popular PDF guides</h2><p>${GUIDES.slice(0, 6).map((g) => `<a href="/guides/${g.slug}/">${esc(g.h1.split(' — ')[0].slice(0, 44))}</a>`).join(' · ')} · <a href="/guides/">All guides →</a></p>`,
     `<h2>Why PDF Suite instead of typical online tools</h2>`,
     `<table><thead><tr><th></th><th>Typical online tools</th><th>PDF Suite</th></tr></thead><tbody>${rows}</tbody></table>`,
     `<h2>Frequently asked questions</h2>`,
@@ -210,6 +300,47 @@ for (const entry of SEO.tools) {
   );
   sitemapUrls.push({ loc: canonical, priority: TOP_TOOLS.has(entry.id) ? '0.9' : '0.8' });
   console.log(`prerendered /${entry.slug}/`);
+}
+
+// Guides hub + articles (content velocity: long-tail demand capture).
+{
+  const canonical = `${SITE}/guides/`;
+  const extra = headTags({
+    title: 'Free PDF Guides & Tutorials | PDF Suite',
+    description:
+      'Step-by-step PDF guides: merge, compress, sign, OCR, convert and more. Free, private, no signup.',
+    canonical,
+    breadcrumbs: [
+      { name: 'PDF Suite', url: `${SITE}/` },
+      { name: 'Guides', url: canonical },
+    ],
+  });
+  const dir = join(DIST, 'guides');
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    join(dir, 'index.html'),
+    buildPage({
+      title: 'Free PDF Guides & Tutorials | PDF Suite',
+      description: 'Step-by-step PDF guides.',
+      canonical,
+      body: guidesIndexBody(),
+      extra,
+    }),
+  );
+  sitemapUrls.push({ loc: canonical, priority: '0.8' });
+  console.log('prerendered /guides/');
+}
+for (const g of GUIDES) {
+  const canonical = `${SITE}/guides/${g.slug}/`;
+  const extra = guideHead(g);
+  const dir = join(DIST, 'guides', g.slug);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    join(dir, 'index.html'),
+    buildPage({ title: g.title, description: g.description, canonical, body: guideBody(g), extra }),
+  );
+  sitemapUrls.push({ loc: canonical, priority: '0.7' });
+  console.log(`prerendered /guides/${g.slug}/`);
 }
 
 // Sitemap + robots (absolute sitemap URL as the spec requires).
