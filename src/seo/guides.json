@@ -848,6 +848,155 @@
     "how-to-compress-pdf-under-1mb",
     "compress-pdf-for-job-application"
    ]
+  },
+  {
+   "slug": "send-giant-pdf-email",
+   "icon": "📦",
+   "title": "Send a Giant PDF by Email (2026 Guide) | PDF Suite",
+   "description": "Gmail bounces PDFs over 25 MB and office servers often cap at 10 MB. Split giant PDFs into email-size chunks and rejoin them byte-identical — offline, no signup.",
+   "h1": "How to Send a Giant PDF by Email Without Bounces",
+   "category": "Use case",
+   "updated": "2026-09-04",
+   "intro": [
+    "A 300 MB scan set will never survive an email server: Gmail caps attachments at 25 MB, Outlook at 20 MB, and corporate servers often enforce 10 MB — before the ~37% base64 inflation email encoding adds on top.",
+    "The fix is not another cloud link. Split the file into email-size chunks, send them as ordinary attachments across one or several emails, and have the recipient rejoin them into a byte-identical copy."
+   ],
+   "sections": [
+    {
+     "h2": "Pick a chunk size the server cannot refuse",
+     "body": [
+      "Size chunks for the strictest server in the chain, not yours: 20 MB slides under Gmail and Yahoo, while 9 MB clears almost every corporate Exchange default. Smaller chunks also resume painlessly — one failed 9 MB attachment re-sends in seconds, a failed 2 GB upload restarts from zero.",
+      "As a rule of thumb, divide the portal or mailbox limit by 1.4 to cover encoding overhead, then round down. A 25 MB Gmail ceiling becomes ~17 MB safe chunks; a 10 MB office server becomes ~7 MB."
+     ]
+    },
+    {
+     "h2": "Split, send, and rejoin without losing a byte",
+     "body": [
+      "Binary chunks are transport copies, not mini-PDFs — nobody can open a single .part file, and that is expected. Numbering keeps order unambiguous: big.pdf.part001 through big.pdf.partNNN rejoin in exactly that sequence.",
+      "Rejoining concatenates bytes, so one missing or renamed part corrupts the result. Always count parts before rejoining (a 10-part set needs all ten), and verify the rejoined size equals the sum of the chunks."
+     ]
+    },
+    {
+     "h2": "Check the giant file before moving gigabytes",
+     "body": [
+      "Moving gigabytes to discover a truncated trailer wastes an afternoon. Inspect the header (%PDF version) and trailer (startxref plus %%EOF markers) with a no-load check first — it reads kilobytes, not gigabytes.",
+      "A healthy trailer means the file will survive the trip; a missing one means repair or re-export before you split, because no transport method fixes corruption."
+     ]
+    }
+   ],
+   "steps": [
+    "Open Large File Split & Join directly and upload the giant file",
+    "Choose Split mode and set MB per chunk for the strictest recipient server",
+    "Download the .part files and attach them across one or several emails",
+    "On the receiving end, upload all parts in numeric order with Join mode",
+    "Download the rejoined file and confirm its size matches the original"
+   ],
+   "tips": [
+    "Name the email subject with part counts ('Plans 3/10') so nothing goes missing.",
+    "Keep one local copy of the original until the recipient confirms the rejoin."
+   ],
+   "faqs": [
+    [
+     "Why does a 24 MB PDF bounce on a 25 MB limit?",
+     "Email encoding inflates attachments by roughly 37% in transit, so a 24 MB file travels as ~33 MB. Aim for two-thirds of the stated limit to be safe."
+    ],
+    [
+     "Can the recipient open a single chunk?",
+     "No. Chunks are raw byte slices for transport, not valid PDFs. They must all be rejoined in order first — then the result opens normally."
+    ],
+    [
+     "What if one email with chunks gets lost?",
+     "Resend just the missing part numbers. Join mode only needs the complete ordered set at the end; arrival order across emails does not matter."
+    ],
+    [
+     "Is there a maximum file size for splitting?",
+     "Splitting streams without loading, so files up to 6 GB work on desktops. Shrinking (compression) is different — it must decode pages and caps around 1 GB."
+    ]
+   ],
+   "relatedTools": [
+    "large-files",
+    "split",
+    "compress"
+   ],
+   "relatedGuides": [
+    "how-to-split-pdf-free",
+    "why-is-my-pdf-so-big",
+    "shrink-huge-pdf-no-crash"
+   ]
+  },
+  {
+   "slug": "shrink-huge-pdf-no-crash",
+   "icon": "🗜",
+   "title": "Shrink a Huge PDF Without Crashing (2026) | PDF Suite",
+   "description": "Big PDFs freeze tabs because browsers cap memory per tab. Shrink huge PDFs with page-by-page streaming into batched files up to ~1 GB — free, private, no uploads.",
+   "h1": "How to Shrink a Huge PDF Without Crashing Your Browser",
+   "category": "How-to",
+   "updated": "2026-09-04",
+   "intro": [
+    "Opening a 900 MB PDF in a normal compressor freezes the tab for a simple reason: browsers give each tab about 4 GB of memory, and classic PDF libraries expand documents to several times their file size while rendering every page at once.",
+    "Streaming compression avoids the pile-up — it opens the file through on-demand byte ranges, renders one page at a time, and writes finished batches to disk as it goes, so memory stays flat no matter the page count."
+   ],
+   "sections": [
+    {
+     "h2": "Why the regular compress chokes on giants",
+     "body": [
+      "Standard compression loads the entire document, renders all pages to full bitmaps (one 300-DPI page costs ~35 MB), holds every canvas, then rebuilds the file — sometimes ten times over when hunting an exact target size. A 300-page scan can briefly demand a double-digit gigabyte heap that no tab will ever grant.",
+      "The symptom is always the same: the spinner stalls, the tab goes white, and the work is lost. The file is fine — the method is wrong for the size."
+     ]
+    },
+    {
+     "h2": "Stream it: one page in memory at a time",
+     "body": [
+      "Streaming mode renders page 1, compresses it, writes it out, drops the bitmap, and only then touches page 2. Peak memory is one page plus one small output batch — typically under 200 MB even for gigabyte inputs.",
+      "Output arrives as one valid PDF per batch (50 pages by default) instead of a single file, because no browser can hold a rebuilt gigabyte document either. Batches open, print, and share exactly like normal PDFs."
+     ]
+    },
+    {
+     "h2": "Know the honest ceilings before you start",
+     "body": [
+      "Streaming reaches roughly 1 GB on a capable desktop: every page must still be decoded once, so time becomes the limit — thousands of pages take a genuinely long time, with progress shown per page. Lossless re-saving never streams (it needs the whole object graph), so it stays capped low.",
+      "All streaming output is rasterized, meaning text is no longer selectable. If selectability matters more than size, extract the text first, or keep the original and ship shrunken copies for distribution."
+     ]
+    }
+   ],
+   "steps": [
+    "Open Large File Split & Join and choose Shrink mode",
+    "Pick Light for archiving, Medium for sharing, Heavy for smallest size",
+    "Set pages per output file (50 is a good default for email-friendly parts)",
+    "Click Run and watch per-page progress on very long documents",
+    "Download each batched PDF — every one opens and prints normally"
+   ],
+   "tips": [
+    "Shrink a copy and archive the original — rasterizing cannot be undone.",
+    "For files over ~1 GB, split first or shrink in two passes."
+   ],
+   "faqs": [
+    [
+     "Why does my browser freeze on big PDFs?",
+     "Each tab caps around 4 GB of memory while classic engines expand PDFs several-fold and render every page at once. Streaming renders one page at a time so memory stays flat."
+    ],
+    [
+     "Will the shrunken PDF keep selectable text?",
+     "No. Shrink rebuilds pages as images to reach small sizes, so text becomes unselectable. Extract text to a sidecar file first if you need search."
+    ],
+    [
+     "How large a PDF can streaming handle?",
+     "Roughly 1 GB on a capable desktop. Beyond that, decode time — not just memory — becomes impractical, so split the document first."
+    ],
+    [
+     "Can I hit an exact target like 10 MB?",
+     "Exact targeting needs repeated full rebuilds, which giants cannot afford. Streaming uses quality presets per batch instead — predictable size, one pass."
+    ]
+   ],
+   "relatedTools": [
+    "large-files",
+    "compress"
+   ],
+   "relatedGuides": [
+    "how-to-compress-pdf-under-1mb",
+    "send-giant-pdf-email",
+    "why-is-my-pdf-so-big"
+   ]
   }
  ]
 }
