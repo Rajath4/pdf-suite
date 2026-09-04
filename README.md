@@ -21,6 +21,18 @@ PDF → PowerPoint · PowerPoint → PDF · PDF → HTML · Recolor (dark/gray/s
 batch Compress / Protect / Watermark / Page numbers / Headers / Rotate / Flatten
 → one ZIP; Docker + hardened nginx; strict CSP; CI; signed build stamps.
 
+## Experience (usability-first, premium)
+
+- **Command palette (`Ctrl/⌘ K`)** — scored search across all 36 tools plus actions
+  (home, theme, install); recents-first empty state; full keyboard operation.
+- **Dark mode** — follows the OS, one-click override in the header, persisted.
+- **Persona entry points** — "What do you need to do?" jobs (sign a contract,
+  hit a portal limit, assemble a report…) route to the right tool.
+- **Discoverability** — category pills with counts, breadcrumbs, related tools,
+  recently-used row, popular jobs.
+- **Run feedback** — determinate progress + elapsed time, input→output stats,
+  Share/Copy actions, offline/airplane-mode trust copy.
+
 ## Quick start
 
 ```bash
@@ -87,7 +99,7 @@ Principles:
 |---|---|
 | `npm run dev` | local dev server |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | vitest unit suite (32 tests: ranges, CSV, engine round-trips, sign/annotate/crop/forms/slides, merge-select, split modes, metadata, markdown, image extraction, progress/recents helpers) |
+| `npm test` | vitest unit suite (37 tests: search scoring, ranges, CSV, engine round-trips, sign/annotate/crop/forms/slides, merge-select, split modes, metadata, markdown, image extraction, progress/recents helpers) |
 | `npm run build` | typecheck + production build + bundle-budget gate |
 | `npm run budget` | standalone perf-budget check (entry ≤150 KB, JS ≤3.8 MB) |
 | `npm run preview` | serve built app |

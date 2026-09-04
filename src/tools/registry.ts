@@ -55,3 +55,63 @@ export const CATEGORIES: string[] = [...new Set(TOOLS.map((t) => t.category))];
 export function getTool(id: string) {
   return TOOLS.find((t) => t.id === id);
 }
+
+/** Synonyms users type that never appear in tool names ("ppt", "esign"…). */
+const SYNONYMS: Record<string, string[]> = {
+  ppt: ['powerpoint', 'pptx', 'slides', 'presentation'],
+  powerpoint: ['pptx', 'slides'],
+  word: ['docx', 'doc'],
+  excel: ['xlsx', 'spreadsheet', 'csv'],
+  photo: ['image', 'jpg', 'png', 'picture'],
+  picture: ['image', 'jpg', 'png'],
+  jpg: ['image', 'picture'],
+  png: ['image', 'picture'],
+  sign: ['signature', 'esign'],
+  signature: ['sign'],
+  zip: ['archive', 'compress'],
+  ocr: ['scan', 'recognition', 'searchable'],
+  delete: ['remove', 'organize', 'extract'],
+  remove: ['delete', 'organize'],
+  password: ['protect', 'encrypt', 'unlock'],
+  merge: ['combine', 'join'],
+  split: ['extract', 'divide'],
+  dark: ['recolor', 'invert', 'night'],
+  gray: ['recolor', 'grayscale'],
+  grey: ['recolor', 'grayscale'],
+  markdown: ['md'],
+  sheet: ['excel', 'csv', 'spreadsheet'],
+  table: ['excel', 'csv'],
+};
+
+/**
+ * Instant, typo-tolerant tool search for the command palette and homepage.
+ * Scored so the obvious target lands in the first rows (research: ranking
+ * quality is what makes or breaks palette UX).
+ */
+export function searchTools(query: string, limit = 9): ToolDef[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const words = q.split(/\s+/).filter((w) => w.length >= 2);
+  const scored: { tool: ToolDef; score: number }[] = [];
+  for (const t of TOOLS) {
+    const title = t.title.toLowerCase();
+    const hay = `${t.title} ${t.description} ${t.category} ${t.id.replace(/-/g, ' ')}`.toLowerCase();
+    let score = 0;
+    if (title === q) score += 100;
+    else if (title.startsWith(q)) score += 80;
+    else if (title.includes(q)) score += 60;
+    else if (t.id.replace(/-/g, '') === q.replace(/\s+/g, '')) score += 70;
+    for (const w of words) {
+      if (title.includes(w)) score += 12;
+      else if (hay.includes(w)) score += 5;
+    }
+    for (const [key, syns] of Object.entries(SYNONYMS)) {
+      if (q.includes(key) && syns.some((s) => hay.includes(s))) score += 25;
+    }
+    if (score > 0) scored.push({ tool: t, score });
+  }
+  return scored
+    .sort((a, b) => b.score - a.score || a.tool.title.localeCompare(b.tool.title))
+    .slice(0, Math.max(1, limit))
+    .map((s) => s.tool);
+}

@@ -1,5 +1,5 @@
 import './styles.css';
-import { CATEGORIES, TOOLS, getTool } from './tools/registry.js';
+import { CATEGORIES, TOOLS, getTool, searchTools } from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
 import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent } from './lib/fileUtils.js';
 import { UserError } from './types.js';
@@ -197,6 +197,202 @@ function offlineDot(): HTMLElement {
   return dot;
 }
 
+// ---------- Theme: system-aware dark mode, user-overridable ----------
+
+type Theme = 'light' | 'dark';
+const THEME_KEY = 'pdfsuite.theme';
+
+function systemTheme(): Theme {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function currentTheme(): Theme {
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === 'light' || stored === 'dark') return stored;
+  } catch {
+    /* ignore */
+  }
+  return systemTheme();
+}
+
+function applyTheme(theme: Theme): void {
+  document.documentElement.dataset['theme'] = theme;
+  document.querySelectorAll<HTMLButtonElement>('.theme-btn').forEach((b) => {
+    b.textContent = theme === 'dark' ? '☀' : '☾';
+    b.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    b.title = theme === 'dark' ? 'Light mode' : 'Dark mode';
+  });
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch {
+    /* ignore */
+  }
+}
+
+function toggleTheme(): void {
+  applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+}
+
+applyTheme(currentTheme());
+// Follow the OS while the user hasn't chosen explicitly.
+try {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    try {
+      if (!localStorage.getItem(THEME_KEY)) applyTheme(e.matches ? 'dark' : 'light');
+    } catch {
+      /* ignore */
+    }
+  });
+} catch {
+  /* older browsers */
+}
+
+// ---------- Command palette: the power-user spine (nouns + verbs, ⌘K) ----------
+
+interface PaletteRow {
+  icon: string;
+  title: string;
+  detail: string;
+  kind: string;
+  run: () => void;
+}
+
+let paletteOpen = false;
+
+function openPalette(): void {
+  if (paletteOpen) return;
+  paletteOpen = true;
+  const overlay = el('div', { class: 'palette-overlay' });
+  const box = el('div', { class: 'palette', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Jump to a tool or action' });
+  const input = document.createElement('input');
+  input.className = 'input palette-input';
+  input.placeholder = 'Type a tool or action…  (Esc to close)';
+  input.setAttribute('aria-label', 'Search tools and actions');
+  input.setAttribute('role', 'combobox');
+  input.setAttribute('aria-expanded', 'true');
+  input.setAttribute('aria-controls', 'palette-list');
+  const list = el('div', { class: 'palette-list', id: 'palette-list', role: 'listbox' });
+  const hints = el('div', { class: 'palette-hints' }, '↑↓ navigate · Enter open · Esc close');
+  box.append(input, list, hints);
+  overlay.append(box);
+  document.body.append(overlay);
+
+  const close = () => {
+    paletteOpen = false;
+    overlay.remove();
+  };
+  overlay.addEventListener('mousedown', (e) => {
+    if (e.target === overlay) close();
+  });
+
+  const appActions: PaletteRow[] = [
+    { icon: '⌂', title: 'Go to all tools', detail: 'Home', kind: 'Action', run: () => { location.hash = '#/'; } },
+    { icon: '◐', title: 'Toggle dark / light mode', detail: 'Theme', kind: 'Action', run: () => toggleTheme() },
+    { icon: '⤓', title: 'Install app', detail: 'PWA', kind: 'Action', run: () => { void promptInstall(); } },
+  ];
+
+  let rows: PaletteRow[] = [];
+  let active = 0;
+
+  const paintActive = () => {
+    [...list.querySelectorAll('.palette-row')].forEach((r, i) => {
+      r.classList.toggle('active', i === active);
+      r.setAttribute('aria-selected', String(i === active));
+    });
+  };
+
+  const paint = () => {
+    const q = input.value.trim();
+    list.innerHTML = '';
+    rows = [];
+    active = 0;
+    const pushRow = (row: PaletteRow) => {
+      const idx = rows.length;
+      rows.push(row);
+      const node = el('button', { class: 'palette-row', role: 'option', type: 'button' });
+      node.append(
+        el('span', { class: 'palette-icon' }, row.icon),
+        el('span', { class: 'palette-title' }, row.title),
+        el('span', { class: 'palette-kind' }, `${row.kind} · ${row.detail}`),
+      );
+      node.addEventListener('click', () => {
+        const run = rows[idx].run;
+        close();
+        run();
+      });
+      node.addEventListener('mousemove', () => {
+        active = idx;
+        paintActive();
+      });
+      list.append(node);
+    };
+
+    if (!q) {
+      const recent = getRecentTools();
+      if (recent.length > 0) {
+        list.append(el('div', { class: 'palette-group' }, 'Recent'));
+        for (const id of recent) {
+          const t = getTool(id);
+          if (t) pushRow({ icon: t.icon, title: t.title, detail: t.category, kind: 'Tool', run: () => { location.hash = `#/tool/${t.id}`; } });
+        }
+      }
+      list.append(el('div', { class: 'palette-group' }, 'Actions'));
+      appActions.forEach(pushRow);
+    } else {
+      const tools = searchTools(q, 8);
+      const matchedActions = appActions.filter((a) =>
+        `${a.title} ${a.detail}`.toLowerCase().includes(q.toLowerCase()),
+      );
+      if (tools.length > 0) {
+        list.append(el('div', { class: 'palette-group' }, 'Tools'));
+        for (const t of tools) {
+          pushRow({ icon: t.icon, title: t.title, detail: t.category, kind: 'Tool', run: () => { location.hash = `#/tool/${t.id}`; } });
+        }
+      }
+      if (matchedActions.length > 0) {
+        list.append(el('div', { class: 'palette-group' }, 'Actions'));
+        matchedActions.forEach(pushRow);
+      }
+      if (rows.length === 0) {
+        list.append(el('div', { class: 'palette-empty' }, `No tools match “${q}”. Try “merge”, “sign” or “ppt”.`));
+      }
+    }
+    paintActive();
+  };
+
+  input.addEventListener('input', paint);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      active = Math.min(active + 1, rows.length - 1);
+      paintActive();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      active = Math.max(active - 1, 0);
+      paintActive();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const run = rows[active]?.run;
+      if (run) {
+        close();
+        run();
+      }
+    } else if (e.key === 'Escape') {
+      close();
+    }
+  });
+  paint();
+  input.focus();
+}
+
+window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    openPalette();
+  }
+});
+
 window.addEventListener('hashchange', render);
 render();
 
@@ -225,6 +421,15 @@ function header(): HTMLElement {
   const inner = el('div', { class: 'wrap topbar-inner' });
   const logo = el('a', { class: 'logo', href: '#/' }, '📕 PDF Suite');
   const nav = el('nav', { class: 'topnav' });
+  const paletteBtn = el('button', { class: 'btn small palette-btn', type: 'button', title: 'Jump to any tool (Ctrl/⌘ K)' }, '🔍 Tools');
+  const kbd = el('kbd', { class: 'kbd' }, '⌘K');
+  paletteBtn.append(kbd);
+  paletteBtn.setAttribute('aria-label', 'Open command palette (Control or Command K)');
+  paletteBtn.addEventListener('click', openPalette);
+  const themeBtn = el('button', { class: 'btn small theme-btn', type: 'button' }, currentTheme() === 'dark' ? '☀' : '☾');
+  themeBtn.setAttribute('aria-label', 'Toggle dark mode');
+  themeBtn.title = 'Toggle dark mode';
+  themeBtn.addEventListener('click', toggleTheme);
   const installBtn = el('button', { class: 'btn small install-btn', type: 'button' }, '⤓ Install');
   installBtn.hidden = !deferredInstall || isInstalled();
   installBtn.addEventListener('click', () => {
@@ -235,6 +440,8 @@ function header(): HTMLElement {
     el('a', { href: '#/tool/merge' }, 'Merge'),
     el('a', { href: '#/tool/split' }, 'Split'),
     el('a', { href: '#/tool/compress' }, 'Compress'),
+    paletteBtn,
+    themeBtn,
     installBtn,
     offlineDot(),
     el('span', { class: 'pill' }, '100% on-device'),
@@ -264,10 +471,20 @@ function footer(): HTMLElement {
   void appVersion().then((v) => {
     ver.textContent = v;
   });
+  const cols = el('div', { class: 'foot-cols' });
+  for (const cat of CATEGORIES) {
+    const col = el('div', { class: 'foot-col' });
+    col.append(el('strong', {}, cat));
+    for (const t of TOOLS.filter((x) => x.category === cat)) {
+      col.append(el('a', { href: `#/tool/${t.id}` }, t.title));
+    }
+    cols.append(col);
+  }
   f.append(
     el('div', { class: 'wrap' },
+      cols,
       el('p', {}, 'PDF Suite — free, private PDF tools. Files never leave your device. No watermark, no sign-up. ', ver),
-      el('p', { class: 'muted' }, 'Built with pdf-lib + pdf.js. Works offline after first load. Tip: run `npm run dev` locally or host the `dist/` folder anywhere static.'),
+      el('p', { class: 'muted' }, 'Built with pdf-lib + pdf.js. Install it and use it offline.'),
     ),
   );
   return f;
@@ -279,13 +496,37 @@ function homePage(): HTMLElement {
   const hero = el('section', { class: 'hero' });
   hero.append(
     el('div', { class: 'badges' }, '✓ No watermark   ✓ No upload   ✓ No sign-up   ✓ Works offline'),
-    el('h1', {}, 'Free PDF tools that respect your privacy'),
-    el('p', { class: 'lede' }, 'Merge, split, compress, convert, redact and sign — entirely in your browser. Inspired by ihatepdf.cv, rebuilt as a clean offline-first clone.'),
+    el('h1', {}, 'Every PDF tool you need. Private by design.'),
+    el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, nothing is tracked, and it installs for offline use.'),
   );
-  const search = textInput('', 'Search tools… try “merge”, “word”, “password”…');
+  const search = textInput('', 'Search 36 tools… try “merge”, “sign”, “ppt”…  ( ⌘K )');
   search.setAttribute('type', 'search');
   search.setAttribute('aria-label', 'Search tools');
   hero.append(search);
+
+  // Persona-driven entry points: users think in jobs, not tool names.
+  const jobs: { icon: string; job: string; why: string; tool: string }[] = [
+    { icon: '📝', job: 'Sign a contract', why: 'Draw or type your signature', tool: 'sign' },
+    { icon: '🎓', job: 'Hit a portal file-size limit', why: 'Shrink to an exact MB target', tool: 'compress' },
+    { icon: '📚', job: 'Assemble a report', why: 'Cherry-pick pages from many files', tool: 'merge' },
+    { icon: '📊', job: 'Mine data from a PDF', why: 'Tables out to Excel in seconds', tool: 'pdf-to-excel' },
+    { icon: '🔒', job: 'Share sensitive docs safely', why: 'Password + redact + strip metadata', tool: 'encrypt' },
+    { icon: '🖨', job: 'Print without wasting ink', why: 'Grayscale in one click', tool: 'invert' },
+  ];
+  const jobStrip = el('div', { class: 'jobs' });
+  for (const j of jobs) {
+    const t = getTool(j.tool)!;
+    const card = el('a', { class: 'job', href: `#/tool/${t.id}` });
+    card.addEventListener('pointerenter', prefetchEngines, { once: true });
+    card.addEventListener('focus', prefetchEngines, { once: true });
+    card.append(
+      el('span', { class: 'job-icon' }, j.icon),
+      el('span', { class: 'job-text' }, el('strong', {}, j.job), el('small', {}, j.why)),
+      el('span', { class: 'job-go' }, '→'),
+    );
+    jobStrip.append(card);
+  }
+  hero.append(el('div', { class: 'jobs-label' }, 'What do you need to do?'), jobStrip);
   // Install banner only after engagement (never on first paint), dismissible,
   // and never inside the installed app. Header button covers the rest.
   if (isEngaged() && !installDismissed() && !isInstalled()) {
@@ -326,12 +567,34 @@ function homePage(): HTMLElement {
   }
 
   const gridRoot = el('div', { id: 'tool-grid' });
+
+  // Category pills: 36 tools need scoping, not just search.
+  let activeCat = 'All';
+  const pills = el('div', { class: 'pills', role: 'tablist', 'aria-label': 'Filter by category' });
+  const paintPills = () => {
+    pills.innerHTML = '';
+    for (const cat of ['All', ...CATEGORIES]) {
+      const count = cat === 'All' ? TOOLS.length : TOOLS.filter((t) => t.category === cat).length;
+      const b = el('button', { class: 'pillbtn', type: 'button', role: 'tab' }, `${cat} · ${count}`);
+      b.setAttribute('aria-selected', String(cat === activeCat));
+      if (cat === activeCat) b.classList.add('on');
+      b.addEventListener('click', () => {
+        activeCat = cat;
+        paintPills();
+        renderGrid(search.value);
+      });
+      pills.append(b);
+    }
+  };
+  paintPills();
+  root.append(pills);
   root.append(gridRoot);
 
   const renderGrid = (q: string) => {
     gridRoot.innerHTML = '';
     const query = q.trim().toLowerCase();
     for (const cat of CATEGORIES) {
+      if (activeCat !== 'All' && cat !== activeCat) continue;
       const tools = TOOLS.filter(
         (t) =>
           t.category === cat &&
@@ -339,7 +602,7 @@ function homePage(): HTMLElement {
       );
       if (tools.length === 0) continue;
       const section = el('section', { class: 'cat' });
-      section.append(el('h2', {}, cat));
+      section.append(el('h2', {}, `${cat} · ${tools.length}`));
       const grid = el('div', { class: 'grid' });
       for (const t of tools) {
         const card = el('a', { class: 'card', href: `#/tool/${t.id}` });
@@ -410,7 +673,13 @@ function toolPage(id: string): HTMLElement {
   // Warm the engine chunks as soon as a tool page opens — Run then feels instant.
   void loadActions().catch(() => {});
 
-  root.append(el('a', { class: 'back', href: '#/' }, '← All tools'));
+  root.append(el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
+    el('a', { href: '#/' }, 'All tools'),
+    el('span', { 'aria-hidden': 'true' }, ' / '),
+    el('span', {}, current.category),
+    el('span', { 'aria-hidden': 'true' }, ' / '),
+    el('span', { 'aria-current': 'page' }, current.title),
+  ));
   root.append(el('h1', {}, `${current.icon} ${current.title}`));
   root.append(el('p', { class: 'lede' }, current.description));
   root.append(el('p', { class: 'pill-line' }, '🔒 Files stay on your device — nothing is uploaded.'));
@@ -840,6 +1109,19 @@ function toolPage(id: string): HTMLElement {
   });
 
   root.append(drop, listBox, optsBox, live, el('div', { class: 'row' }, runBtn, startOver), progressWrap, status, results);
+
+  // Cross-navigation: users rarely need just one tool.
+  const related = TOOLS.filter((t) => t.category === current.category && t.id !== current.id).slice(0, 6);
+  if (related.length > 0) {
+    const rel = el('div', { class: 'related' });
+    rel.append(el('span', { class: 'muted' }, `More ${current.category.toLowerCase()}: `));
+    for (const t of related) {
+      const a = el('a', { class: 'chip', href: `#/tool/${t.id}` }, `${t.icon} ${t.title}`);
+      a.addEventListener('pointerenter', prefetchEngines, { once: true });
+      rel.append(a);
+    }
+    root.append(rel);
+  }
 
   // Behavior guards: Cmd/Ctrl+Enter runs; a stray drop anywhere loads files
   // instead of navigating away and vaporizing state; leaving with loaded
