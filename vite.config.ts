@@ -35,7 +35,9 @@ function buildMeta(): Plugin {
 }
 
 export default defineConfig({
-  base: './',
+  // Absolute base: every tool has a real URL (/merge-pdf/) with correct
+  // asset, SW, and manifest resolution. (Subpath hosting needs base + rebuild.)
+  base: '/',
   server: {
     port: 5173,
   },
@@ -73,12 +75,12 @@ export default defineConfig({
         // Deep-link shortcuts + "Open with" file handling (progressive
         // enhancement — supported browsers get native-grade integration).
         shortcuts: [
-          { name: 'Merge PDFs', url: './#/tool/merge', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
-          { name: 'Split PDF', url: './#/tool/split', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
-          { name: 'Compress PDF', url: './#/tool/compress', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
+          { name: 'Merge PDFs', url: '/merge-pdf/', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
+          { name: 'Split PDF', url: '/split-pdf/', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
+          { name: 'Compress PDF', url: '/compress-pdf/', icons: [{ src: 'icons/icon-192.png', sizes: '192x192' }] },
         ],
         file_handlers: [
-          { action: './', accept: { 'application/pdf': ['.pdf'] } },
+          { action: '/', accept: { 'application/pdf': ['.pdf'] } },
         ],
         icons: [
           {

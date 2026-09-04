@@ -56,6 +56,58 @@ export function getTool(id: string) {
   return TOOLS.find((t) => t.id === id);
 }
 
+/**
+ * Canonical public slugs — one indexable landing page per tool.
+ * Single source of truth for the app router; content.json mirrors it
+ * (enforced by seo.test.ts) for the prerender script.
+ */
+export const TOOL_SLUGS: Record<string, string> = {
+  merge: 'merge-pdf',
+  split: 'split-pdf',
+  compress: 'compress-pdf',
+  'pdf-to-jpg': 'pdf-to-jpg',
+  'extract-images': 'extract-images',
+  'images-to-pdf': 'images-to-pdf',
+  organize: 'organize-pages',
+  sign: 'sign-pdf',
+  annotate: 'edit-pdf',
+  crop: 'crop-pdf',
+  'fill-forms': 'fill-pdf-forms',
+  rotate: 'rotate-pdf',
+  watermark: 'add-watermark',
+  'page-numbers': 'add-page-numbers',
+  'header-footer': 'headers-footers',
+  redact: 'redact-pdf',
+  'extract-text': 'extract-text',
+  ocr: 'ocr-pdf',
+  encrypt: 'protect-pdf',
+  decrypt: 'unlock-pdf',
+  flatten: 'flatten-pdf',
+  privacy: 'remove-pdf-metadata',
+  'pdf-to-word': 'pdf-to-word',
+  'word-to-pdf': 'word-to-pdf',
+  'pdf-to-excel': 'pdf-to-excel',
+  'excel-to-pdf': 'excel-to-pdf',
+  'pdf-to-pptx': 'pdf-to-pptx',
+  'pptx-to-pdf': 'pptx-to-pdf',
+  'pdf-to-html': 'pdf-to-html',
+  invert: 'pdf-dark-mode',
+  create: 'create-pdf',
+  markdown: 'markdown-to-pdf',
+  'html-to-pdf': 'html-to-pdf',
+  compare: 'compare-pdfs',
+  repair: 'repair-pdf',
+  scan: 'scan-to-pdf',
+};
+
+export function toolSlug(id: string): string {
+  return TOOL_SLUGS[id] ?? id;
+}
+
+export function toolIdFromSlug(slug: string): string | undefined {
+  return Object.keys(TOOL_SLUGS).find((id) => TOOL_SLUGS[id] === slug);
+}
+
 /** Synonyms users type that never appear in tool names ("ppt", "esign"…). */
 const SYNONYMS: Record<string, string[]> = {
   ppt: ['powerpoint', 'pptx', 'slides', 'presentation'],

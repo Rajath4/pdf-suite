@@ -1,5 +1,5 @@
 import './styles.css';
-import { CATEGORIES, TOOLS, getTool, searchTools } from './tools/registry.js';
+import { CATEGORIES, TOOLS, getTool, searchTools, toolSlug, toolIdFromSlug } from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
 import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent } from './lib/fileUtils.js';
 import { UserError } from './types.js';
@@ -260,6 +260,12 @@ interface PaletteRow {
 
 let paletteOpen = false;
 
+/** SPA navigation to a tool (address bar + view stay in sync). */
+function goTool(id: string): void {
+  history.pushState({}, '', toolHref(id));
+  render();
+}
+
 function openPalette(): void {
   if (paletteOpen) return;
   paletteOpen = true;
@@ -287,7 +293,7 @@ function openPalette(): void {
   });
 
   const appActions: PaletteRow[] = [
-    { icon: '⌂', title: 'Go to all tools', detail: 'Home', kind: 'Action', run: () => { location.hash = '#/'; } },
+    { icon: '⌂', title: 'Go to all tools', detail: 'Home', kind: 'Action', run: () => { history.pushState({}, '', '/'); render(); } },
     { icon: '◐', title: 'Toggle dark / light mode', detail: 'Theme', kind: 'Action', run: () => toggleTheme() },
     { icon: '⤓', title: 'Install app', detail: 'PWA', kind: 'Action', run: () => { void promptInstall(); } },
   ];
@@ -334,7 +340,7 @@ function openPalette(): void {
         list.append(el('div', { class: 'palette-group' }, 'Recent'));
         for (const id of recent) {
           const t = getTool(id);
-          if (t) pushRow({ icon: t.icon, title: t.title, detail: t.category, kind: 'Tool', run: () => { location.hash = `#/tool/${t.id}`; } });
+          if (t) pushRow({ icon: t.icon, title: t.title, detail: t.category, kind: 'Tool', run: () => goTool(t.id) });
         }
       }
       list.append(el('div', { class: 'palette-group' }, 'Actions'));
@@ -347,7 +353,7 @@ function openPalette(): void {
       if (tools.length > 0) {
         list.append(el('div', { class: 'palette-group' }, 'Tools'));
         for (const t of tools) {
-          pushRow({ icon: t.icon, title: t.title, detail: t.category, kind: 'Tool', run: () => { location.hash = `#/tool/${t.id}`; } });
+          pushRow({ icon: t.icon, title: t.title, detail: t.category, kind: 'Tool', run: () => goTool(t.id) });
         }
       }
       if (matchedActions.length > 0) {
@@ -393,33 +399,146 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-window.addEventListener('hashchange', render);
-render();
+// ---------- Routing: real URLs (History API) + legacy hash redirect ----------
+// SEO bedrock: every tool lives at a crawlable path (/merge-pdf/) with unique
+// prerendered HTML. Legacy #/tool/<id> links redirect to the canonical path.
+
+type Route = { kind: 'home' } | { kind: 'tool'; id: string } | { kind: 'missing'; slug: string };
+
+function slugFromPath(pathname: string): string {
+  return pathname.replace(/^\/+|\/+$/g, '');
+}
+
+function resolveRoute(): Route {
+  const hash = location.hash || '';
+  if (hash.startsWith('#/tool/')) {
+    const id = decodeURIComponent(hash.slice('#/tool/'.length));
+    const tool = getTool(id);
+    const target = tool ? `/${toolSlug(id)}/` : '/';
+    if (target !== location.pathname) location.replace(target + location.search);
+    return tool ? { kind: 'tool', id } : { kind: 'home' };
+  }
+  if (hash && hash !== '#/' && hash !== '#main') {
+    history.replaceState({}, '', `${location.pathname}${location.search}`);
+  }
+  const slug = slugFromPath(location.pathname);
+  if (!slug || slug === 'index.html') return { kind: 'home' };
+  const id = toolIdFromSlug(slug);
+  return id ? { kind: 'tool', id } : { kind: 'missing', slug };
+}
+
+/** Per-route cleanup (replaces scattered hashchange-once listeners). */
+let routeCleanups: Array<() => void> = [];
+function onRouteLeave(fn: () => void): void {
+  routeCleanups.push(fn);
+}
+
+function toolHref(id: string): string {
+  return `/${toolSlug(id)}/`;
+}
 
 function render(): void {
+  for (const fn of routeCleanups.splice(0)) {
+    try {
+      fn();
+    } catch {
+      /* ignore */
+    }
+  }
   app.innerHTML = '';
   const skip = el('a', { class: 'skip-link', href: '#main' }, 'Skip to content');
   app.append(skip);
   app.append(header());
-  const hash = location.hash || '#/';
-  if (hash.startsWith('#/tool/')) {
-    const id = decodeURIComponent(hash.slice('#/tool/'.length));
-    app.append(toolPage(id));
-  } else {
-    app.append(homePage());
-  }
+  const route = resolveRoute();
+  if (route.kind === 'tool') app.append(toolPage(route.id));
+  else if (route.kind === 'missing') app.append(notFoundPage(route.slug));
+  else app.append(homePage());
   app.append(footer());
+  void syncRouteMeta(route);
   // SPA a11y: move focus to the new view so screen readers announce it.
   document.getElementById('main')?.focus({ preventScroll: true });
   window.scrollTo({ top: 0 });
 }
+
+/** Keeps tab titles + meta description in sync per route (prerendered HTML
+ *  already carries the canonical SEO head for crawlers and first paint). */
+async function syncRouteMeta(route: Route): Promise<void> {
+  try {
+    const { default: SEO } = await import('./seo/content.json');
+    const seo = SEO as unknown as { tools: SeoEntry[]; home: SeoEntry };
+    const entry =
+      route.kind === 'tool'
+        ? seo.tools.find((t) => t.id === route.id)
+        : seo.home;
+    if (!entry) return;
+    document.title = entry.title;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', entry.description);
+  } catch {
+    /* content is progressive enhancement — never break the app */
+  }
+}
+
+interface SeoEntry {
+  id?: string;
+  slug: string;
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+  steps?: string[];
+  faqs?: [string, string][];
+}
+
+function notFoundPage(slug: string): HTMLElement {
+  const root = el('main', { class: 'wrap tool', id: 'main', tabindex: '-1' });
+  root.append(el('h1', {}, 'Page not found'));
+  root.append(el('p', { class: 'lede' }, `There's no tool at “/${slug}/”. Try one of these instead:`));
+  const grid = el('div', { class: 'grid' });
+  const guesses = searchTools(slug.replace(/-/g, ' '), 6);
+  for (const t of (guesses.length > 0 ? guesses : TOOLS.slice(0, 6))) {
+    const card = el('a', { class: 'card', href: toolHref(t.id) });
+    card.append(
+      el('div', { class: 'card-icon' }, t.icon),
+      el('div', { class: 'card-title' }, t.title),
+      el('div', { class: 'card-desc' }, t.description),
+    );
+    grid.append(card);
+  }
+  root.append(grid);
+  root.append(el('p', {}, 'Or start from ', el('a', { href: '/' }, 'all tools'), '.'));
+  return root;
+}
+
+// Intercept same-origin app links for instant client-side navigation.
+// Crawlers and no-JS users still see (and follow) real hrefs — best of both.
+document.addEventListener('click', (e) => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+  const anchor = (e.target as HTMLElement | null)?.closest?.('a[href^="/"]') as HTMLAnchorElement | null;
+  if (!anchor) return;
+  let url: URL;
+  try {
+    url = new URL(anchor.getAttribute('href')!, location.origin);
+  } catch {
+    return;
+  }
+  if (url.origin !== location.origin) return;
+  const slug = slugFromPath(url.pathname);
+  const known = slug === '' || slug === 'index.html' || !!toolIdFromSlug(slug);
+  // Unknown paths (docs, assets) get normal browser navigation.
+  if (!known) return;
+  e.preventDefault();
+  if (url.pathname !== location.pathname) history.pushState({}, '', url.pathname);
+  render();
+});
+window.addEventListener('popstate', render);
+render();
 
 // ---------- Header / footer / home ----------
 
 function header(): HTMLElement {
   const h = el('header', { class: 'topbar' });
   const inner = el('div', { class: 'wrap topbar-inner' });
-  const logo = el('a', { class: 'logo', href: '#/' }, '📕 PDF Suite');
+  const logo = el('a', { class: 'logo', href: '/' }, '📕 PDF Suite');
   const nav = el('nav', { class: 'topnav' });
   const paletteBtn = el('button', { class: 'btn small palette-btn', type: 'button', title: 'Jump to any tool (Ctrl/⌘ K)' }, '🔍 Tools');
   const kbd = el('kbd', { class: 'kbd' }, '⌘K');
@@ -436,10 +555,10 @@ function header(): HTMLElement {
     void promptInstall();
   });
   nav.append(
-    el('a', { href: '#/' }, 'All tools'),
-    el('a', { href: '#/tool/merge' }, 'Merge'),
-    el('a', { href: '#/tool/split' }, 'Split'),
-    el('a', { href: '#/tool/compress' }, 'Compress'),
+    el('a', { href: '/' }, 'All tools'),
+    el('a', { href: toolHref('merge') }, 'Merge'),
+    el('a', { href: toolHref('split') }, 'Split'),
+    el('a', { href: toolHref('compress') }, 'Compress'),
     paletteBtn,
     themeBtn,
     installBtn,
@@ -455,7 +574,7 @@ let cachedVersion: string | null = null;
 async function appVersion(): Promise<string> {
   if (cachedVersion) return cachedVersion;
   try {
-    const res = await fetch('version.json', { cache: 'no-store' });
+    const res = await fetch('/version.json', { cache: 'no-store' });
     if (!res.ok) throw new Error('no version file');
     const data = (await res.json()) as { version?: string; commit?: string };
     cachedVersion = `v${data.version ?? '?'} (${data.commit ?? 'dev'})`;
@@ -476,7 +595,7 @@ function footer(): HTMLElement {
     const col = el('div', { class: 'foot-col' });
     col.append(el('strong', {}, cat));
     for (const t of TOOLS.filter((x) => x.category === cat)) {
-      col.append(el('a', { href: `#/tool/${t.id}` }, t.title));
+      col.append(el('a', { href: toolHref(t.id) }, t.title));
     }
     cols.append(col);
   }
@@ -516,7 +635,7 @@ function homePage(): HTMLElement {
   const jobStrip = el('div', { class: 'jobs' });
   for (const j of jobs) {
     const t = getTool(j.tool)!;
-    const card = el('a', { class: 'job', href: `#/tool/${t.id}` });
+    const card = el('a', { class: 'job', href: toolHref(t.id) });
     card.addEventListener('pointerenter', prefetchEngines, { once: true });
     card.addEventListener('focus', prefetchEngines, { once: true });
     card.append(
@@ -552,7 +671,7 @@ function homePage(): HTMLElement {
     const grid = el('div', { class: 'grid' });
     for (const id of recent) {
       const t = getTool(id)!;
-      const card = el('a', { class: 'card', href: `#/tool/${t.id}` });
+      const card = el('a', { class: 'card', href: toolHref(t.id) });
       card.addEventListener('pointerenter', prefetchEngines, { once: true });
       card.addEventListener('focus', prefetchEngines, { once: true });
       card.append(
@@ -605,7 +724,7 @@ function homePage(): HTMLElement {
       section.append(el('h2', {}, `${cat} · ${tools.length}`));
       const grid = el('div', { class: 'grid' });
       for (const t of tools) {
-        const card = el('a', { class: 'card', href: `#/tool/${t.id}` });
+        const card = el('a', { class: 'card', href: toolHref(t.id) });
         // Prefetch the engine chunks on intent so the tool page feels instant.
         card.addEventListener('pointerenter', prefetchEngines, { once: true });
         card.addEventListener('focus', prefetchEngines, { once: true });
@@ -636,7 +755,7 @@ function homePage(): HTMLElement {
     }
   };
   window.addEventListener('keydown', onKey);
-  window.addEventListener('hashchange', () => window.removeEventListener('keydown', onKey), { once: true });
+  onRouteLeave(() => window.removeEventListener('keydown', onKey));
 
   const faq = el('section', { class: 'faq' });
   faq.append(el('h2', {}, 'How it works'));
@@ -665,7 +784,7 @@ function toolPage(id: string): HTMLElement {
   const tool = getTool(id);
   const root = el('main', { class: 'wrap tool', id: 'main', tabindex: '-1' });
   if (!tool) {
-    root.append(el('h1', {}, 'Tool not found'), el('p', {}, 'Go back to '), el('a', { href: '#/' }, 'all tools.'));
+    root.append(el('h1', {}, 'Tool not found'), el('p', {}, 'Go back to '), el('a', { href: '/' }, 'all tools.'));
     return root;
   }
   const current: ToolDef = tool;
@@ -674,7 +793,7 @@ function toolPage(id: string): HTMLElement {
   void loadActions().catch(() => {});
 
   root.append(el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
-    el('a', { href: '#/' }, 'All tools'),
+    el('a', { href: '/' }, 'All tools'),
     el('span', { 'aria-hidden': 'true' }, ' / '),
     el('span', {}, current.category),
     el('span', { 'aria-hidden': 'true' }, ' / '),
@@ -1116,7 +1235,7 @@ function toolPage(id: string): HTMLElement {
     const rel = el('div', { class: 'related' });
     rel.append(el('span', { class: 'muted' }, `More ${current.category.toLowerCase()}: `));
     for (const t of related) {
-      const a = el('a', { class: 'chip', href: `#/tool/${t.id}` }, `${t.icon} ${t.title}`);
+      const a = el('a', { class: 'chip', href: toolHref(t.id) }, `${t.icon} ${t.title}`);
       a.addEventListener('pointerenter', prefetchEngines, { once: true });
       rel.append(a);
     }
@@ -1147,21 +1266,49 @@ function toolPage(id: string): HTMLElement {
   window.addEventListener('dragover', onWinDragOver);
   window.addEventListener('drop', onWinDrop);
   window.addEventListener('beforeunload', onBeforeUnload);
-  window.addEventListener(
-    'hashchange',
-    () => {
-      window.removeEventListener('keydown', onToolKey);
-      window.removeEventListener('dragover', onWinDragOver);
-      window.removeEventListener('drop', onWinDrop);
-      window.removeEventListener('beforeunload', onBeforeUnload);
-    },
-    { once: true },
-  );
+  onRouteLeave(() => {
+    window.removeEventListener('keydown', onToolKey);
+    window.removeEventListener('dragover', onWinDragOver);
+    window.removeEventListener('drop', onWinDrop);
+    window.removeEventListener('beforeunload', onBeforeUnload);
+  });
 
   const tips = el('details', { class: 'tips' });
   tips.append(el('summary', {}, 'Tips & limits'), el('p', {},
     'Large PDFs are limited by device memory. Password-protected files must be unlocked first. Rasterizing tools (Heavy compress, Invert, Dark mode) produce smaller or recolored files but text is no longer selectable.'));
   root.append(tips);
+
+  // Same content the prerendered landing page carries: About + How-to + FAQ.
+  // Loaded lazily so the interactive shell stays lean.
+  const seoMount = el('div', { class: 'seo-section' });
+  root.append(seoMount);
+  void (async () => {
+    try {
+      const { default: SEO } = await import('./seo/content.json');
+      const entry = (SEO as unknown as { tools: SeoEntry[] }).tools.find((t) => t.id === current.id);
+      if (!entry) return;
+      const about = el('section', { class: 'faq' });
+      about.append(el('h2', {}, `About ${current.title}`));
+      about.append(el('p', {}, entry.intro));
+      if (entry.steps && entry.steps.length > 0) {
+        about.append(el('h3', {}, `How to use ${current.title}`));
+        const ol = el('ol', { class: 'howto' });
+        for (const step of entry.steps) ol.append(el('li', {}, step));
+        about.append(ol);
+      }
+      if (entry.faqs && entry.faqs.length > 0) {
+        about.append(el('h3', {}, 'Frequently asked questions'));
+        for (const [q, a] of entry.faqs) {
+          const d = el('details', {});
+          d.append(el('summary', {}, q), el('p', {}, a));
+          about.append(d);
+        }
+      }
+      seoMount.append(about);
+    } catch {
+      /* content is enhancement only */
+    }
+  })();
 
   paintFiles();
   return root;
@@ -2056,5 +2203,5 @@ function mountScanner(
   });
   wrap.append(video, el('div', { class: 'row' }, startBtn, capBtn));
   live.append(wrap);
-  window.addEventListener('hashchange', () => stream?.getTracks().forEach((t) => t.stop()), { once: true });
+  onRouteLeave(() => stream?.getTracks().forEach((t) => t.stop()));
 }

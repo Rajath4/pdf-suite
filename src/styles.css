@@ -146,6 +146,9 @@ input[type="color"].input { padding: 4px; height: 42px; cursor: pointer; }
 /* ---------- FAQ / footer ---------- */
 .faq { margin: 36px 0; }
 .faq details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 8px 0; }
+.faq h3 { margin: 22px 0 8px; font-size: 1.05rem; }
+.howto { display: grid; gap: 8px; padding-left: 22px; margin: 8px 0; }
+.howto li::marker { color: var(--brand); font-weight: 800; }
 .footer { border-top: 1px solid var(--line); margin-top: 44px; padding: 28px 0 44px; color: var(--muted); font-size: 0.9rem; }
 .foot-cols { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; margin-bottom: 20px; }
 .foot-col { display: grid; gap: 5px; align-content: start; }

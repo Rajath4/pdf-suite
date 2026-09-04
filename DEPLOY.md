@@ -4,6 +4,24 @@ Any static host works — the build output is `dist/` (no server code).
 HTTPS is **required** in production (service workers and installability only
 work on secure origins; `localhost` is exempt for testing).
 
+## Domain + SEO setup (read this for Google traffic)
+
+Each of the 36 tools is prerendered at build time to a real landing page
+(`/merge-pdf/`, `/sign-pdf/`, …) with unique titles, meta, canonicals,
+FAQ/HowTo/Breadcrumb schema, and a sitemap — hash URLs are legacy-redirected.
+
+1. **Set your domain:** `SITE_URL=https://yourdomain.com npm run build`
+   (default `https://pdfsuite.app`). It bakes canonicals, sitemap, and OG tags.
+2. **Serve at the domain root.** The build uses absolute paths; subpath hosting
+   (e.g. `example.com/app/`) needs a `base` change in `vite.config.ts` + rebuild.
+3. **Google Search Console:** add the property, submit `/sitemap.xml`, then use
+   URL Inspection on `/`, `/merge-pdf/`, and one converter page to confirm the
+   crawled HTML contains the H1/FAQ/canonical (no JS needed).
+4. **Keep URLs stable:** slugs live in `TOOL_SLUGS` (`src/tools/registry.ts`);
+   renaming one without a redirect loses rankings — add server redirects.
+5. **Content quality gate:** `npm test` enforces unique titles/descriptions and
+   minimum substantive bodies per page — the anti-thin-content guardrail.
+
 ## Option A — Docker (recommended for enterprise/VPS)
 
 ```bash

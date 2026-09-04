@@ -22,7 +22,6 @@ batch Compress / Protect / Watermark / Page numbers / Headers / Rotate / Flatten
 → one ZIP; Docker + hardened nginx; strict CSP; CI; signed build stamps.
 
 ## Experience (usability-first, premium)
-
 - **Command palette (`Ctrl/⌘ K`)** — scored search across all 36 tools plus actions
   (home, theme, install); recents-first empty state; full keyboard operation.
 - **Dark mode** — follows the OS, one-click override in the header, persisted.
@@ -106,11 +105,25 @@ Principles:
 
 ## Performance & quality
 
-- **Code-split engines:** the homepage shell is ~30 KB; pdf-lib/pdf.js/office
+- **Code-split engines:** the homepage shell is ~60 KB; pdf-lib/pdf.js/office
   chunks load lazily on first tool use (prefetched on card hover).
 - `npm run build` fails on budget breach (`scripts/check-budget.mjs`).
 - CI (`.github/workflows/ci.yml`) runs typecheck → tests → build on every push.
 - `dist/version.json` stamps every build (footer shows `v1.1.0 (abc1234)`).
+
+## SEO (built to rank)
+
+- **Real URLs, not hash routes:** every tool lives at `/merge-pdf/` etc.
+  (History API + click interception keeps SPA speed; legacy `#/tool/x` redirects).
+- **Prerendered at build** (`scripts/prerender.mjs`): unique title/meta/canonical,
+  H1 + how-to + FAQ content, and JSON-LD (SoftwareApplication, FAQPage,
+  BreadcrumbList, HowTo) on all 37 pages — no JS required to index.
+- **`sitemap.xml` + `robots.txt`** generated per build (override domain with
+  `SITE_URL=https://yourdomain.com npm run build`).
+- **Quality gates in `npm test`:** unique titles/descriptions, SERP lengths,
+  minimum substantive bodies — the anti-thin-content guardrail.
+- Internal linking: homepage hub → all tools, related + popular links per page,
+  full sitemap footer. See [DEPLOY.md](DEPLOY.md) for the Search Console flow.
 
 ## Deploy
 

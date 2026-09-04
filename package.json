@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && node scripts/check-budget.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/prerender.mjs && node scripts/check-budget.mjs",
     "preview": "vite preview --port 4173",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "budget": "node scripts/check-budget.mjs"
+    "budget": "node scripts/check-budget.mjs",
+    "prerender": "node scripts/prerender.mjs"
   },
   "keywords": [
     "pdf",

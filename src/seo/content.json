@@ -1,0 +1,1033 @@
+{
+ "home": {
+  "description": "36 free PDF tools that run 100% in your browser: merge, sign, compress, convert, OCR and more. No upload, no watermark, no signup. Installs for offline use.",
+  "faqs": [
+   [
+    "Is PDF Suite really free?",
+    "Yes. Every tool is free with no watermark, no account, and no daily limits. Processing happens on your device, so there is no per-use server cost to pass on to you."
+   ],
+   [
+    "Are my files uploaded to any server?",
+    "No. Open any tool, then turn on airplane mode — everything still works. Your documents never leave your browser tab."
+   ],
+   [
+    "Can I use PDF Suite offline?",
+    "Yes. After your first visit, install the app and all 36 tools work without internet — on planes, in offices with strict firewalls, anywhere."
+   ]
+  ],
+  "h1": "Free Online PDF Tools — Private, Unlimited, No Signup",
+  "intro": "Merge, sign, compress, convert, redact and secure PDFs entirely in your browser. No uploads, no watermarks, no accounts, no daily caps — and every tool installs for offline use.",
+  "slug": "",
+  "title": "Free PDF Tools Online — Merge, Sign, Compress | PDF Suite"
+ },
+ "tools": [
+  {
+   "description": "Combine multiple PDFs into one file free. Pick pages per file, reorder, and download with no watermark or signup.",
+   "faqs": [
+    [
+     "Can I merge only specific pages from each file?",
+     "Yes. Enter ranges like 1-3, 5 next to any file and only those pages are included — a feature competitors put behind paywalls."
+    ],
+    [
+     "Are my PDFs uploaded to a server?",
+     "No. Merging runs entirely in your browser, so confidential contracts and records never leave your device."
+    ],
+    [
+     "Is there a limit on files or pages?",
+     "No artificial limits — only your device memory. No watermark is ever added to the output."
+    ]
+   ],
+   "h1": "Merge PDF Files Online Free — No Watermark, No Signup",
+   "id": "merge",
+   "intro": "Combine unlimited PDFs into one document in seconds. Select exact pages from each file, drag to reorder, and download a clean file — all processed locally, never uploaded.",
+   "slug": "merge-pdf",
+   "steps": [
+    "Drop two or more PDFs onto the page",
+    "Optionally type page ranges (e.g. 1-3, 5) per file",
+    "Drag files into the order you want",
+    "Click Run and download the merged PDF"
+   ],
+   "title": "Merge PDF Online Free — No Watermark | PDF Suite"
+  },
+  {
+   "description": "Split a PDF into ranges, chunks, odd/even sets, or files under a size limit. Free, private, no signup.",
+   "faqs": [
+    [
+     "How do I extract specific pages?",
+     "Choose Extract range and type pages like 1-3, 5. Only those pages are saved to a new PDF."
+    ],
+    [
+     "Can I split a large PDF for email attachments?",
+     "Yes. Use Split by file size and set your portal's limit — pages are packed so no file exceeds it."
+    ],
+    [
+     "Do split PDFs keep their quality?",
+     "Yes. Pages are copied without re-rendering, so text stays selectable and quality is unchanged."
+    ]
+   ],
+   "h1": "Split PDF Online Free — Extract Any Pages",
+   "id": "split",
+   "intro": "Separate a PDF exactly how you need it: page ranges, every-N chunks, odd/even sets, or size-capped files for email portals. No upload, no watermark.",
+   "slug": "split-pdf",
+   "steps": [
+    "Upload your PDF",
+    "Pick a mode: range, chunks, odd/even, or by size",
+    "Set pages, chunk size, or the MB target",
+    "Click Run and download your files"
+   ],
+   "title": "Split PDF Online Free — Extract Pages | PDF Suite"
+  },
+  {
+   "description": "Reduce PDF size with presets, or hit an exact target like 1 MB for upload portals. Free, unlimited, private.",
+   "faqs": [
+    [
+     "How do I compress a PDF under 1 MB?",
+     "Choose Target size mode and enter 1. The engine iterates quality and scale until the file fits — built for job and visa portals."
+    ],
+    [
+     "Will compression ruin readability?",
+     "Light and Medium keep text sharp. Heavy and target-size modes rasterize pages, trading selectability for size."
+    ],
+    [
+     "Can I compress many PDFs at once?",
+     "Yes. Upload multiple files and every one is compressed with the same settings, delivered as a ZIP."
+    ]
+   ],
+   "h1": "Compress PDF Online Free — Shrink to Any Size",
+   "id": "compress",
+   "intro": "Shrink PDFs by up to 90% with quality presets — or dial in an exact target size for stubborn upload portals. Batch mode compresses whole folders at once.",
+   "slug": "compress-pdf",
+   "steps": [
+    "Upload one PDF — or many for batch mode",
+    "Choose Light, Medium, Heavy, or Target size",
+    "For portals, enter the MB limit (e.g. 1)",
+    "Click Run and check the before/after sizes"
+   ],
+   "title": "Compress PDF Online Free — Shrink to Any Size | PDF Suite"
+  },
+  {
+   "description": "Turn PDF pages into crisp JPG or PNG images up to ~600 DPI, or grab every page as a ZIP. Free, no watermark.",
+   "faqs": [
+    [
+     "What DPI do I get?",
+     "Standard (~150), High (~300), or Ultra (~600 DPI) — enough for print, slides, and archiving."
+    ],
+    [
+     "JPG or PNG — which should I pick?",
+     "JPG for smaller files and photos; PNG for lossless quality with text and line art."
+    ],
+    [
+     "Are the images watermarked?",
+     "Never. Exports are clean, full-resolution renders of your pages."
+    ]
+   ],
+   "h1": "Convert PDF to JPG Online Free — HD Images",
+   "id": "pdf-to-jpg",
+   "intro": "Export any PDF page as a high-resolution JPG or PNG — or download every page as a ZIP. Perfect for slides, prints, and sharing pages as images.",
+   "slug": "pdf-to-jpg",
+   "steps": [
+    "Upload your PDF",
+    "Pick JPG or PNG and the quality level",
+    "Click Run — single pages download directly",
+    "Multi-page PDFs arrive as a ZIP"
+   ],
+   "title": "Convert PDF to JPG Online Free — HD Images | PDF Suite"
+  },
+  {
+   "description": "Pull embedded photos and graphics out of any PDF as JPG or PNG files. Original quality, free, no upload.",
+   "faqs": [
+    [
+     "What image quality do I get?",
+     "JPEGs embedded in the PDF are extracted byte-identical — zero quality loss. Simple graphics are rebuilt as PNGs."
+    ],
+    [
+     "What if some images can't be extracted?",
+     "Masks and exotic color spaces are counted and reported; render those pages with PDF to JPG instead."
+    ],
+    [
+     "Where do my files go?",
+     "Nowhere. Extraction runs in your browser — nothing uploads, nothing is stored."
+    ]
+   ],
+   "h1": "Extract Images from PDF Free Online",
+   "id": "extract-images",
+   "intro": "Pull every embedded photo and graphic out of a PDF at original quality — scans, catalogs, presentations. No upload, no limits, no watermark.",
+   "slug": "extract-images",
+   "steps": [
+    "Upload your PDF",
+    "Click Run — embedded images are detected",
+    "Download one image directly, or many as a ZIP",
+    "Check the note for any skipped image types"
+   ],
+   "title": "Extract Images from PDF Free Online | PDF Suite"
+  },
+  {
+   "description": "Turn JPG, PNG, or WebP photos into a single PDF. Batch convert, A4 or fit-to-image. Free and private.",
+   "faqs": [
+    [
+     "How many images can I convert at once?",
+     "As many as your device memory allows — whole photo albums become one PDF."
+    ],
+    [
+     "Can I control the page size?",
+     "Yes. Choose fit-to-image or standard A4 with adjustable margins."
+    ],
+    [
+     "Do my photos upload anywhere?",
+     "No. Everything is embedded locally in your browser."
+    ]
+   ],
+   "h1": "Convert JPG to PDF Online Free — Images to PDF",
+   "id": "images-to-pdf",
+   "intro": "Turn photos and scans into a single polished PDF. Batch-convert JPG, PNG, and WebP with A4 or fit-to-image pages — all offline, all free.",
+   "slug": "images-to-pdf",
+   "steps": [
+    "Add one or many images",
+    "Choose A4 or fit-to-image pages",
+    "Reorder with the arrow buttons if needed",
+    "Click Run and download the PDF"
+   ],
+   "title": "Convert JPG to PDF Free Online | PDF Suite"
+  },
+  {
+   "description": "Reorder, rotate, and delete PDF pages with live thumbnails. The visual way to fix any document. Free.",
+   "faqs": [
+    [
+     "Can I delete just one bad page?",
+     "Yes. Click ✕ on any thumbnail, then Run — everything else stays untouched."
+    ],
+    [
+     "Can I fix sideways pages here too?",
+     "Yes. Rotate individual thumbnails 90° at a time, or use Rotate PDF for whole-document rotation."
+    ],
+    [
+     "Does reordering change quality?",
+     "No. Pages are rearranged without re-rendering, so text and quality are preserved."
+    ]
+   ],
+   "h1": "Organize PDF Pages Free — Reorder, Rotate, Delete",
+   "id": "organize",
+   "intro": "See every page as a thumbnail, then drag-free reorder, rotate sideways scans, and delete the pages you don't need. What you see is what downloads.",
+   "slug": "organize-pages",
+   "steps": [
+    "Upload your PDF to load thumbnails",
+    "Move, rotate, or delete pages",
+    "Restore anything with one click if needed",
+    "Click Run and download the reorganized file"
+   ],
+   "title": "Organize PDF Pages Free — Reorder & Delete | PDF Suite"
+  },
+  {
+   "description": "Draw, type, or upload your signature and stamp it anywhere on a PDF. Saved in your browser only. Free.",
+   "faqs": [
+    [
+     "Is my signature uploaded anywhere?",
+     "No. It is drawn and stored only in your browser's local storage — it never touches a network."
+    ],
+    [
+     "Can I place the signature on multiple pages?",
+     "Yes. Add as many placements as you need, with per-placement position and size."
+    ],
+    [
+     "Is this a legally valid e-signature?",
+     "It is a standard electronic signature mark, accepted for most everyday agreements. Regulated filings may require certified signatures."
+    ]
+   ],
+   "h1": "Sign PDF Online Free — E-Signature",
+   "id": "sign",
+   "intro": "Create your signature by drawing, typing, or uploading — then stamp it at exact positions on any pages. Your signature never leaves your browser.",
+   "slug": "sign-pdf",
+   "steps": [
+    "Create your signature: draw, type, or upload",
+    "Save it (kept only in this browser)",
+    "Add placements: page, position, size",
+    "Click Run and download the signed PDF"
+   ],
+   "title": "Sign PDF Online Free — E-Signature | PDF Suite"
+  },
+  {
+   "description": "Add text, yellow highlights, and image stamps to any PDF page. Simple markup without heavy software. Free.",
+   "faqs": [
+    [
+     "Can I edit the original PDF text?",
+     "This tool overlays new text, highlights, and stamps — the lightweight edit most people need. Original text reflow requires desktop software."
+    ],
+    [
+     "Can I add my company logo?",
+     "Yes. Upload a stamp image once, then place it at any size on any pages."
+    ],
+    [
+     "Will annotations print?",
+     "Yes. Everything is baked permanently into the PDF on download."
+    ]
+   ],
+   "h1": "Edit PDF Online Free — Text, Highlights & Stamps",
+   "id": "annotate",
+   "intro": "Mark up PDFs in seconds: place text anywhere, highlight key lines, stamp logos. All annotations are baked into the file on download.",
+   "slug": "edit-pdf",
+   "steps": [
+    "Upload your PDF",
+    "Add text, highlight, or image annotations",
+    "Set page, position, size, and color",
+    "Click Run and download the marked-up PDF"
+   ],
+   "title": "Edit PDF Online Free — Text & Annotations | PDF Suite"
+  },
+  {
+   "description": "Trim PDF margins on all pages or selected pages. Clean up scans and slides. Free, no signup. No signup, no watermark — clean margins in seconds.",
+   "faqs": [
+    [
+     "Does cropping delete content?",
+     "Cropping hides margins via the page box — content outside is not rendered by readers. For sensitive data, use Redact instead."
+    ],
+    [
+     "Can I crop only some pages?",
+     "Yes. Leave the pages field blank for all pages, or enter ranges like 1-3, 5."
+    ],
+    [
+     "What margins can I set?",
+     "Independent top, bottom, left, and right percentages up to 90%, with sanity checks."
+    ]
+   ],
+   "h1": "Crop PDF Online Free — Trim Margins",
+   "id": "crop",
+   "intro": "Cut away ugly margins from scans, slides, and exports. Set per-side percentages for all pages or just the ones you pick.",
+   "slug": "crop-pdf",
+   "steps": [
+    "Upload your PDF",
+    "Set top, bottom, left, and right margins",
+    "Optionally limit to page ranges",
+    "Click Run and download the cropped file"
+   ],
+   "title": "Crop PDF Online Free — Trim Margins | PDF Suite"
+  },
+  {
+   "description": "Fill interactive PDF forms in your browser, then flatten to lock them. Perfect for HR, applications, taxes.",
+   "faqs": [
+    [
+     "My PDF shows no fields — why?",
+     "It is probably a flat scan, not a real form. Try OCR or Annotate instead — this tool needs embedded form fields."
+    ],
+    [
+     "What happens when I flatten?",
+     "Fields become permanent static text that can't be edited — ideal before sending contracts and applications."
+    ],
+    [
+     "Which field types are supported?",
+     "Text fields, checkboxes, and dropdowns. Unsupported types are listed and left untouched."
+    ]
+   ],
+   "h1": "Fill PDF Forms Online Free",
+   "id": "fill-forms",
+   "intro": "Complete interactive PDF forms — applications, HR paperwork, tax forms — right in your browser, then flatten to lock the answers before sending.",
+   "slug": "fill-pdf-forms",
+   "steps": [
+    "Upload a fillable PDF to list its fields",
+    "Fill text, checkboxes, and dropdowns",
+    "Choose whether to flatten (lock) the result",
+    "Click Run and download the completed form"
+   ],
+   "title": "Fill PDF Forms Online Free | PDF Suite"
+  },
+  {
+   "description": "Rotate all pages or selected pages 90°, 180°, or 270°. Fix sideways scans instantly. Batch supported.",
+   "faqs": [
+    [
+     "Can I rotate only some pages?",
+     "Yes. Enter ranges like 1-2, 5, or leave blank to rotate the whole document."
+    ],
+    [
+     "Does rotation reduce quality?",
+     "No. Rotation only changes page orientation metadata — pixels and text are untouched."
+    ],
+    [
+     "Can I rotate many files at once?",
+     "Yes. Upload several PDFs and each is rotated identically, delivered as a ZIP."
+    ]
+   ],
+   "h1": "Rotate PDF Online Free — Fix Sideways Pages",
+   "id": "rotate",
+   "intro": "Straighten sideways scans and mixed-orientation documents. Rotate everything or just selected pages — one file or a whole batch.",
+   "slug": "rotate-pdf",
+   "steps": [
+    "Upload your PDF (or several)",
+    "Pick 90°, 180°, or 270°",
+    "Limit to page ranges if needed",
+    "Click Run and download"
+   ],
+   "title": "Rotate PDF Online Free — Fix Sideways Pages | PDF Suite"
+  },
+  {
+   "description": "Stamp text or your logo across PDF pages — single center or tiled pattern, with opacity control. Batch supported.",
+   "faqs": [
+    [
+     "Text or logo — which is better?",
+     "Text for CONFIDENTIAL/DRAFT marks; upload your logo for branded corporate documents."
+    ],
+    [
+     "Can I watermark many files at once?",
+     "Yes. Batch mode stamps every file with identical settings and zips the results."
+    ],
+    [
+     "Will the watermark print and copy?",
+     "It prints, yes. It is a visible overlay — for certified protection, also Protect the file with a password."
+    ]
+   ],
+   "h1": "Add Watermark to PDF Free Online",
+   "id": "watermark",
+   "intro": "Protect and brand documents with diagonal or tiled text marks — or stamp your company logo across every page. Batch mode handles whole folders.",
+   "slug": "add-watermark",
+   "steps": [
+    "Upload your PDF",
+    "Choose text or logo mode and set opacity",
+    "Pick single-center or tiled layout",
+    "Click Run and download"
+   ],
+   "title": "Add Watermark to PDF Free Online | PDF Suite"
+  },
+  {
+   "description": "Number PDF pages automatically with positions, formats, and custom start numbers. Batch supported. Free for unlimited files, right in your browser.",
+   "faqs": [
+    [
+     "Can I start numbering from a different number?",
+     "Yes. Set any start number — useful when merging chapters into a larger document."
+    ],
+    [
+     "What formats are available?",
+     "Plain numbers, X / Y, Page X, and Page X of Y, in five positions."
+    ],
+    [
+     "Does it work on many files?",
+     "Yes — batch mode numbers each file separately with the same style."
+    ]
+   ],
+   "h1": "Add Page Numbers to PDF Free Online",
+   "id": "page-numbers",
+   "intro": "Paginate reports, theses, and contracts in seconds. Control format, position, size, and start number — for one file or a batch.",
+   "slug": "add-page-numbers",
+   "steps": [
+    "Upload your PDF",
+    "Pick format, position, and start number",
+    "Click Run",
+    "Download the paginated file"
+   ],
+   "title": "Add Page Numbers to PDF Free Online | PDF Suite"
+  },
+  {
+   "description": "Add running headers and footers with automatic page counters to every page. Free, batch supported. Page counters update automatically on every page.",
+   "faqs": [
+    [
+     "How do automatic page numbers work?",
+     "Write Page {page} of {total} and each page renders its own numbers automatically."
+    ],
+    [
+     "Can headers differ per page?",
+     "Headers are uniform across the document — for per-page text, use Edit & Annotate instead."
+    ],
+    [
+     "Is batch mode supported?",
+     "Yes. The same header and footer are applied to every uploaded file."
+    ]
+   ],
+   "h1": "Add Header and Footer to PDF Free",
+   "id": "header-footer",
+   "intro": "Give documents a professional running header and footer — titles, dates, and automatic Page X of Y counters on every page.",
+   "slug": "headers-footers",
+   "steps": [
+    "Upload your PDF",
+    "Type header and footer (use {page} and {total})",
+    "Set the font size",
+    "Click Run and download"
+   ],
+   "title": "Add Header and Footer to PDF Free | PDF Suite"
+  },
+  {
+   "description": "Black out sensitive text regions permanently before sharing contracts and records. Free and offline.",
+   "faqs": [
+    [
+     "Is redaction reversible?",
+     "No — boxes are baked permanently into the file. Always keep an unredacted original."
+    ],
+    [
+     "Should I do anything after redacting?",
+     "Yes. Run Flatten PDF too, so no hidden layer or selectable text remains beneath the boxes."
+    ],
+    [
+     "Why do this offline?",
+     "Redaction is for your most sensitive documents — processing locally means they are never exposed to a server."
+    ]
+   ],
+   "h1": "Redact PDF Online Free — Remove Sensitive Data",
+   "id": "redact",
+   "intro": "Permanently black out confidential regions before sharing. Positions are percentages, boxes are baked in, and files never upload.",
+   "slug": "redact-pdf",
+   "steps": [
+    "Upload your PDF",
+    "Add black boxes: page, position, size",
+    "Review the placement list",
+    "Click Run (then Flatten) and download"
+   ],
+   "title": "Redact PDF Online Free — Remove Sensitive Data | PDF Suite"
+  },
+  {
+   "description": "Extract PDF text to TXT, or structured Markdown with headings and lists. Free, instant, private. Your documents never leave your device.",
+   "faqs": [
+    [
+     "What is the Markdown export good for?",
+     "Notes, docs, and feeding LLMs: headings, lists, and emphasis are reconstructed from the layout."
+    ],
+    [
+     "The PDF is a scan — why is there no text?",
+     "Scans are pictures of text. Run OCR first to recognize it, then extract."
+    ],
+    [
+     "Is formatting preserved?",
+     "Structure (headings, lists) is preserved in Markdown mode; exact fonts and layout are not."
+    ]
+   ],
+   "h1": "Extract Text from PDF Free — TXT & Markdown",
+   "id": "extract-text",
+   "intro": "Copy every word out of a PDF as plain text — or as structured Markdown with headings and lists, ready for notes and AI tools.",
+   "slug": "extract-text",
+   "steps": [
+    "Upload your PDF",
+    "Choose plain text or Markdown",
+    "Click Run and preview the result",
+    "Download, copy, or share the text"
+   ],
+   "title": "Extract Text from PDF Free — TXT & Markdown | PDF Suite"
+  },
+  {
+   "description": "Turn scans into selectable text with on-device OCR in 14 languages. No upload, free, unlimited. Language packs cache for offline use after first run.",
+   "faqs": [
+    [
+     "Which languages are supported?",
+     "English, Spanish, French, German, Italian, Portuguese, Dutch, Russian, Arabic, Hindi, Chinese, Japanese, Korean, and Turkish."
+    ],
+    [
+     "Does OCR work offline?",
+     "After the first use, the engine and language packs are cached — then it works fully offline."
+    ],
+    [
+     "What do I get back?",
+     "Both the recognized text file and a PDF rebuilt from it — free, no limits."
+    ]
+   ],
+   "h1": "OCR PDF Online Free — 14 Languages",
+   "id": "ocr",
+   "intro": "Make scanned PDFs readable and reusable. Recognize text in 14 languages entirely on your device — text file plus rebuilt PDF included.",
+   "slug": "ocr-pdf",
+   "steps": [
+    "Upload a scan or photo of a document",
+    "Pick the document language",
+    "Click Run and wait for recognition",
+    "Download the text, the PDF, or both"
+   ],
+   "title": "OCR PDF Online Free — 14 Languages | PDF Suite"
+  },
+  {
+   "description": "Lock PDFs with AES password encryption in your browser. Passwords never leave your device. Batch supported.",
+   "faqs": [
+    [
+     "What encryption is used?",
+     "Standard PDF AES encryption with user and owner passwords — compatible with all major readers."
+    ],
+    [
+     "Can I protect many files at once?",
+     "Yes. Batch mode applies the same password to every file and zips the results."
+    ],
+    [
+     "I forgot the password — can you recover it?",
+     "No, and neither can anyone else. There is no server copy and no backdoor — keep passwords safe."
+    ]
+   ],
+   "h1": "Protect PDF with Password Free (AES)",
+   "id": "encrypt",
+   "intro": "Password-lock sensitive PDFs with AES encryption — contracts, statements, HR files. Batch mode secures whole folders with one password.",
+   "slug": "protect-pdf",
+   "steps": [
+    "Upload your PDF (or several)",
+    "Set a password (min 4 characters)",
+    "Optionally set a separate owner password",
+    "Click Run and download the locked file"
+   ],
+   "title": "Protect PDF with Password Free (AES) | PDF Suite"
+  },
+  {
+   "description": "Remove the password from PDFs you own. Decryption happens locally — nothing uploads. Free. The password is never stored or transmitted.",
+   "faqs": [
+    [
+     "Do you store my password?",
+     "No. It lives in memory for the seconds the unlock takes, then is gone."
+    ],
+    [
+     "What if I don't know the password?",
+     "Only the correct password unlocks the file — there is no cracking or bypass, by design."
+    ],
+    [
+     "What next after unlocking?",
+     "Edit, merge, or compress freely — then re-protect with Protect PDF if needed."
+    ]
+   ],
+   "h1": "Unlock PDF Online Free — Remove Password",
+   "id": "decrypt",
+   "intro": "Remove password protection from PDFs you own. The password never leaves your browser — decryption is instant and local.",
+   "slug": "unlock-pdf",
+   "steps": [
+    "Upload the locked PDF",
+    "Enter its current password",
+    "Click Run",
+    "Download the unlocked file"
+   ],
+   "title": "Unlock PDF Online Free — Remove Password | PDF Suite"
+  },
+  {
+   "description": "Bake form fields and annotations into static pages so PDFs can't be edited further. Batch supported.",
+   "faqs": [
+    [
+     "When should I flatten?",
+     "Before sending contracts, redacted files, and completed forms — it locks everything into static pages."
+    ],
+    [
+     "Can I flatten many files?",
+     "Yes, batch mode flattens every uploaded file with one run."
+    ],
+    [
+     "Does flattening change appearance?",
+     "No. It preserves exactly how the file looks while removing editability."
+    ]
+   ],
+   "h1": "Flatten PDF Online Free",
+   "id": "flatten",
+   "intro": "Make PDFs permanently non-editable by baking fields and annotations into the pages. Essential after redacting or filling forms.",
+   "slug": "flatten-pdf",
+   "steps": [
+    "Upload your PDF",
+    "Click Run — no settings needed",
+    "Download the locked, static file",
+    "Share it knowing it can't be altered"
+   ],
+   "title": "Flatten PDF Online Free | PDF Suite"
+  },
+  {
+   "description": "Find hidden author names and metadata, then edit or strip them before sharing. Privacy-first and free.",
+   "faqs": [
+    [
+     "What hides in my PDFs?",
+     "Author names, software fingerprints, and creation dates — often revealing more than you intend."
+    ],
+    [
+     "Edit or strip — which should I choose?",
+     "Edit to publish clean attribution (title, author). Strip to share anonymously."
+    ],
+    [
+     "Why check metadata at all?",
+     "Resumes, leaks, and legal filings have all embarrassed senders via forgotten metadata."
+    ]
+   ],
+   "h1": "Remove PDF Metadata Free — Privacy Cleaner",
+   "id": "privacy",
+   "intro": "See everything your PDF reveals about you — then rewrite the attribution or wipe it clean before sharing. All local, all free.",
+   "slug": "remove-pdf-metadata",
+   "steps": [
+    "Upload your PDF",
+    "Inspect the hidden metadata",
+    "Choose Edit attribution or Strip everything",
+    "Download the clean file"
+   ],
+   "title": "Remove PDF Metadata Free — Privacy Cleaner | PDF Suite"
+  },
+  {
+   "description": "Convert PDF to editable Word (.docx) with text extracted per page. Private, free, no watermark. No watermarks, no page limits, no account needed.",
+   "faqs": [
+    [
+     "How accurate is the conversion?",
+     "Text content transfers reliably, page by page. Complex multi-column layouts are simplified to flowing text."
+    ],
+    [
+     "Is there a page limit?",
+     "No — only your device memory. Long reports convert fine."
+    ],
+    [
+     "Do my files upload?",
+     "Never. Extraction and DOCX building happen entirely in your browser."
+    ]
+   ],
+   "h1": "Convert PDF to Word Free Online (DOCX)",
+   "id": "pdf-to-word",
+   "intro": "Turn any text PDF into an editable Word document. Text is extracted page by page into a clean .docx — privately, with no limits.",
+   "slug": "pdf-to-word",
+   "steps": [
+    "Upload your PDF",
+    "Click Run — text is extracted",
+    "Download the editable .docx",
+    "Polish formatting in Word"
+   ],
+   "title": "Convert PDF to Word Free Online (DOCX) | PDF Suite"
+  },
+  {
+   "description": "Convert Word (.docx) to PDF with headings preserved. Fast, free, and fully private. Output is clean, print-ready, and watermark-free.",
+   "faqs": [
+    [
+     "Are images preserved?",
+     "Text structure transfers reliably. Complex embedded objects may simplify — check the preview."
+    ],
+    [
+     "Which Word formats work?",
+     "Modern .docx files. Legacy .doc should be re-saved as .docx first."
+    ],
+    [
+     "Is the output watermarked?",
+     "Never. The PDF is clean and print-ready."
+    ]
+   ],
+   "h1": "Convert Word to PDF Free Online",
+   "id": "word-to-pdf",
+   "intro": "Turn .docx documents into clean PDFs with headings intact. No upload, no account, no watermark — ready to submit or print.",
+   "slug": "word-to-pdf",
+   "steps": [
+    "Upload your .docx file",
+    "Click Run to convert",
+    "Preview the extracted text",
+    "Download the PDF"
+   ],
+   "title": "Convert Word to PDF Free Online | PDF Suite"
+  },
+  {
+   "description": "Extract PDF text tables into editable CSV and Excel files. Runs locally, free, no upload. You get both CSV and XLSX in a single run.",
+   "faqs": [
+    [
+     "How good is table detection?",
+     "Text lines are extracted faithfully; complex merged-cell layouts simplify to rows. Verify numbers before filing."
+    ],
+    [
+     "What formats do I get?",
+     "Both .csv (universal) and .xlsx (Excel-ready) in one run."
+    ],
+    [
+     "Can it handle scanned tables?",
+     "Scans need OCR first — run OCR, then convert the rebuilt PDF."
+    ]
+   ],
+   "h1": "Convert PDF to Excel Free Online",
+   "id": "pdf-to-excel",
+   "intro": "Pull text and tables out of PDFs into editable spreadsheets — CSV and XLSX together, extracted entirely on your device.",
+   "slug": "pdf-to-excel",
+   "steps": [
+    "Upload your PDF",
+    "Click Run to extract",
+    "Download the .csv, the .xlsx, or both",
+    "Verify figures in Excel"
+   ],
+   "title": "Convert PDF to Excel Free Online | PDF Suite"
+  },
+  {
+   "description": "Render CSV and Excel sheets as clean, paginated PDF tables. Headers detected automatically. Free. Tables paginate cleanly onto A4 pages automatically.",
+   "faqs": [
+    [
+     "Which spreadsheet formats work?",
+     "CSV files and Excel workbooks (.xlsx/.xls) — the first worksheet is used."
+    ],
+    [
+     "How do large sheets paginate?",
+     "Tables flow across landscape A4 pages automatically with repeating-style headers."
+    ],
+    [
+     "Are colors and formulas kept?",
+     "Values and structure transfer; cell styling and formulas do not — check the output."
+    ]
+   ],
+   "h1": "Convert Excel to PDF Free Online",
+   "id": "excel-to-pdf",
+   "intro": "Turn spreadsheets into presentation-ready PDF tables. CSV and Excel in, clean paginated PDF out — no upload required.",
+   "slug": "excel-to-pdf",
+   "steps": [
+    "Upload your .csv or .xlsx",
+    "Name the PDF title",
+    "Click Run",
+    "Download the formatted PDF"
+   ],
+   "title": "Convert Excel to PDF Free Online | PDF Suite"
+  },
+  {
+   "description": "Convert each PDF page into an editable PowerPoint slide (.pptx). Perfect for reusing content in decks.",
+   "faqs": [
+    [
+     "Are the slides editable?",
+     "Each slide holds a high-resolution page image you can crop, annotate, and rearrange in PowerPoint."
+    ],
+    [
+     "How many slides can I make?",
+     "One per page, no cap beyond device memory. Long PDFs become long decks."
+    ],
+    [
+     "What quality are the slides?",
+     "Rendered at high resolution — crisp on projectors and screen shares."
+    ]
+   ],
+   "h1": "Convert PDF to PowerPoint Free (PPTX)",
+   "id": "pdf-to-pptx",
+   "intro": "Reuse PDF content in presentations: every page becomes a high-resolution PowerPoint slide you can rearrange and present.",
+   "slug": "pdf-to-pptx",
+   "steps": [
+    "Upload your PDF",
+    "Click Run — pages render at high resolution",
+    "Download the .pptx deck",
+    "Rearrange and present in PowerPoint"
+   ],
+   "title": "Convert PDF to PowerPoint Free (PPTX) | PDF Suite"
+  },
+  {
+   "description": "Convert PowerPoint (.pptx) slides to PDF free. Text and images preserved, offline in your browser. Ready to email, print, or archive in seconds.",
+   "faqs": [
+    [
+     "Is exact slide layout preserved?",
+     "Text and images transfer faithfully; pixel-perfect Slide Master styling is simplified."
+    ],
+    [
+     "Which PowerPoint formats work?",
+     "Modern .pptx files. Legacy .ppt needs re-saving as .pptx first."
+    ],
+    [
+     "How big can the deck be?",
+     "Dozens of slides convert smoothly — only device memory limits you."
+    ]
+   ],
+   "h1": "Convert PowerPoint to PDF Free Online",
+   "id": "pptx-to-pdf",
+   "intro": "Turn .pptx decks into clean PDFs with text and images intact. No upload, no account — ready to email or archive.",
+   "slug": "pptx-to-pdf",
+   "steps": [
+    "Upload your .pptx file",
+    "Click Run to convert slides",
+    "Check the page count note",
+    "Download the PDF"
+   ],
+   "title": "Convert PowerPoint to PDF Free Online | PDF Suite"
+  },
+  {
+   "description": "Publish PDF text as a styled standalone webpage. Great for archiving content as searchable HTML. The output is a single self-contained HTML file.",
+   "faqs": [
+    [
+     "What does the HTML look like?",
+     "A clean, readable page with your text organized per original page — no trackers, no bloat."
+    ],
+    [
+     "Are images included?",
+     "Text transfers; embedded images do not. For image pages, use PDF to JPG."
+    ],
+    [
+     "Can I host the file?",
+     "Yes. It is a single self-contained .html file — drop it on any static host."
+    ]
+   ],
+   "h1": "Convert PDF to HTML Free Online",
+   "id": "pdf-to-html",
+   "intro": "Turn PDFs into clean standalone webpages. Text organized by page, zero bloat — publish or archive searchable content.",
+   "slug": "pdf-to-html",
+   "steps": [
+    "Upload your PDF",
+    "Click Run to extract",
+    "Preview the generated page",
+    "Download the .html file"
+   ],
+   "title": "Convert PDF to HTML Free Online | PDF Suite"
+  },
+  {
+   "description": "Give PDFs permanent dark mode, full invert, print-saving grayscale, or warm sepia. Free, offline. Rebuilt locally with original quality preserved.",
+   "faqs": [
+    [
+     "Which style should I choose?",
+     "Dark mode for night reading, grayscale to save printer ink, sepia for a warm paper feel."
+    ],
+    [
+     "Does text stay selectable?",
+     "No — pages are rebuilt as images to recolor them. Keep the original for copying text."
+    ],
+    [
+     "Can I revert back?",
+     "Just keep the original file. Recoloring is a one-way render — run again from the source anytime."
+    ]
+   ],
+   "h1": "PDF Dark Mode — Invert & Grayscale Free",
+   "id": "invert",
+   "intro": "Recolor any PDF: true dark mode for night reading, grayscale to save ink, or sepia for warmth. Rebuilt locally, free forever.",
+   "slug": "pdf-dark-mode",
+   "steps": [
+    "Upload your PDF",
+    "Pick dark, invert, grayscale, or sepia",
+    "Click Run",
+    "Download the recolored file"
+   ],
+   "title": "PDF Dark Mode — Invert & Grayscale Free | PDF Suite"
+  },
+  {
+   "description": "Write formatted documents and export clean PDFs — titles, paragraphs, and structure included. Free. Nothing is stored anywhere — write and download.",
+   "faqs": [
+    [
+     "Do I need an account?",
+     "No. Write, export, done — nothing is stored anywhere."
+    ],
+    [
+     "Can I add images?",
+     "This editor handles titles and body text. For images, use Images to PDF or Annotate."
+    ],
+    [
+     "What paper size is used?",
+     "Standard A4-style pages with comfortable margins, ready to print."
+    ]
+   ],
+   "h1": "Create PDF Online Free — No Signup",
+   "id": "create",
+   "intro": "Write it here, download a clean PDF. Titles, paragraphs, and structure — no account, no watermark, no fuss.",
+   "slug": "create-pdf",
+   "steps": [
+    "Type a title and body text",
+    "Set the font size",
+    "Click Run",
+    "Download your PDF"
+   ],
+   "title": "Create PDF Online Free — No Signup | PDF Suite"
+  },
+  {
+   "description": "Paste Markdown and get a beautifully formatted PDF with headings, lists, and code. Free, instant. Headings, lists, and code render beautifully.",
+   "faqs": [
+    [
+     "What Markdown is supported?",
+     "Headings, bullet and numbered lists, quotes, code blocks, bold/italic, and links."
+    ],
+    [
+     "Can I upload a .md file?",
+     "Yes — drop a Markdown file instead of pasting, and it converts the same way."
+    ],
+    [
+     "Are the PDFs print-ready?",
+     "Yes. Clean A4-style pages with comfortable typography."
+    ]
+   ],
+   "h1": "Convert Markdown to PDF Free Online",
+   "id": "markdown",
+   "intro": "Technical docs, READMEs, and notes become polished PDFs in one click — headings, lists, and code rendered beautifully.",
+   "slug": "markdown-to-pdf",
+   "steps": [
+    "Paste Markdown or drop a .md file",
+    "Click Run",
+    "Download the formatted PDF",
+    "Print or share it anywhere"
+   ],
+   "title": "Convert Markdown to PDF Free Online | PDF Suite"
+  },
+  {
+   "description": "Convert HTML files or pasted code into professional PDFs. Free, private, runs in your browser. Receipts and reports become archivable PDFs.",
+   "faqs": [
+    [
+     "Should I paste code or upload a file?",
+     "Either — pasted HTML and uploaded .html files convert identically."
+    ],
+    [
+     "Is CSS preserved exactly?",
+     "Text content converts reliably; pixel-perfect CSS needs browser Print → Save as PDF instead."
+    ],
+    [
+     "What is this good for?",
+     "Receipts, reports, and invoices saved from web apps as archivable PDFs."
+    ]
+   ],
+   "h1": "Convert HTML to PDF Free Online",
+   "id": "html-to-pdf",
+   "intro": "Turn web content into archivable PDFs: paste HTML or upload a file and get a clean document — privately, in your browser.",
+   "slug": "html-to-pdf",
+   "steps": [
+    "Paste HTML or upload an .html file",
+    "Name the document",
+    "Click Run",
+    "Download the PDF"
+   ],
+   "title": "Convert HTML to PDF Free Online | PDF Suite"
+  },
+  {
+   "description": "Spot differences between two PDFs with synced side-by-side scrolling. Perfect for contract review. Free.",
+   "faqs": [
+    [
+     "Are differences highlighted automatically?",
+     "You view both versions side by side with synced scrolling — ideal for careful contract review."
+    ],
+    [
+     "Do the files upload?",
+     "No. Both render locally, so confidential redlines never leave your machine."
+    ],
+    [
+     "Can I compare scanned PDFs?",
+     "Yes — scans render as images. For text comparison, OCR them first."
+    ]
+   ],
+   "h1": "Compare Two PDFs Side by Side Free",
+   "id": "compare",
+   "intro": "Review contract versions and revisions with two PDFs side by side and scroll locked together. Private, instant, free.",
+   "slug": "compare-pdfs",
+   "steps": [
+    "Upload both PDF versions",
+    "Pages render side by side",
+    "Scroll either side — they stay synced",
+    "No download needed; it is a viewer"
+   ],
+   "title": "Compare Two PDFs Side by Side Free | PDF Suite"
+  },
+  {
+   "description": "Recover readable pages from damaged or truncated PDFs with a forensic rebuild engine. Free. The report tells you exactly what was recovered.",
+   "faqs": [
+    [
+     "What damage can it fix?",
+     "Truncated downloads, corrupt objects, and broken cross-references — readable pages are salvaged."
+    ],
+    [
+     "What if only some pages recover?",
+     "You get every salvageable page plus a report of what was skipped."
+    ],
+    [
+     "Why did my PDF corrupt?",
+     "Interrupted downloads and failing drives are the usual causes — re-download first if you can."
+    ]
+   ],
+   "h1": "Repair Corrupted PDF Online Free",
+   "id": "repair",
+   "intro": "Salvage readable pages from damaged PDFs. The forensic engine rebuilds what it can and tells you exactly what was recovered.",
+   "slug": "repair-pdf",
+   "steps": [
+    "Upload the damaged file",
+    "Click Run to scan and rebuild",
+    "Read the recovery report",
+    "Download the repaired PDF"
+   ],
+   "title": "Repair Corrupted PDF Online Free | PDF Suite"
+  },
+  {
+   "description": "Turn your phone camera into a document scanner and save multi-page PDFs. No app install needed. Captures stay in your browser from lens to PDF.",
+   "faqs": [
+    [
+     "How is this better than a photo?",
+     "Captures are sized to A4 pages and combined into one proper multi-page PDF."
+    ],
+    [
+     "Can I mix camera and uploaded photos?",
+     "Yes. Capture pages, then add existing photos before running."
+    ],
+    [
+     "Do scans upload anywhere?",
+     "No. Captures stay in your browser tab from lens to PDF."
+    ]
+   ],
+   "h1": "Scan to PDF Free — Phone Camera Scanner",
+   "id": "scan",
+   "intro": "Your phone is the scanner: capture pages with the camera, combine them into a clean multi-page PDF — no app, no upload.",
+   "slug": "scan-to-pdf",
+   "steps": [
+    "Allow camera access and point at a page",
+    "Capture every page you need",
+    "Optionally add existing photos",
+    "Click Run and download the scan"
+   ],
+   "title": "Scan to PDF Free — Phone Camera Scanner | PDF Suite"
+  }
+ ]
+}
