@@ -82,6 +82,24 @@ export function parseProgress(msg: string): { done: number; total: number } | nu
   return { done: Math.min(done, total), total };
 }
 
+/** Merge input kinds. Smallpdf parity: photos and documents merge alongside PDFs. */
+export type MergeKind = 'pdf' | 'image' | 'text' | 'word' | 'sheet' | 'unsupported';
+
+export function classifyMergeFile(name: string, mime: string): MergeKind {
+  const lower = name.toLowerCase();
+  const ext = lower.includes('.') ? lower.slice(lower.lastIndexOf('.')) : '';
+  if (mime === 'application/pdf' || ext === '.pdf') return 'pdf';
+  if (mime.startsWith('image/') || ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'].includes(ext)) return 'image';
+  if (mime === 'text/plain' || mime === 'text/markdown' || ['.txt', '.md', '.markdown'].includes(ext)) return 'text';
+  if (mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || ext === '.docx') return 'word';
+  if (mime.includes('spreadsheet') || mime === 'text/csv' || ['.csv', '.xlsx', '.xls'].includes(ext)) return 'sheet';
+  return 'unsupported';
+}
+
+export function isPdfName(name: string, mime: string): boolean {
+  return classifyMergeFile(name, mime) === 'pdf';
+}
+
 /**
  * "Recently used" list for repeat-visit behavior. Pure (storage-agnostic)
  * so it stays unit-testable; the UI layer binds it to localStorage.

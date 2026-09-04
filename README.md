@@ -6,7 +6,7 @@ no watermark, no sign-up, no per-hour limits. Files never leave the device.
 
 ## Features (36 tools, all functional offline after first load)
 
-**Essentials:** Merge PDFs (per-file page ranges) · Split PDF (ranges, chunks, odd/even, by size) ·
+**Essentials:** Merge PDFs, photos & documents (per-file page ranges) · Split PDF (ranges, chunks, odd/even, by size) ·
 Compress PDF (presets or exact target size) · PDF → JPG/PNG/ZIP · Extract Images · Images → PDF
 **Edit & Organize:** Sign PDF (draw/type/upload) · Edit & Annotate (text, highlights, image stamps) ·
 Organize pages (reorder/rotate/delete) · Rotate · Crop · Watermark (text or logo) · Page numbers ·

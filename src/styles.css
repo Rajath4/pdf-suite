@@ -523,9 +523,6 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 }
 .stage-card[hidden] { display: none; }
 
-/* No-results state */
-.no-results { text-align: center; padding: 28px; color: var(--muted); display: grid; gap: 10px; justify-items: center; }
-
 /* Motion safety: information without kinetic complexity */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

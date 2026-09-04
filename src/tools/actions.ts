@@ -6,7 +6,7 @@ import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
 import { UserError } from '../types.js';
 import {
-  mergePdfs, mergeSelected, splitPdf, splitEvery, splitOddEven, splitBySize,
+  mergeSelected, splitPdf, splitEvery, splitOddEven, splitBySize,
   rotatePdf, organizePdf, losslessResave,
   imagesToPdf, addTextWatermark, addPageNumbers, addHeaderFooter,
   redactPdf, flattenPdf, readMetadata, stripMetadata, setMetadata,
@@ -18,7 +18,7 @@ import {
 import {
   renderAllPages, extractAllText, extractStyledLines, canvasToBlob, invertCanvas, tintCanvas,
 } from '../lib/pdfRender.js';
-import { baseName, loadImageElement, readAsArrayBuffer, readAsText } from '../lib/fileUtils.js';
+import { baseName, loadImageElement, readAsArrayBuffer, readAsText, classifyMergeFile } from '../lib/fileUtils.js';
 
 // Office-format engines (docx / mammoth / xlsx) are heavy and rarely needed —
 // load them on demand so the main tool chunk stays lean.
@@ -126,14 +126,32 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
   switch (id) {
     case 'merge': {
       need(ctx, 2);
-      ctx.onProgress('Merging…');
+      ctx.onProgress('Preparing files…');
       // Per-file page ranges ('' = whole file), aligned with upload order.
       const ranges = JSON.parse(ctx.opts.mergeRanges || '[]') as string[];
-      const parts = await Promise.all(
-        ctx.files.map(async (f, i) => ({ bytes: await pdfBytes(f), ranges: ranges[i] ?? '' })),
-      );
+      const parts: { bytes: ArrayBuffer; ranges: string }[] = [];
+      let converted = 0;
+      for (let i = 0; i < ctx.files.length; i++) {
+        const f = ctx.files[i];
+        const kind = classifyMergeFile(f.name, f.type);
+        if (kind === 'unsupported') {
+          throw new UserError(`"${f.name}" can't be merged — use PDFs, images, text, Word, or spreadsheets.`);
+        }
+        if (kind === 'pdf') {
+          parts.push({ bytes: await pdfBytes(f), ranges: ranges[i] ?? '' });
+        } else {
+          ctx.onProgress(`Converting ${f.name}…`);
+          parts.push({ bytes: await convertToPdfBytes(f, kind), ranges: '' });
+          converted++;
+        }
+      }
+      ctx.onProgress('Merging…');
       const data = await mergeSelected(parts);
-      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: 'merged.pdf' }];
+      return [{
+        blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }),
+        filename: 'merged.pdf',
+        note: converted > 0 ? `${converted} non-PDF file${converted > 1 ? 's were' : ' was'} converted with simplified layout.` : undefined,
+      }];
     }
     case 'split': {
       need(ctx, 1);
@@ -759,4 +777,36 @@ async function fileToDataUrl(f: File): Promise<string> {
     r.onerror = () => reject(new Error('Could not read image.'));
     r.readAsDataURL(f);
   });
+}
+
+/**
+ * Mixed-format merge support (Smallpdf parity): photos, text, Word, and
+ * sheets become PDF pages so they can merge alongside real PDFs.
+ */
+async function convertToPdfBytes(f: File, kind: 'image' | 'text' | 'word' | 'sheet'): Promise<ArrayBuffer> {
+  if (kind === 'image') {
+    const url = URL.createObjectURL(f);
+    try {
+      const img = await loadImageElement(url);
+      const data = await imagesToPdf(
+        [{ dataUrl: await fileToDataUrl(f), width: img.naturalWidth || 1200, height: img.naturalHeight || 1600 }],
+        { pageSize: 'fit', orientation: 'auto', marginPt: 0 },
+      );
+      return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+  if (kind === 'text') {
+    const data = await textToPdf({ title: baseName(f.name), body: await readAsText(f), fontSize: 11, lineHeight: 1.5 });
+    return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+  }
+  const { docxToPlainText, parseCsv, workbookToTable } = await loadOffice();
+  if (kind === 'word') {
+    const data = await textToPdf({ title: baseName(f.name), body: await docxToPlainText(f), fontSize: 11, lineHeight: 1.5 });
+    return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+  }
+  const table = /\.csv$/i.test(f.name) ? parseCsv(await readAsText(f)) : await workbookToTable(f);
+  const data = await tableToPdf(table, baseName(f.name));
+  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
 }

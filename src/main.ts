@@ -1,7 +1,7 @@
 import './styles.css';
 import { CATEGORIES, TOOLS, getTool, searchTools, toolSlug, toolIdFromSlug, nextTools } from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
-import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent } from './lib/fileUtils.js';
+import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent, isPdfName } from './lib/fileUtils.js';
 import { UserError } from './types.js';
 import type { ToolDef } from './types.js';
 import { registerSW } from 'virtual:pwa-register';
@@ -839,10 +839,9 @@ function homePage(): HTMLElement {
     h1,
     el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, nothing is tracked, and it installs for offline use.'),
   );
-  const search = textInput('', 'Search 36 tools… try “merge”, “sign”, “ppt”…  ( ⌘K )');
-  search.setAttribute('type', 'search');
-  search.setAttribute('aria-label', 'Search tools');
-  hero.append(search);
+  // One search surface only (header palette) — no duplicate hero search box.
+  // The palette shortcut is taught once, right here.
+  hero.append(el('p', { class: 'muted' }, 'Tip: press / anywhere to jump to any tool instantly.'));
 
   // File-first entry (pdfguru pattern, done smarter): drop a file, then pick
   // what to do with it. The staged files ride along to whichever tool wins.
@@ -1018,7 +1017,7 @@ function homePage(): HTMLElement {
       b.addEventListener('click', () => {
         activeCat = cat;
         paintPills();
-        renderGrid(search.value);
+        renderGrid();
       });
       pills.append(b);
     }
@@ -1027,16 +1026,11 @@ function homePage(): HTMLElement {
   root.append(pills);
   root.append(gridRoot);
 
-  const renderGrid = (q: string) => {
+  const renderGrid = () => {
     gridRoot.innerHTML = '';
-    const query = q.trim().toLowerCase();
     for (const cat of CATEGORIES) {
       if (activeCat !== 'All' && cat !== activeCat) continue;
-      const tools = TOOLS.filter(
-        (t) =>
-          t.category === cat &&
-          (!query || `${t.title} ${t.description}`.toLowerCase().includes(query)),
-      );
+      const tools = TOOLS.filter((t) => t.category === cat);
       if (tools.length === 0) continue;
       const section = el('section', { class: 'cat' });
       section.append(el('h2', {}, `${cat} · ${tools.length}`));
@@ -1057,33 +1051,16 @@ function homePage(): HTMLElement {
       section.append(grid);
       gridRoot.append(section);
     }
-    if (!gridRoot.children.length) {
-      const empty = el('div', { class: 'no-results' });
-      empty.append(
-        el('span', {}, `Nothing matches “${q.trim()}”. Try “merge”, “sign”, “ppt”, or “password”.`),
-      );
-      const reset = el('button', { class: 'btn', type: 'button' }, 'Show all tools');
-      reset.addEventListener('click', () => {
-        search.value = '';
-        activeCat = 'All';
-        paintPills();
-        renderGrid('');
-        search.focus();
-      });
-      empty.append(reset);
-      gridRoot.append(empty);
-    }
   };
-  search.addEventListener('input', () => renderGrid(search.value));
-  renderGrid('');
+  renderGrid();
 
-  // Press "/" anywhere on the homepage to jump to search.
+  // Press "/" anywhere to summon the palette (the one search surface).
   const onKey = (e: KeyboardEvent) => {
     const target = e.target as HTMLElement | null;
     const typing = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
     if (e.key === '/' && !typing) {
       e.preventDefault();
-      search.focus();
+      openPalette();
     }
   };
   window.addEventListener('keydown', onKey);
@@ -1330,8 +1307,11 @@ function toolPage(id: string): HTMLElement {
         const range = document.createElement('input');
         range.type = 'text';
         range.className = 'input range-inline';
-        range.placeholder = 'All pages (e.g. 1-3, 5)';
+        const isPdf = isPdfName(f.name, f.type);
+        range.placeholder = isPdf ? 'All pages (e.g. 1-3, 5)' : 'Whole file (ranges need PDF)';
         range.value = mergeRanges[i] ?? '';
+        range.disabled = !isPdf;
+        if (!isPdf) range.title = 'Page ranges apply to PDFs only — images and documents merge whole.';
         range.setAttribute('aria-label', `Pages to take from ${f.name}`);
         range.addEventListener('input', () => {
           mergeRanges[i] = range.value;
@@ -1770,7 +1750,10 @@ function toolPage(id: string): HTMLElement {
   root.append(seoMount);
   void (async () => {
     try {
-      const { default: SEO } = await import('./seo/content.json');
+      const [{ default: SEO }, { default: GUIDES }] = await Promise.all([
+        import('./seo/content.json'),
+        import('./seo/guides.json'),
+      ]);
       const entry = (SEO as unknown as { tools: SeoEntry[] }).tools.find((t) => t.id === current.id);
       if (!entry) return;
       const about = el('section', { class: 'faq' });
@@ -1789,6 +1772,18 @@ function toolPage(id: string): HTMLElement {
           d.append(el('summary', {}, q), el('p', {}, a));
           about.append(d);
         }
+      }
+      // Blog-style cross-links (Smallpdf pattern): guides that use this tool.
+      const guides = (GUIDES as unknown as { guides: GuideEntry[] }).guides.filter((g) =>
+        g.relatedTools.includes(current.id),
+      );
+      if (guides.length > 0) {
+        about.append(el('h3', {}, 'Learn more'));
+        const rel = el('div', { class: 'related' });
+        for (const g of guides.slice(0, 4)) {
+          rel.append(el('a', { class: 'chip', href: `/guides/${g.slug}/` }, `📖 ${g.h1.replace(/ —.*$/, '').slice(0, 44)}`));
+        }
+        about.append(rel);
       }
       seoMount.append(about);
     } catch {

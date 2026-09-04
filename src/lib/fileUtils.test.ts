@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { baseName, formatBytes, parseProgress, pushRecent, withExt } from './fileUtils.js';
+import { baseName, classifyMergeFile, formatBytes, isPdfName, parseProgress, pushRecent, withExt } from './fileUtils.js';
 
 describe('formatBytes', () => {
   it('formats bytes, KB and MB', () => {
@@ -49,5 +49,26 @@ describe('pushRecent', () => {
     expect(pushRecent(['a', 'b'], 'c')).toEqual(['c', 'a', 'b']);
     expect(pushRecent(['a', 'b'], 'a')).toEqual(['a', 'b']);
     expect(pushRecent(['a', 'b', 'c', 'd', 'e'], 'f')).toEqual(['f', 'a', 'b', 'c', 'd']);
+  });
+});
+
+describe('classifyMergeFile', () => {
+  it('routes by mime first, extension as fallback', () => {
+    expect(classifyMergeFile('a.pdf', 'application/pdf')).toBe('pdf');
+    expect(classifyMergeFile('a.PDF', '')).toBe('pdf');
+    expect(classifyMergeFile('photo.jpg', 'image/jpeg')).toBe('image');
+    expect(classifyMergeFile('scan.png', '')).toBe('image');
+    expect(classifyMergeFile('notes.txt', 'text/plain')).toBe('text');
+    expect(classifyMergeFile('doc.md', '')).toBe('text');
+    expect(classifyMergeFile('r.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')).toBe('word');
+    expect(classifyMergeFile('s.xlsx', '')).toBe('sheet');
+    expect(classifyMergeFile('s.csv', 'text/csv')).toBe('sheet');
+    expect(classifyMergeFile('deck.pptx', 'application/vnd.openxmlformats-officedocument.presentationml.presentation')).toBe('unsupported');
+    expect(classifyMergeFile('noext', '')).toBe('unsupported');
+  });
+
+  it('flags pdfs for range support', () => {
+    expect(isPdfName('a.pdf', 'application/pdf')).toBe(true);
+    expect(isPdfName('a.jpg', 'image/jpeg')).toBe(false);
   });
 });

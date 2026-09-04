@@ -139,6 +139,8 @@ function toolBody(entry, meta) {
   const related = [...META.entries()]
     .filter(([id, m]) => m.category === meta.category && id !== entry.id)
     .slice(0, 6);
+  // Mirror of the SPA's "Learn more" chips: guides that use this tool.
+  const guides = GUIDES.filter((g) => g.relatedTools.includes(entry.id)).slice(0, 4);
   const popular = ['merge', 'compress', 'sign', 'split']
     .filter((id) => id !== entry.id)
     .map((id) => {
@@ -161,6 +163,9 @@ function toolBody(entry, meta) {
       ? `<h2>Related PDF tools</h2><p>${related.map(([id, m]) => `<a href="/${SEO.tools.find((t) => t.id === id).slug}/">${esc(m.icon)} ${esc(m.title)}</a>`).join(' · ')}</p>`
       : '',
     `<h2>Popular PDF tools</h2><p>${popular}</p>`,
+    guides.length
+      ? `<h2>Learn more</h2><p>${guides.map((g) => `<a href="/guides/${g.slug}/">📖 ${esc(g.h1.split(' — ')[0].slice(0, 44))}</a>`).join(' · ')}</p>`
+      : '',
     `<p><a href="/">← All 36 free PDF tools</a> · Canonical: <a href="${url}">${url}</a></p></div>`,
   ].join('\n');
 }

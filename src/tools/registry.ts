@@ -2,7 +2,7 @@ import type { ToolDef } from '../types.js';
 
 export const TOOLS: ToolDef[] = [
   // Essentials
-  { id: 'merge', title: 'Merge PDFs', description: 'Combine multiple PDFs into one. Pick pages per file, reorder freely.', category: 'Essentials', icon: '⧉', accept: 'application/pdf,.pdf', multiple: true },
+  { id: 'merge', title: 'Merge PDFs', description: 'Combine PDFs, photos & documents into one. Pick pages per file, reorder freely.', category: 'Essentials', icon: '⧉', accept: 'application/pdf,.pdf,image/*,.jpg,.jpeg,.png,.webp,.txt,.md,.docx,.csv,.xlsx,.xls', multiple: true },
   { id: 'split', title: 'Split PDF', description: 'Ranges, every-N chunks, odd/even, or split by file size.', category: 'Essentials', icon: '✂', accept: 'application/pdf,.pdf', multiple: false },
   { id: 'compress', title: 'Compress PDF', description: 'Presets, or shrink to an exact target size (e.g. under 1 MB). Batch supported.', category: 'Essentials', icon: '🗜', accept: 'application/pdf,.pdf', multiple: true },
   { id: 'pdf-to-jpg', title: 'PDF to JPG / PNG', description: 'Export pages as images, or all pages as a ZIP.', category: 'Essentials', icon: '📸', accept: 'application/pdf,.pdf', multiple: false },

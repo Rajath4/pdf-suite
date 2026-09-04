@@ -54,7 +54,7 @@
  },
  "tools": [
   {
-   "description": "Combine multiple PDFs into one file free. Pick pages per file, reorder, and download with no watermark or signup.",
+   "description": "Combine PDFs, photos and documents into one file free. Pick pages per file, reorder, download with no watermark.",
    "faqs": [
     [
      "Can I merge only specific pages from each file?",
@@ -67,17 +67,29 @@
     [
      "Is there a limit on files or pages?",
      "No artificial limits — only your device memory. No watermark is ever added to the output."
+    ],
+    [
+     "Can I merge JPGs or Word files too?",
+     "Yes — photos, text files, Word documents, and spreadsheets convert automatically and merge alongside your PDFs. Page ranges apply to PDFs only."
+    ],
+    [
+     "Why is the merged file so big?",
+     "Scanned pages dominate size. Merge first, then run Compress — or split out only the pages you need before merging."
+    ],
+    [
+     "Will mixed files look consistent?",
+     "Photos become full pages; documents convert with simplified layout. For pixel-perfect uniformity, convert Office files to PDF first, then merge."
     ]
    ],
    "h1": "Merge PDF Files Online Free — No Watermark, No Signup",
    "id": "merge",
-   "intro": "Combine unlimited PDFs into one document in seconds. Select exact pages from each file, drag to reorder, and download a clean file — all processed locally, never uploaded.",
+   "intro": "Combining files should take thirty seconds: drop PDFs, photos, even Word docs — arrange them, download one clean document. No account, no watermark, no daily counter. This guide shows the fastest way using a free offline-first merger, including the pro moves most people miss: selecting exact pages from each PDF, and mixing photos and documents into the same file.",
    "slug": "merge-pdf",
    "steps": [
-    "Drop two or more PDFs onto the page",
-    "Optionally type page ranges (e.g. 1-3, 5) per file",
-    "Drag files into the order you want",
-    "Click Run and download the merged PDF"
+    "Drop PDFs, images, or documents onto the merge tool",
+    "Type page ranges per PDF if needed (blank = whole file)",
+    "Arrange the order, then click Run",
+    "Verify the preview and keep the download"
    ],
    "title": "Merge PDF Online Free — No Watermark | PDF Suite"
   },
@@ -95,6 +107,14 @@
     [
      "Do split PDFs keep their quality?",
      "Yes. Pages are copied without re-rendering, so text stays selectable and quality is unchanged."
+    ],
+    [
+     "What is the fastest way to pull one chapter?",
+     "Ranges mode: type the chapter span (e.g. 45-62) and download just those pages."
+    ],
+    [
+     "Does splitting keep text selectable?",
+     "Yes — pages copy without re-rendering, so text, links, and quality stay pixel-identical."
     ]
    ],
    "h1": "Split PDF Online Free — Extract Any Pages",
@@ -123,6 +143,14 @@
     [
      "Can I compress many PDFs at once?",
      "Yes. Upload multiple files and every one is compressed with the same settings, delivered as a ZIP."
+    ],
+    [
+     "Which preset should I choose?",
+     "Light for archiving, Medium for everyday sharing, Heavy for messaging apps, Target size when a portal dictates the exact number."
+    ],
+    [
+     "Does compression work well on scans?",
+     "Scans compress the most since they are photos. Text-born PDFs shrink less — there is simply less to squeeze."
     ]
    ],
    "h1": "Compress PDF Online Free — Shrink to Any Size",
@@ -207,6 +235,14 @@
     [
      "Do my photos upload anywhere?",
      "No. Everything is embedded locally in your browser."
+    ],
+    [
+     "Which image formats work?",
+     "JPG, PNG, and WebP — photos, screenshots, and scans alike."
+    ],
+    [
+     "How do I keep full quality?",
+     "Images embed at full resolution; choose fit-to-image pages to avoid any scaling."
     ]
    ],
    "h1": "Convert JPG to PDF Online Free — Images to PDF",
@@ -263,6 +299,14 @@
     [
      "Is this a legally valid e-signature?",
      "It is a standard electronic signature mark, accepted for most everyday agreements. Regulated filings may require certified signatures."
+    ],
+    [
+     "Can I use my scanned handwritten signature?",
+     "Yes — upload a photo or scan of it, ideally as a transparent PNG, and place it like any signature."
+    ],
+    [
+     "Do recipients need this app to see the signature?",
+     "No. It bakes permanently into the PDF and opens signed in every reader."
     ]
    ],
    "h1": "Sign PDF Online Free — E-Signature",
@@ -543,6 +587,14 @@
     [
      "What do I get back?",
      "Both the recognized text file and a PDF rebuilt from it — free, no limits."
+    ],
+    [
+     "Which file types can I OCR?",
+     "Text-less PDFs, scanned PDFs, and photos (JPG/PNG) of documents."
+    ],
+    [
+     "How long does recognition take?",
+     "Seconds per page on desktop; progress shows per page so long scans never feel stuck."
     ]
    ],
    "h1": "OCR PDF Online Free — 14 Languages",
@@ -571,6 +623,14 @@
     [
      "I forgot the password — can you recover it?",
      "No, and neither can anyone else. There is no server copy and no backdoor — keep passwords safe."
+    ],
+    [
+     "What is the owner password for?",
+     "It gates printing, copying, and editing separately from opening. Set both on sensitive files."
+    ],
+    [
+     "Does protection survive email and cloud drives?",
+     "Yes — encryption travels inside the file itself, however you send or store it."
     ]
    ],
    "h1": "Protect PDF with Password Free (AES)",
@@ -683,6 +743,14 @@
     [
      "Do my files upload?",
      "Never. Extraction and DOCX building happen entirely in your browser."
+    ],
+    [
+     "My PDF is a scan — will it convert?",
+     "Scans have no text layer, so convert the OCR rebuilt file instead: run OCR first, then convert."
+    ],
+    [
+     "Why does the layout shift in Word?",
+     "Word reflows text while PDF fixes positions. Body content transfers reliably; magazine layouts simplify."
     ]
    ],
    "h1": "Convert PDF to Word Free Online (DOCX)",
