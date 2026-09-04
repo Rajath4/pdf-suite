@@ -37,7 +37,7 @@
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.2.67",
     "pptxgenjs": "^3.12.0",
-    "tesseract.js": "^5.1.0",
+    "tesseract.js": "^7.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
