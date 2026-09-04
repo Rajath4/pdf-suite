@@ -940,7 +940,7 @@ function homePage(): HTMLElement {
   const h1 = el('h1', {});
   h1.append('Every PDF tool you need. ', el('span', { class: 'grad' }, 'Private by design.'));
   hero.append(
-    el('div', { class: 'hero-eyebrow' }, '✦ 37 free tools · no signup · no watermark'),
+    el('div', { class: 'hero-eyebrow' }, '✦ 36 free tools · no signup · no watermark'),
     h1,
     el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, nothing is tracked, and it installs for offline use.'),
   );
