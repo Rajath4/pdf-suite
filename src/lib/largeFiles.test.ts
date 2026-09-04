@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  chooseCompressPath,
   chunkFileName,
   inspectLargeFile,
   parseChunkMB,
@@ -68,6 +69,21 @@ describe('shrink batching', () => {
     expect(shrinkPresetCfg('heavy')).toEqual({ scale: 1.0, q: 0.55 });
     expect(shrinkPresetCfg('medium')).toEqual({ scale: 1.5, q: 0.72 });
     expect(shrinkPresetCfg('bogus')).toEqual({ scale: 1.5, q: 0.72 });
+  });
+});
+
+describe('chooseCompressPath', () => {
+  const MB = 1024 * 1024;
+  it('routes small files fast, big lossy files to stream', () => {
+    expect(chooseCompressPath(50 * MB, 200 * MB, 'medium', 1024 * MB)).toBe('fast');
+    expect(chooseCompressPath(200 * MB, 200 * MB, 'medium', 1024 * MB)).toBe('fast');
+    expect(chooseCompressPath(500 * MB, 200 * MB, 'heavy', 1024 * MB)).toBe('stream');
+    expect(chooseCompressPath(500 * MB, 200 * MB, 'target', 1024 * MB)).toBe('stream');
+  });
+
+  it('refuses lossless over the fast cap and giants over the ceiling', () => {
+    expect(chooseCompressPath(500 * MB, 200 * MB, 'lossless', 1024 * MB)).toBe('reject');
+    expect(chooseCompressPath(5 * 1024 * MB, 200 * MB, 'medium', 1024 * MB)).toBe('reject');
   });
 });
 

@@ -148,10 +148,14 @@
      "Which preset should I choose?",
      "Light for archiving, Medium for everyday sharing, Heavy for messaging apps, Target size when a portal dictates the exact number."
     ],
-    [
-     "Does compression work well on scans?",
-     "Scans compress the most since they are photos. Text-born PDFs shrink less — there is simply less to squeeze."
-    ]
+     [
+      "Does compression work well on scans?",
+      "Scans compress the most since they are photos. Text-born PDFs shrink less — there is simply less to squeeze."
+     ],
+     [
+      "What happens with very large PDFs?",
+      "Files over the fast-path cap switch to streaming mode automatically: pages render one at a time into batched PDFs up to ~1 GB. Output is rasterized, so use Lossless only for smaller files."
+     ]
    ],
    "h1": "Compress PDF Online Free — Shrink to Any Size",
    "id": "compress",

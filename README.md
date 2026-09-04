@@ -34,7 +34,8 @@ batch Compress / Protect / Watermark / Page numbers / Headers / Rotate / Flatten
 - **File-first flows** — drop a file on the homepage, pick the tool after;
   outputs chain into the next tool ("Continue in Compress") with the file
   carried along, offline. Limits stated upfront and adapt to the device
-  (up to 500 MB/file on desktops; raster-heavy tools stay lower).
+  and tool (up to 1 GB for Compress, 6 GB for Large File Split & Join on
+  desktops; raster-heavy tools stay lower).
 
 ## Quick start
 
@@ -92,7 +93,7 @@ Principles:
 ## Privacy & limits
 
 - Everything runs in the tab via `pdf-lib`, `pdf.js`, `Tesseract.js`, `JSZip`, `mammoth`, `docx`, `xlsx`.
-- Practical limit adapts to device RAM and operation (up to 500 MB/file on desktops).
+- Practical limit adapts to device RAM and operation (up to 1 GB for Compress, 6 GB for Large File Split & Join on desktops).
 - Rasterizing tools (Heavy compress, Invert) trade text-selectability for size/color — noted in UI.
 - Password tools use PDF AES encryption; decryption happens locally.
 

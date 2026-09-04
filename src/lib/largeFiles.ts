@@ -13,6 +13,8 @@
  */
 
 export const LARGE_FILE_MAX_BYTES = 6 * 1024 * 1024 * 1024; // 6 GB hard ceiling
+/** Streaming shrink (ranged open, one bitmap at a time) stays flat to here. */
+export const LARGE_SHRINK_MAX_BYTES = 1024 * 1024 * 1024; // 1 GB
 const HEAD_BYTES = 64 * 1024;
 const TAIL_BYTES = 512 * 1024;
 
@@ -71,6 +73,26 @@ export function shrinkPresetCfg(preset: string): { scale: number; q: number } {
   if (preset === 'light') return { scale: 2.0, q: 0.85 };
   if (preset === 'heavy') return { scale: 1.0, q: 0.55 };
   return { scale: 1.5, q: 0.72 };
+}
+
+export type CompressPath = 'fast' | 'stream' | 'reject';
+
+/**
+ * Adaptive dispatch for Compress: small files take the fast in-memory path,
+ * big files stream page-by-page, lossless over the fast cap is refused
+ * (pdf-lib re-save cannot stream — it needs the whole object graph).
+ * Pure and unit-tested; actions.ts executes the verdict.
+ */
+export function chooseCompressPath(
+  sizeBytes: number,
+  fastCapBytes: number,
+  preset: string,
+  streamCeilBytes: number,
+): CompressPath {
+  if (sizeBytes <= fastCapBytes) return 'fast';
+  if (preset === 'lossless') return 'reject';
+  if (sizeBytes <= streamCeilBytes) return 'stream';
+  return 'reject';
 }
 
 /** Byte ranges for N chunks. No I/O — pure math, constant memory. */

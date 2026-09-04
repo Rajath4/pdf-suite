@@ -108,7 +108,7 @@ export function pushRecent(list: string[], id: string, max = 5): string[] {
   return [id, ...list.filter((x) => x !== id)].slice(0, Math.max(1, max));
 }
 
-import { LARGE_FILE_MAX_BYTES } from './largeFiles.js';
+import { LARGE_FILE_MAX_BYTES, LARGE_SHRINK_MAX_BYTES } from './largeFiles.js';
 
 /**
  * Why any cap exists: a PDF explodes in memory — pdf-lib's object model runs
@@ -138,6 +138,21 @@ export function fileLimitBytes(toolId = ''): number {
   // Streaming large-file tools never hold the file (Blob.slice views + tiny
   // head/tail reads), so they scale to disk size instead of tab RAM.
   if (toolId === 'large-files') return LARGE_FILE_MAX_BYTES;
+  const fast = fastPathCapBytes(toolId);
+  if (toolId === 'compress') {
+    // Adaptive Compress: files over the fast cap stream page-by-page instead
+    // of loading whole. Low-RAM phones stay on the fast cap (streaming would
+    // thrash); unknown devices get a middle ceiling; desktops get ~1 GB.
+    const dm = deviceMemoryGB();
+    if (dm != null && dm <= 2) return fast;
+    if (dm == null) return Math.max(fast, 500 * MB);
+    return Math.max(fast, LARGE_SHRINK_MAX_BYTES);
+  }
+  return fast;
+}
+
+/** In-memory fast path ceiling, before any streaming fallback. */
+export function fastPathCapBytes(toolId = ''): number {
   const dm = deviceMemoryGB();
   const baseMB = dm == null ? 250 : dm <= 2 ? 100 : dm <= 4 ? 250 : 500;
   if (HEAVY_TOOLS.has(toolId)) return Math.min(baseMB, 200) * MB;

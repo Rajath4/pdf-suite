@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { baseName, classifyMergeFile, fileLimitBytes, fmtMonth, formatBytes, isPdfName, pageWeight, pageWeightHint, parseProgress, pushRecent, readMinutes, withExt } from './fileUtils.js';
+import { describe, expect, it, vi, afterEach } from 'vitest';
+import { baseName, classifyMergeFile, fileLimitBytes, fastPathCapBytes, fmtMonth, formatBytes, isPdfName, pageWeight, pageWeightHint, parseProgress, pushRecent, readMinutes, withExt } from './fileUtils.js';
 
 describe('formatBytes', () => {
   it('formats bytes, KB and MB', () => {
@@ -94,12 +94,24 @@ describe('fmtMonth', () => {
 });
 
 describe('fileLimitBytes', () => {
+  afterEach(() => vi.unstubAllGlobals());
   // Node has no deviceMemory → unknown-device branch (250 MB base).
   it('caps raster-heavy tools lower than shuffling tools', () => {
     expect(fileLimitBytes('merge')).toBe(250 * 1024 * 1024);
-    expect(fileLimitBytes('compress')).toBe(200 * 1024 * 1024);
     expect(fileLimitBytes('ocr')).toBe(200 * 1024 * 1024);
     expect(fileLimitBytes('')).toBe(250 * 1024 * 1024);
+    expect(fastPathCapBytes('compress')).toBe(200 * 1024 * 1024);
+  });
+
+  it('gives Compress a streaming ceiling above the fast cap', () => {
+    // Unknown device → middle ceiling; fast path unchanged.
+    expect(fileLimitBytes('compress')).toBe(500 * 1024 * 1024);
+    vi.stubGlobal('navigator', { deviceMemory: 8 });
+    expect(fileLimitBytes('compress')).toBe(1024 * 1024 * 1024);
+    expect(fastPathCapBytes('compress')).toBe(200 * 1024 * 1024);
+    // Low-RAM phones stay on the fast cap — streaming would thrash.
+    vi.stubGlobal('navigator', { deviceMemory: 1 });
+    expect(fileLimitBytes('compress')).toBe(100 * 1024 * 1024);
   });
 });
 

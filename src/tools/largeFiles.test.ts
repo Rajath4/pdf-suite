@@ -1,5 +1,29 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { runTool } from './actions.js';
+
+// Node 20 ships File/Blob but no FileReader (browser-only); the app's
+// readAsArrayBuffer uses it, so shim the one method the tests exercise.
+if (typeof globalThis.FileReader === 'undefined') {
+  class FakeFileReader {
+    result: ArrayBuffer | null = null;
+    error: unknown = null;
+    onload: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    readAsArrayBuffer(blob: Blob) {
+      void (blob as Blob).arrayBuffer().then(
+        (buf) => {
+          this.result = buf;
+          this.onload?.();
+        },
+        (e) => {
+          this.error = e;
+          this.onerror?.();
+        },
+      );
+    }
+  }
+  vi.stubGlobal('FileReader', FakeFileReader);
+}
 
 const prog = () => {};
 
@@ -68,5 +92,36 @@ describe('large-files tool end to end', () => {
     await expect(
       runTool('large-files', { files: [file], opts: { mode: 'join' }, onProgress: prog }),
     ).rejects.toThrow(/at least 2/i);
+  });
+});
+
+describe('compress adaptive dispatch', () => {
+  const prog = () => {};
+
+  async function tinyPdf(): Promise<File> {
+    const { PDFDocument } = await import('pdf-lib');
+    const doc = await PDFDocument.create();
+    doc.addPage([300, 300]);
+    const bytes = await doc.save();
+    return new File([new Uint8Array(bytes)], 'tiny.pdf', { type: 'application/pdf' });
+  }
+
+  it('keeps small lossless files on the fast path', async () => {
+    const outs = await runTool('compress', {
+      files: [await tinyPdf()],
+      opts: { preset: 'lossless' },
+      onProgress: prog,
+    });
+    expect(outs).toHaveLength(1);
+    expect(outs[0].filename).toBe('tiny-compressed.pdf');
+  });
+
+  it('refuses oversized lossless with a streaming pointer', async () => {
+    const f = await tinyPdf();
+    // Fake the size: dispatch reads size, lossless never touches bytes.
+    Object.defineProperty(f, 'size', { value: 800 * 1024 * 1024 });
+    await expect(
+      runTool('compress', { files: [f], opts: { preset: 'lossless' }, onProgress: prog }),
+    ).rejects.toThrow(/lossless re-save caps/i);
   });
 });

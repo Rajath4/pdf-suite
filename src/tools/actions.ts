@@ -19,8 +19,8 @@ import {
   renderAllPages, extractAllText, extractStyledLines, canvasToBlob, invertCanvas, tintCanvas,
   openRangedDoc,
 } from '../lib/pdfRender.js';
-import { baseName, loadImageElement, readAsArrayBuffer, readAsText, classifyMergeFile, pageWeight, pageWeightHint } from '../lib/fileUtils.js';
-import { LARGE_FILE_MAX_BYTES, chunkFileName, inspectLargeFile, parseChunkMB, parsePagesPerFile, planBatches, planChunks, rejoinFileName, shrinkPresetCfg } from '../lib/largeFiles.js';
+import { baseName, fastPathCapBytes, fileLimitBytes, formatBytes, loadImageElement, readAsArrayBuffer, readAsText, classifyMergeFile, pageWeight, pageWeightHint } from '../lib/fileUtils.js';
+import { LARGE_FILE_MAX_BYTES, chooseCompressPath, chunkFileName, inspectLargeFile, parseChunkMB, parsePagesPerFile, planBatches, planChunks, rejoinFileName, shrinkPresetCfg } from '../lib/largeFiles.js';
 
 // Office-format engines (docx / mammoth / xlsx) are heavy and rarely needed —
 // load them on demand so the main tool chunk stays lean.
@@ -31,6 +31,59 @@ const loadPptx = () => import('pptxgenjs');
 async function dataUrlToBytes(dataUrl: string): Promise<Uint8Array> {
   const res = await fetch(dataUrl);
   return new Uint8Array(await res.arrayBuffer());
+}
+
+/**
+ * Streaming lossy compress shared by Compress (adaptive large-file path) and
+ * Large Files → Shrink. Ranged open (no full load), one bitmap in RAM at a
+ * time, one valid PDF per batch. Practical ceiling ~1 GB — every page must
+ * still be decoded once, so time (not just RAM) bounds it.
+ */
+export async function shrinkStream(
+  f: File,
+  opts: {
+    preset: string;
+    perFile: number;
+    onProgress: (msg: string) => void;
+    auto?: boolean;
+    targetNote?: string;
+  },
+): Promise<ActionOut[]> {
+  const label = opts.preset;
+  const cfg = shrinkPresetCfg(label);
+  opts.onProgress(opts.auto ? 'Large-file mode: opening without loading…' : 'Opening without loading…');
+  const ranged = await openRangedDoc(f);
+  try {
+    const batches = planBatches(ranged.numPages, opts.perFile);
+    const outs: ActionOut[] = [];
+    for (const b of batches) {
+      const doc = await PDFDocument.create();
+      for (let p = b.startPage; p <= b.endPage; p++) {
+        opts.onProgress(`Shrinking ${p}/${ranged.numPages}…`);
+        const canvas = await ranged.renderPage(p, cfg.scale);
+        try {
+          const blob = await canvasToBlob(canvas, 'image/jpeg', cfg.q);
+          const img = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+          const page = doc.addPage([img.width, img.height]);
+          page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+        } finally {
+          canvas.width = 0; // drop the bitmap immediately
+        }
+      }
+      const data = await doc.save({ useObjectStreams: true });
+      const suffix = batches.length === 1 ? 'shrunk' : `shrunk-p${b.startPage}-${b.endPage}`;
+      outs.push({
+        blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }),
+        filename: `${baseName(f.name)}-${suffix}.pdf`,
+        note: b.index === 1
+          ? `${opts.auto ? 'Large-file mode auto-enabled: ' : ''}${ranged.numPages} pages rasterized (${label} quality) into ${batches.length} file(s). Text is not selectable — that is the size tradeoff.${opts.targetNote ?? ''}`
+          : undefined,
+      });
+    }
+    return outs;
+  } finally {
+    await ranged.destroy();
+  }
 }
 
 export interface Ctx {
@@ -207,7 +260,27 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
     case 'compress': {
       need(ctx, 1);
       const preset = ctx.opts.preset ?? 'medium';
-      const bytes = await pdfBytes(ctx.files[0]);
+      const f = ctx.files[0];
+      // Adaptive dispatch: small files take the fast in-memory path; files
+      // over the fast cap stream page-by-page (ranged open, one bitmap at a
+      // time) instead of refusing them. Upload caps already enforce the ceiling.
+      const path = chooseCompressPath(f.size, fastPathCapBytes('compress'), preset, fileLimitBytes('compress'));
+      if (path === 'reject') {
+        if (preset === 'lossless') {
+          throw new UserError(`"${f.name}" is ${formatBytes(f.size)} — lossless re-save caps at ${formatBytes(fastPathCapBytes('compress'))} on this device because it must hold the whole document. Use a lossy preset (large files stream automatically) or split first.`);
+        }
+        throw new UserError(`"${f.name}" is ${formatBytes(f.size)} — over the ${formatBytes(fileLimitBytes('compress'))} Compress ceiling on this device. Try Large File Split & Join to break it up first.`);
+      }
+      if (path === 'stream') {
+        return shrinkStream(f, {
+          preset: preset === 'target' ? 'medium' : preset,
+          perFile: 50,
+          onProgress: ctx.onProgress,
+          auto: true,
+          targetNote: preset === 'target' ? ` Exact MB target is unavailable at this size — medium quality batches instead.` : '',
+        });
+      }
+      const bytes = await pdfBytes(f);
       if (preset === 'lossless') {
         ctx.onProgress('Re-saving with object streams…');
         const data = await losslessResave(bytes);
@@ -808,44 +881,11 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
         }];
       }
       if (mode === 'shrink') {
-        // Streaming lossy compress: ranged open (no full load), one bitmap in
-        // RAM at a time, valid-PDF output per batch. Practical ceiling ~1 GB —
-        // every page must still be decoded once, so time (not just RAM) bounds it.
-        const cfg = shrinkPresetCfg(ctx.opts.shrinkPreset ?? 'medium');
-        const perFile = parsePagesPerFile(ctx.opts.pagesPerFile);
-        ctx.onProgress('Opening without loading…');
-        const ranged = await openRangedDoc(f);
-        try {
-          const batches = planBatches(ranged.numPages, perFile);
-          const outs: ActionOut[] = [];
-          for (const b of batches) {
-            const doc = await PDFDocument.create();
-            for (let p = b.startPage; p <= b.endPage; p++) {
-              ctx.onProgress(`Shrinking ${p}/${ranged.numPages}…`);
-              const canvas = await ranged.renderPage(p, cfg.scale);
-              try {
-                const blob = await canvasToBlob(canvas, 'image/jpeg', cfg.q);
-                const img = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
-                const page = doc.addPage([img.width, img.height]);
-                page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
-              } finally {
-                canvas.width = 0; // drop the bitmap immediately
-              }
-            }
-            const data = await doc.save({ useObjectStreams: true });
-            const suffix = batches.length === 1 ? 'shrunk' : `shrunk-p${b.startPage}-${b.endPage}`;
-            outs.push({
-              blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }),
-              filename: `${baseName(f.name)}-${suffix}.pdf`,
-              note: b.index === 1
-                ? `${ranged.numPages} pages rasterized (${ctx.opts.shrinkPreset ?? 'medium'} quality) into ${batches.length} file(s). Text is not selectable — that is the size tradeoff.`
-                : undefined,
-            });
-          }
-          return outs;
-        } finally {
-          await ranged.destroy();
-        }
+        return shrinkStream(f, {
+          preset: ctx.opts.shrinkPreset ?? 'medium',
+          perFile: parsePagesPerFile(ctx.opts.pagesPerFile),
+          onProgress: ctx.onProgress,
+        });
       }
       // split — pure Blob.slice views, zero-copy, constant memory at any size.
       const plans = planChunks(f.size, chunkMB * 1024 * 1024);

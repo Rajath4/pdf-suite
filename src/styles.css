@@ -325,6 +325,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 
 .opts { display: grid; gap: 12px; margin: 14px 0; }
 .field { display: grid; gap: 6px; font-size: 0.92rem; }
+.field[hidden] { display: none; }
 .field-label { font-weight: 650; }
 
 /* Tactile buttons */

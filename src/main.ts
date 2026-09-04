@@ -950,7 +950,7 @@ function homePage(): HTMLElement {
     el('span', { class: 'stage-icon', 'aria-hidden': 'true' }, '⤓'),
     el('span', {},
       el('strong', {}, 'Drop a PDF here to start'),
-      el('span', { class: 'muted' }, ` — then pick what to do with it. Max ${formatBytes(fileLimitBytes())} per file on this device.`),
+      el('span', { class: 'muted' }, ` — then pick what to do with it. Files up to ${formatBytes(LARGE_FILE_MAX_BYTES)} accepted here; each tool states its own cap on arrival.`),
     ),
   );
   stageZone.append(stageInput);
@@ -1237,7 +1237,7 @@ function homePage(): HTMLElement {
   faq.append(el('h2', {}, 'How it works'));
   const items: [string, string][] = [
     ['Are my files uploaded anywhere?', 'No. Every tool runs with JavaScript in your tab. Prove it: load any tool, then turn on airplane mode — everything still works.'],
-    ['Is there a watermark or limit?', 'No watermark, no account, no daily cap. Per-file size adapts to your device (up to 500 MB on desktops) to keep the tab stable.'],
+    ['Is there a watermark or limit?', 'No watermark, no account, no daily cap. Per-file size adapts to your device and tool (up to 1 GB for Compress, 6 GB for Large File Split & Join on desktops) to keep the tab stable.'],
     ['Which tools are included?', '37 tools: merge with page ranges and photos, split, compress to exact sizes, sign, annotate, crop, fill forms, convert to and from Word, Excel, and PowerPoint, OCR in 14 languages, protect and unlock, redact, extract text and images, compare, repair, scan, large-file split, shrink and join — plus step-by-step guides.'],
     ['Password-protected PDFs?', 'Unlock first with Security → Unlock PDF, then use any other tool, then re-protect if needed.'],
   ];
@@ -1367,7 +1367,7 @@ function toolPage(id: string): HTMLElement {
     for (const f of next) {
       if (f.size > cap) {
         setStatus(
-          `"${f.name}" is ${formatBytes(f.size)} — over the ${formatBytes(cap)} per-file limit for ${current.title} on this device. Split it first, or use a desktop on larger files.`,
+          `"${f.name}" is ${formatBytes(f.size)} — over the ${formatBytes(cap)} per-file limit for ${current.title} on this device. Try Large File Split & Join (up to 6 GB), or use a desktop for larger files.`,
           'error',
         );
         continue;
@@ -1931,16 +1931,30 @@ function buildOptions(
       add('Pages per file · chunks only', 'size', textInput('5', '', 'number'));
       add('MB per file · by-size only', 'targetMB', textInput('5', '', 'number'));
       break;
-    case 'compress':
-      add('Preset', 'preset', selectInput([
+    case 'compress': {
+      const presetSel = selectInput([
         { value: 'light', label: 'Light — best quality' },
         { value: 'medium', label: 'Medium — balanced (recommended)' },
         { value: 'heavy', label: 'Heavy — smallest file' },
         { value: 'target', label: 'Target size — e.g. under 1 MB for portals' },
         { value: 'lossless', label: 'Lossless — re-save only (keeps text sharp)' },
-      ], 'medium'));
-      add('Target size in MB', 'targetMB', textInput('1', '', 'number'));
+      ], 'medium');
+      bag['preset'] = presetSel;
+      box.append(field('Preset', presetSel));
+      const targetInput = textInput('1', '', 'number');
+      bag['targetMB'] = targetInput;
+      const targetRow = field('Target size in MB', targetInput);
+      box.append(targetRow);
+      // Target size applies to one preset only — keep it hidden otherwise so
+      // users never wonder what it does for Light/Medium/Heavy/Lossless.
+      const syncTargetRow = () => {
+        targetRow.hidden = presetSel.value !== 'target';
+      };
+      presetSel.addEventListener('change', syncTargetRow);
+      syncTargetRow();
+      box.append(el('p', { class: 'muted' }, 'Files over the fast-path cap switch to large-file streaming mode automatically (rasterized batches, ~1 GB ceiling). Lossless stays capped — it must hold the whole document.'));
       break;
+    }
     case 'pdf-to-jpg':
       add('Image format', 'format', selectInput([
         { value: 'jpg', label: 'JPG (smaller)' },
@@ -2101,22 +2115,43 @@ function buildOptions(
         { value: 'sepia', label: 'Sepia' },
       ], 'dark'));
       break;
-    case 'large-files':
-      add('Mode', 'mode', selectInput([
+    case 'large-files': {
+      const modeSel = selectInput([
         { value: 'split', label: 'Split into chunks (5 GB+ safe)' },
         { value: 'join', label: 'Rejoin chunks in order' },
         { value: 'inspect', label: 'Inspect giant file (no-load check)' },
         { value: 'shrink', label: 'Shrink giant PDF (~1 GB max, rasterized)' },
-      ], 'split'));
-      add('MB per chunk · split/inspect only (5–2000)', 'chunkMB', textInput('100', '25 for email, 100 default', 'number'));
-      add('Quality · shrink only', 'shrinkPreset', selectInput([
+      ], 'split');
+      bag['mode'] = modeSel;
+      box.append(field('Mode', modeSel));
+      const chunkInput = textInput('100', '25 for email, 100 default', 'number');
+      bag['chunkMB'] = chunkInput;
+      const chunkRow = field('MB per chunk · split/inspect only (5–2000)', chunkInput);
+      box.append(chunkRow);
+      const shrinkSel = selectInput([
         { value: 'light', label: 'Light — best quality' },
         { value: 'medium', label: 'Medium — balanced (recommended)' },
         { value: 'heavy', label: 'Heavy — smallest file' },
-      ], 'medium'));
-      add('Pages per file · shrink only (10–200)', 'pagesPerFile', textInput('50', '', 'number'));
+      ], 'medium');
+      bag['shrinkPreset'] = shrinkSel;
+      const shrinkRow = field('Quality · shrink only', shrinkSel);
+      box.append(shrinkRow);
+      const ppfInput = textInput('50', '', 'number');
+      bag['pagesPerFile'] = ppfInput;
+      const ppfRow = field('Pages per file · shrink only (10–200)', ppfInput);
+      box.append(ppfRow);
+      // Same rule as Compress: each option shows only for the mode it belongs to.
+      const syncLargeRows = () => {
+        const m = modeSel.value;
+        chunkRow.hidden = !(m === 'split' || m === 'inspect');
+        shrinkRow.hidden = m !== 'shrink';
+        ppfRow.hidden = m !== 'shrink';
+      };
+      modeSel.addEventListener('change', syncLargeRows);
+      syncLargeRows();
       box.append(el('p', { class: 'muted' }, 'Chunks are transport copies, not valid PDFs — rejoin here before opening. Upload order = chunk order for Join. Shrink rebuilds pages as images, so text is no longer selectable.'));
       break;
+    }
     default:
       break;
   }
