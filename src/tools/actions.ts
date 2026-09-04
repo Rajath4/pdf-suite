@@ -17,8 +17,10 @@ import {
 } from '../lib/pdfCore.js';
 import {
   renderAllPages, extractAllText, extractStyledLines, canvasToBlob, invertCanvas, tintCanvas,
+  openRangedDoc,
 } from '../lib/pdfRender.js';
 import { baseName, loadImageElement, readAsArrayBuffer, readAsText, classifyMergeFile, pageWeight, pageWeightHint } from '../lib/fileUtils.js';
+import { LARGE_FILE_MAX_BYTES, chunkFileName, inspectLargeFile, parseChunkMB, parsePagesPerFile, planBatches, planChunks, rejoinFileName, shrinkPresetCfg } from '../lib/largeFiles.js';
 
 // Office-format engines (docx / mammoth / xlsx) are heavy and rarely needed —
 // load them on demand so the main tool chunk stays lean.
@@ -773,6 +775,98 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
       );
       const data = await imagesToPdf(imgs, { pageSize: 'a4', orientation: 'auto', marginPt: 24 });
       return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: 'scan.pdf' }];
+    }
+    case 'large-files': {
+      const mode = (ctx.opts.mode ?? 'split') as 'split' | 'join' | 'inspect' | 'shrink';
+      const chunkMB = parseChunkMB(ctx.opts.chunkMB);
+      if (mode === 'join') {
+        if (ctx.files.length < 2) throw new UserError('Upload at least 2 chunk files (.part001, .part002…) in order, then Run.');
+        for (const f of ctx.files) {
+          if (f.size > LARGE_FILE_MAX_BYTES) throw new UserError(`"${f.name}" exceeds the 6 GB large-file ceiling.`);
+        }
+        const total = ctx.files.reduce((a, f) => a + f.size, 0);
+        ctx.onProgress(`Joining ${ctx.files.length}/${ctx.files.length}…`);
+        const filename = rejoinFileName(ctx.files[0].name);
+        const blob = new Blob(ctx.files, { type: /\.pdf$/i.test(filename) ? 'application/pdf' : 'application/octet-stream' });
+        return [{
+          blob,
+          filename,
+          note: `Rejoined ${ctx.files.length} chunks in upload order (${(total / 1024 / 1024).toFixed(1)} MB total). If the result won't open, the chunks are out of order or one is missing — re-upload them sorted by name.`,
+        }];
+      }
+      need(ctx, 1);
+      const f = ctx.files[0];
+      if (f.size > LARGE_FILE_MAX_BYTES) throw new UserError(`"${f.name}" exceeds the 6 GB large-file ceiling.`);
+      if (mode === 'inspect') {
+        ctx.onProgress('Reading header + trailer…');
+        const out = await inspectLargeFile(f, chunkMB);
+        return [{
+          blob: new Blob([out.reportText], { type: 'text/plain' }),
+          filename: `${baseName(f.name)}-large-file-report.txt`,
+          note: out.note,
+          previewText: out.reportText,
+        }];
+      }
+      if (mode === 'shrink') {
+        // Streaming lossy compress: ranged open (no full load), one bitmap in
+        // RAM at a time, valid-PDF output per batch. Practical ceiling ~1 GB —
+        // every page must still be decoded once, so time (not just RAM) bounds it.
+        const cfg = shrinkPresetCfg(ctx.opts.shrinkPreset ?? 'medium');
+        const perFile = parsePagesPerFile(ctx.opts.pagesPerFile);
+        ctx.onProgress('Opening without loading…');
+        const ranged = await openRangedDoc(f);
+        try {
+          const batches = planBatches(ranged.numPages, perFile);
+          const outs: ActionOut[] = [];
+          for (const b of batches) {
+            const doc = await PDFDocument.create();
+            for (let p = b.startPage; p <= b.endPage; p++) {
+              ctx.onProgress(`Shrinking ${p}/${ranged.numPages}…`);
+              const canvas = await ranged.renderPage(p, cfg.scale);
+              try {
+                const blob = await canvasToBlob(canvas, 'image/jpeg', cfg.q);
+                const img = await doc.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+                const page = doc.addPage([img.width, img.height]);
+                page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+              } finally {
+                canvas.width = 0; // drop the bitmap immediately
+              }
+            }
+            const data = await doc.save({ useObjectStreams: true });
+            const suffix = batches.length === 1 ? 'shrunk' : `shrunk-p${b.startPage}-${b.endPage}`;
+            outs.push({
+              blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }),
+              filename: `${baseName(f.name)}-${suffix}.pdf`,
+              note: b.index === 1
+                ? `${ranged.numPages} pages rasterized (${ctx.opts.shrinkPreset ?? 'medium'} quality) into ${batches.length} file(s). Text is not selectable — that is the size tradeoff.`
+                : undefined,
+            });
+          }
+          return outs;
+        } finally {
+          await ranged.destroy();
+        }
+      }
+      // split — pure Blob.slice views, zero-copy, constant memory at any size.
+      const plans = planChunks(f.size, chunkMB * 1024 * 1024);
+      if (plans.length <= 1) {
+        return [{
+          blob: f.slice(0, f.size, 'application/octet-stream'),
+          filename: chunkFileName(f.name, 1),
+          note: `Already under ${chunkMB} MB — single chunk. Nothing was re-encoded.`,
+        }];
+      }
+      return plans.map((p) => {
+        ctx.onProgress(`Chunk ${p.index}/${plans.length}…`);
+        const blob = f.slice(p.start, p.end, 'application/octet-stream');
+        return {
+          blob,
+          filename: chunkFileName(f.name, p.index),
+          note: p.index === 1
+            ? `${plans.length} chunks of ~${chunkMB} MB. Transport only — NOT valid PDFs alone. Rejoin here (Join mode, same order) before opening.`
+            : undefined,
+        };
+      });
     }
     default:
       throw new UserError(`Unknown tool "${id}".`);

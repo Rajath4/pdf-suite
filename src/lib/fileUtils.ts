@@ -108,6 +108,8 @@ export function pushRecent(list: string[], id: string, max = 5): string[] {
   return [id, ...list.filter((x) => x !== id)].slice(0, Math.max(1, max));
 }
 
+import { LARGE_FILE_MAX_BYTES } from './largeFiles.js';
+
 /**
  * Why any cap exists: a PDF explodes in memory — pdf-lib's object model runs
  * 2–5× file size in JS heap, and one 300-DPI page bitmap is ~35 MB. Mobile
@@ -133,6 +135,9 @@ export function deviceMemoryGB(): number | null {
 }
 
 export function fileLimitBytes(toolId = ''): number {
+  // Streaming large-file tools never hold the file (Blob.slice views + tiny
+  // head/tail reads), so they scale to disk size instead of tab RAM.
+  if (toolId === 'large-files') return LARGE_FILE_MAX_BYTES;
   const dm = deviceMemoryGB();
   const baseMB = dm == null ? 250 : dm <= 2 ? 100 : dm <= 4 ? 250 : 500;
   if (HEAVY_TOOLS.has(toolId)) return Math.min(baseMB, 200) * MB;

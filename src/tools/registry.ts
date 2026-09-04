@@ -47,6 +47,7 @@ export const TOOLS: ToolDef[] = [
   // Utilities
   { id: 'compare', title: 'Compare PDFs', description: 'View two PDFs side-by-side with synced scrolling.', category: 'View & Utilities', icon: '⚖', accept: 'application/pdf,.pdf', multiple: true },
   { id: 'repair', title: 'Repair PDF', description: 'Recover readable pages from a damaged PDF.', category: 'View & Utilities', icon: '🛠', accept: 'application/pdf,.pdf', multiple: false },
+  { id: 'large-files', title: 'Large File Split & Join', description: 'Split giant files into email-size chunks, shrink huge PDFs, and rejoin byte-identical. Streams to 6 GB.', category: 'View & Utilities', icon: '📦', accept: 'application/pdf,.pdf', multiple: true },
   { id: 'scan', title: 'Scan to PDF', description: 'Use your camera as a scanner and save as PDF.', category: 'View & Utilities', icon: '📡', accept: 'image/*', multiple: true },
 ];
 
@@ -97,6 +98,7 @@ export const TOOL_SLUGS: Record<string, string> = {
   'html-to-pdf': 'html-to-pdf',
   compare: 'compare-pdfs',
   repair: 'repair-pdf',
+  'large-files': 'large-file-split-join',
   scan: 'scan-to-pdf',
 };
 
@@ -149,6 +151,7 @@ export const NEXT_TOOLS: Record<string, string[]> = {
   'html-to-pdf': ['merge', 'compress'],
   compare: ['merge'],
   repair: ['split', 'compress'],
+  'large-files': ['split', 'merge', 'compress'],
   scan: ['merge', 'ocr', 'compress'],
 };
 

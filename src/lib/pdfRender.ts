@@ -20,6 +20,69 @@ async function openDoc(bytes: ArrayBuffer, password?: string) {
   }).promise;
 }
 
+/**
+ * Constant-memory opening for GB-scale files. Instead of copying the whole
+ * file into the worker (openDoc above), only the first 512 KB is sent upfront
+ * and every further byte range is served on demand from Blob.slice() views —
+ * zero-copy, nothing materialized on the main thread. Pair with
+ * disableAutoFetch so the worker fetches only pages you actually visit.
+ * Full-document walks still accumulate ~1x file size in the worker, which is
+ * why lossy large-file work caps around ~1 GB (see large-files Shrink mode).
+ */
+export interface RangedSource {
+  readonly size: number;
+  slice(start: number, end: number): Blob;
+}
+
+export interface RangedDoc {
+  numPages: number;
+  renderPage(pageNumber: number, scale: number): Promise<HTMLCanvasElement>;
+  destroy(): Promise<void>;
+}
+
+export async function openRangedDoc(source: RangedSource, password?: string): Promise<RangedDoc> {
+  const FIRST = 512 * 1024;
+  const head = new Uint8Array(
+    await source.slice(0, Math.min(FIRST, source.size)).arrayBuffer(),
+  );
+  // pdf.js pulls ranges by calling requestDataRange on our transport; we serve
+  // each from a Blob.slice() view. Nothing is copied until requested.
+  class FileRangeTransport extends pdfjsLib.PDFDataRangeTransport {
+    override async requestDataRange(begin: number, end: number): Promise<void> {
+      const buf = await source.slice(begin, Math.min(end, source.size)).arrayBuffer();
+      this.onDataRange(begin, new Uint8Array(buf));
+    }
+  }
+  const transport = new FileRangeTransport(source.size, head);
+  const doc = await pdfjsLib.getDocument({
+    range: transport,
+    password: password ?? '',
+    isEvalSupported: false,
+    disableAutoFetch: true,
+  }).promise;
+  return {
+    numPages: doc.numPages,
+    renderPage: async (pageNumber: number, scale: number) => {
+      const page = await doc.getPage(pageNumber);
+      try {
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas 2D not supported.');
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        return canvas;
+      } finally {
+        page.cleanup();
+      }
+    },
+    destroy: async () => {
+      await doc.destroy();
+    },
+  };
+}
+
 export async function getPageCount(bytes: ArrayBuffer): Promise<number> {
   const doc = await openDoc(bytes);
   const n = doc.numPages;

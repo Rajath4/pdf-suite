@@ -2,6 +2,7 @@ import './styles.css';
 import { CATEGORIES, TOOLS, getTool, searchTools, toolSlug, toolIdFromSlug, nextTools } from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
 import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent, isPdfName, readMinutes, fmtMonth, fileLimitBytes } from './lib/fileUtils.js';
+import { LARGE_FILE_MAX_BYTES } from './lib/largeFiles.js';
 import { UserError } from './types.js';
 import type { ToolDef } from './types.js';
 import { registerSW } from 'virtual:pwa-register';
@@ -974,7 +975,7 @@ function homePage(): HTMLElement {
       });
       row.append(b);
     }
-    const all = el('button', { class: 'btn small', type: 'button' }, 'All 36 tools ↓');
+    const all = el('button', { class: 'btn small', type: 'button' }, 'All 37 tools ↓');
     all.addEventListener('click', () => {
       stageFilesForTool(files);
       document.getElementById('tool-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -991,7 +992,9 @@ function homePage(): HTMLElement {
   };
   const takeStaged = (list: FileList | null | undefined) => {
     if (!list || list.length === 0) return;
-    const cap = fileLimitBytes();
+    // Homepage staging allows up to the streaming large-file ceiling — each
+    // tool page re-validates against its own (usually lower) cap on arrival.
+    const cap = LARGE_FILE_MAX_BYTES;
     const files = [...list].filter((f) => {
       if (f.size > cap) {
         showToast(`"${f.name}" exceeds the ${formatBytes(cap)} per-file limit on this device and was skipped.`);
@@ -1094,7 +1097,7 @@ function homePage(): HTMLElement {
 
   const gridRoot = el('div', { id: 'tool-grid' });
 
-  // Category pills: 36 tools need scoping, not just search.
+  // Category pills: 37 tools need scoping, not just search.
   let activeCat = 'All';
   const pills = el('div', { class: 'pills', role: 'tablist', 'aria-label': 'Filter by category' });
   const paintPills = () => {
@@ -1235,7 +1238,7 @@ function homePage(): HTMLElement {
   const items: [string, string][] = [
     ['Are my files uploaded anywhere?', 'No. Every tool runs with JavaScript in your tab. Prove it: load any tool, then turn on airplane mode — everything still works.'],
     ['Is there a watermark or limit?', 'No watermark, no account, no daily cap. Per-file size adapts to your device (up to 500 MB on desktops) to keep the tab stable.'],
-    ['Which tools are included?', '36 tools: merge with page ranges and photos, split, compress to exact sizes, sign, annotate, crop, fill forms, convert to and from Word, Excel, and PowerPoint, OCR in 14 languages, protect and unlock, redact, extract text and images, compare, repair, scan — plus step-by-step guides.'],
+    ['Which tools are included?', '37 tools: merge with page ranges and photos, split, compress to exact sizes, sign, annotate, crop, fill forms, convert to and from Word, Excel, and PowerPoint, OCR in 14 languages, protect and unlock, redact, extract text and images, compare, repair, scan, large-file split, shrink and join — plus step-by-step guides.'],
     ['Password-protected PDFs?', 'Unlock first with Security → Unlock PDF, then use any other tool, then re-protect if needed.'],
   ];
   for (const [q, a] of items) {
@@ -1455,6 +1458,9 @@ function toolPage(id: string): HTMLElement {
   // Best-effort and async — never blocks the UI or fails the flow.
   let countToken = 0;
   async function annotatePageCounts(): Promise<void> {
+    // Large-file tools stream without ever loading the file — probing the page
+    // count would defeat that by pulling gigabytes into RAM. Skip silently.
+    if (current.id === 'large-files') return;
     if (!current.accept.includes('pdf') || state.files.length === 0) return;
     const token = ++countToken;
     const snapshot = [...state.files];
@@ -2094,6 +2100,22 @@ function buildOptions(
         { value: 'grayscale', label: 'Grayscale (print-friendly)' },
         { value: 'sepia', label: 'Sepia' },
       ], 'dark'));
+      break;
+    case 'large-files':
+      add('Mode', 'mode', selectInput([
+        { value: 'split', label: 'Split into chunks (5 GB+ safe)' },
+        { value: 'join', label: 'Rejoin chunks in order' },
+        { value: 'inspect', label: 'Inspect giant file (no-load check)' },
+        { value: 'shrink', label: 'Shrink giant PDF (~1 GB max, rasterized)' },
+      ], 'split'));
+      add('MB per chunk · split/inspect only (5–2000)', 'chunkMB', textInput('100', '25 for email, 100 default', 'number'));
+      add('Quality · shrink only', 'shrinkPreset', selectInput([
+        { value: 'light', label: 'Light — best quality' },
+        { value: 'medium', label: 'Medium — balanced (recommended)' },
+        { value: 'heavy', label: 'Heavy — smallest file' },
+      ], 'medium'));
+      add('Pages per file · shrink only (10–200)', 'pagesPerFile', textInput('50', '', 'number'));
+      box.append(el('p', { class: 'muted' }, 'Chunks are transport copies, not valid PDFs — rejoin here before opening. Upload order = chunk order for Join. Shrink rebuilds pages as images, so text is no longer selectable.'));
       break;
     default:
       break;

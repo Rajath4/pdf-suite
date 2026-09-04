@@ -12,7 +12,7 @@
    ],
    [
     "Can I use PDF Suite offline?",
-    "Yes. After your first visit, install the app and all 36 tools work without internet — on planes, in offices with strict firewalls, anywhere."
+    "Yes. After your first visit, install the app and all 37 tools work without internet — on planes, in offices with strict firewalls, anywhere."
    ]
   ],
   "h1": "Free Online PDF Tools — Private, Unlimited, No Signup",
@@ -1127,7 +1127,44 @@
     "Optionally add existing photos",
     "Click Run and download the scan"
    ],
-   "title": "Scan to PDF Free — Phone Camera Scanner | PDF Suite"
-  }
- ]
+    "title": "Scan to PDF Free — Phone Camera Scanner | PDF Suite"
+   },
+   {
+    "description": "Split giant PDFs into email-size chunks, shrink huge PDFs without loading them, and rejoin byte-identical. Streams files to 6 GB.",
+    "faqs": [
+     [
+      "Can I split a 5 GB PDF in the browser?",
+      "Yes. Chunks are byte slices streamed straight to download — the file never enters tab memory, so sizes up to 6 GB work offline."
+     ],
+     [
+      "Are the chunks valid PDFs I can open?",
+      "No. Chunks are transport copies for email and upload portals. Rejoin them here in the same order before opening."
+     ],
+     [
+      "How do I rejoin chunks correctly?",
+      "Upload every .part001, .part002 file in numeric order with Join mode. Missing or shuffled parts produce a file that will not open."
+     ],
+     [
+      "What does Inspect mode check without loading?",
+      "It reads only the first 64 KB and last 512 KB to verify the %PDF header and startxref trailer, then suggests a chunk size."
+     ],
+     [
+      "How does Shrink handle a 1 GB PDF without crashing?",
+      "It opens the file through on-demand byte ranges, renders one page at a time, and emits valid PDFs every 50 pages — memory stays flat. Output pages are images, so text is not selectable."
+     ]
+    ],
+    "h1": "Large File Split & Join Free — Handle GB Files",
+    "id": "large-files",
+    "intro": "Email portals choke on gigabyte PDFs. Binary-split them into small chunks for transport, shrink huge PDFs page-by-page without loading them, then rejoin byte-identical copies here — plus a no-load inspector that checks giant files without opening them.",
+    "slug": "large-file-split-join",
+    "steps": [
+     "Open this tool directly (not the homepage) for files over 250 MB",
+     "Split: upload one giant file, set MB per chunk, Run, download parts",
+     "Join: upload all parts in numeric order, Run, download the rejoined file",
+     "Shrink: pick quality and pages per file to compress a huge PDF in batches",
+     "Inspect: check header and trailer health before moving gigabytes around"
+    ],
+    "title": "Split Large PDF Files Free — 6 GB Chunks | PDF Suite"
+   }
+  ]
 }
