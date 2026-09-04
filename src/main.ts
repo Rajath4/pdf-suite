@@ -186,10 +186,15 @@ function showToast(msg: string, actionLabel?: string, onAction?: () => void): vo
 }
 
 function offlineDot(): HTMLElement {
-  const dot = el('span', { class: 'netdot', title: navigator.onLine ? 'Online' : 'Offline — app still works' });
+  // Shown ONLY while offline: when online it added noise and confused the
+  // offline story ("it says online — are my files uploading?"). Offline,
+  // it becomes live proof the app keeps working.
+  const dot = el('span', { class: 'netdot', title: 'You are offline — the app keeps working' });
   const paint = () => {
-    dot.textContent = navigator.onLine ? '● online' : '● offline-ready';
-    dot.dataset['off'] = String(!navigator.onLine);
+    const off = !navigator.onLine;
+    dot.hidden = !off;
+    dot.textContent = '● Offline — app still works';
+    dot.dataset['off'] = String(off);
   };
   paint();
   window.addEventListener('online', paint);

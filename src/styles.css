@@ -89,6 +89,10 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Full-bleed decorations (hero wash) extend past the reading width;
+     clip keeps sub-pixel vw rounding from creating a sideways scrollbar.
+     `clip` (unlike `hidden`) preserves position: sticky. */
+  overflow-x: clip;
 }
 
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
@@ -132,7 +136,11 @@ main { animation: rise 0.28s var(--ease-out); }
 /* ---------- Hero ---------- */
 .hero { padding: 52px 0 10px; position: relative; }
 .hero::before {
-  content: ""; position: absolute; inset: -20px 0 auto 0; height: 340px; z-index: -1;
+  content: ""; position: absolute; top: -20px; height: 340px; z-index: -1;
+  /* Break out of the centered reading column so the wash spans the full
+     viewport instead of ending in hard cuts at the content edges. */
+  left: calc(50% - 50vw);
+  right: calc(50% - 50vw);
   background:
     radial-gradient(560px 220px at 12% 0%, rgba(225, 29, 72, 0.1), transparent 70%),
     radial-gradient(640px 260px at 88% 10%, rgba(124, 58, 237, 0.1), transparent 70%);
