@@ -623,19 +623,14 @@ function homePage(): HTMLElement {
     h1,
     el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, nothing is tracked, and it installs for offline use.'),
   );
-  const stats = el('div', { class: 'hero-stats' });
-  for (const [num, label] of [['36', 'free tools'], ['0', 'uploads or accounts'], ['0', 'daily limits'], ['100%', 'offline-capable']] as [string, string][]) {
-    const s = el('div', { class: 'stat' });
-    s.append(el('span', { class: 'stat-num' }, num), el('span', { class: 'stat-label' }, label));
-    stats.append(s);
-  }
-  hero.append(stats);
   const search = textInput('', 'Search 36 tools… try “merge”, “sign”, “ppt”…  ( ⌘K )');
   search.setAttribute('type', 'search');
   search.setAttribute('aria-label', 'Search tools');
   hero.append(search);
 
   // Persona-driven entry points: users think in jobs, not tool names.
+  // Rendered AFTER Recently used: returners get their tools first,
+  // first-timers get guided discovery. Both stay one scroll away.
   const jobs: { icon: string; job: string; why: string; tool: string }[] = [
     { icon: '📝', job: 'Sign a contract', why: 'Draw or type your signature', tool: 'sign' },
     { icon: '🎓', job: 'Hit a portal file-size limit', why: 'Shrink to an exact MB target', tool: 'compress' },
@@ -658,7 +653,6 @@ function homePage(): HTMLElement {
     );
     jobStrip.append(card);
   }
-  hero.append(el('div', { class: 'jobs-label' }, 'What do you need to do?'), jobStrip);
   // Install banner only after engagement (never on first paint), dismissible,
   // and never inside the installed app. Header button covers the rest.
   if (isEngaged() && !installDismissed() && !isInstalled()) {
@@ -677,6 +671,7 @@ function homePage(): HTMLElement {
   }
   root.append(hero);
 
+  // Returning users first: their own tools above everything else.
   const recent = getRecentTools();
   if (recent.length > 0) {
     const section = el('section', { class: 'cat recent' });
@@ -698,6 +693,12 @@ function homePage(): HTMLElement {
     section.append(grid);
     root.append(section);
   }
+
+  // Guided discovery second: jobs route intent → tool for everyone else.
+  const jobsSection = el('section', { class: 'cat' });
+  jobsSection.append(el('h2', {}, 'What do you need to do?'));
+  jobsSection.append(jobStrip);
+  root.append(jobsSection);
 
   const gridRoot = el('div', { id: 'tool-grid' });
 

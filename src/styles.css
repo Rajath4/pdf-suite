@@ -157,13 +157,8 @@ main { animation: rise 0.28s var(--ease-out); }
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .lede { color: var(--muted); font-size: 1.08rem; max-width: 64ch; }
-.hero-stats { display: flex; gap: 22px; flex-wrap: wrap; margin: 18px 0 4px; }
-.stat { display: grid; }
-.stat-num { font-size: 1.35rem; font-weight: 850; letter-spacing: -0.02em; }
-.stat-label { font-size: 0.8rem; color: var(--muted); }
 
 /* Persona jobs */
-.jobs-label { margin: 24px 0 8px; font-weight: 750; font-size: 0.95rem; letter-spacing: -0.01em; }
 .jobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
 .job {
   display: flex; gap: 12px; align-items: center;
@@ -524,6 +519,5 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
   .topnav > a:nth-child(2), .topnav > a:nth-child(3) { display: none; }
   .hero { padding-top: 32px; }
   .foot-cols { grid-template-columns: repeat(2, 1fr); }
-  .hero-stats { gap: 14px; }
   .preview-frame { height: 340px; }
 }
