@@ -26,6 +26,22 @@ npm run preview  # serve dist/ at http://localhost:4173
 
 No backend. Host `dist/` on any static host (GitHub Pages, Netlify, nginx).
 
+## Install as an app (PWA, offline-first)
+
+The build ships a web manifest + Workbox service worker:
+
+- **Offline:** after the first visit, the entire app shell (all tools, pdf.js worker)
+  is cached — disconnect and everything keeps working. OCR language data fetched
+  from a CDN on first use is cached too.
+- **Install:** Chrome/Edge → address-bar install icon or the in-app **⤓ Install**
+  button. iOS Safari → Share → “Add to Home Screen”. The app then runs
+  standalone, like a native app.
+- **Updates:** the service worker uses `autoUpdate` — a toast prompts to refresh
+  when a new version is deployed.
+
+> Dev note: the service worker only runs on `npm run preview` / production
+> builds, not on `npm run dev`. Icons live in `public/icons/`.
+
 ## Architecture (clean code, best practices)
 
 ```

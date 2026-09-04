@@ -6,8 +6,89 @@ import { downloadBlob, formatBytes } from './lib/fileUtils.js';
 import { renderPage, getPageCount } from './lib/pdfRender.js';
 import { UserError } from './types.js';
 import type { ToolDef } from './types.js';
+import { registerSW } from 'virtual:pwa-register';
 
 const app = document.getElementById('app')!;
+
+// PWA: keep the service worker fresh and surface update/offline state.
+const swUpdate = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    showToast('Update available — reload to get the latest version.', 'Refresh now', () => {
+      void swUpdate(true);
+    });
+  },
+  onOfflineReady() {
+    showToast('Ready for offline use — you can install this app now.');
+  },
+});
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+let deferredInstall: BeforeInstallPromptEvent | null = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstall = e as BeforeInstallPromptEvent;
+  document.querySelectorAll<HTMLButtonElement>('.install-btn').forEach((b) => {
+    b.hidden = false;
+  });
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstall = null;
+  document.querySelectorAll<HTMLButtonElement>('.install-btn').forEach((b) => {
+    b.hidden = true;
+  });
+  showToast('Installed — find PDF Suite on your home screen or app list.');
+});
+
+async function promptInstall(): Promise<void> {
+  if (deferredInstall) {
+    await deferredInstall.prompt();
+    await deferredInstall.userChoice;
+    deferredInstall = null;
+    document.querySelectorAll<HTMLButtonElement>('.install-btn').forEach((b) => {
+      b.hidden = true;
+    });
+    return;
+  }
+  // iOS Safari and other browsers without beforeinstallprompt:
+  // guide the user to the manual "Add to Home Screen" flow.
+  showToast('To install: open the share menu → “Add to Home Screen” (iOS) or menu → “Install app” (Chrome/Edge).');
+}
+
+function showToast(msg: string, actionLabel?: string, onAction?: () => void): void {
+  document.querySelector('.toast')?.remove();
+  const t = el('div', { class: 'toast', role: 'status' });
+  t.append(el('span', {}, msg));
+  if (actionLabel && onAction) {
+    const btn = el('button', { class: 'btn small primary', type: 'button' }, actionLabel);
+    btn.addEventListener('click', () => {
+      onAction();
+      t.remove();
+    });
+    t.append(btn);
+  }
+  const close = el('button', { class: 'btn small', type: 'button', title: 'Dismiss' }, '✕');
+  close.addEventListener('click', () => t.remove());
+  t.append(close);
+  document.body.append(t);
+  window.setTimeout(() => t.remove(), 12000);
+}
+
+function offlineDot(): HTMLElement {
+  const dot = el('span', { class: 'netdot', title: navigator.onLine ? 'Online' : 'Offline — app still works' });
+  const paint = () => {
+    dot.textContent = navigator.onLine ? '● online' : '● offline-ready';
+    dot.dataset['off'] = String(!navigator.onLine);
+  };
+  paint();
+  window.addEventListener('online', paint);
+  window.addEventListener('offline', paint);
+  return dot;
+}
 
 window.addEventListener('hashchange', render);
 render();
@@ -33,11 +114,18 @@ function header(): HTMLElement {
   const inner = el('div', { class: 'wrap topbar-inner' });
   const logo = el('a', { class: 'logo', href: '#/' }, '📕 PDF Suite');
   const nav = el('nav', { class: 'topnav' });
+  const installBtn = el('button', { class: 'btn small install-btn', type: 'button' }, '⤓ Install');
+  installBtn.hidden = !deferredInstall;
+  installBtn.addEventListener('click', () => {
+    void promptInstall();
+  });
   nav.append(
     el('a', { href: '#/' }, 'All tools'),
     el('a', { href: '#/tool/merge' }, 'Merge'),
     el('a', { href: '#/tool/split' }, 'Split'),
     el('a', { href: '#/tool/compress' }, 'Compress'),
+    installBtn,
+    offlineDot(),
     el('span', { class: 'pill' }, '100% on-device'),
   );
   inner.append(logo, nav);
@@ -69,6 +157,16 @@ function homePage(): HTMLElement {
   search.setAttribute('type', 'search');
   search.setAttribute('aria-label', 'Search tools');
   hero.append(search);
+  const installBanner = el('div', { class: 'install-banner' });
+  installBanner.append(
+    el('span', {}, '📲 Install PDF Suite for offline use — works like a native app, no app store needed.'),
+  );
+  const installCta = el('button', { class: 'btn primary small', type: 'button' }, 'Install app');
+  installCta.addEventListener('click', () => {
+    void promptInstall();
+  });
+  installBanner.append(installCta);
+  hero.append(installBanner);
   root.append(hero);
 
   const gridRoot = el('div', { id: 'tool-grid' });
