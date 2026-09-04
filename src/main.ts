@@ -947,8 +947,8 @@ function homePage(): HTMLElement {
   // One search surface only (header palette) — no duplicate hero search box.
   // The palette itself teaches its shortcut; nothing more needed here.
 
-  // File-first entry (pdfguru pattern, done smarter): drop a file, then pick
-  // what to do with it. The staged files ride along to whichever tool wins.
+  // File-first entry: drop a file, then pick what to do with it. The staged
+  // files ride along to whichever tool wins.
   const stageZone = el('div', {
     class: 'stage',
     tabindex: '0',
@@ -1296,7 +1296,7 @@ function toolPage(id: string): HTMLElement {
   root.append(head);
   root.append(el('p', { class: 'lede' }, current.description));
 
-  // iLovePDF-style 3-step flow: Upload → Adjust → Download.
+  // Guided 3-step flow: Upload → Adjust → Download.
   const steps = el('ol', { class: 'steps' });
   const stepEls = [el('li', {}, '1 · Upload'), el('li', {}, '2 · Adjust'), el('li', {}, '3 · Download')];
   steps.append(...stepEls);
@@ -1676,8 +1676,7 @@ function toolPage(id: string): HTMLElement {
       if (autoDownload) downloadBlob(out.blob, out.filename);
       results.append(card);
     }
-    // Productivity chaining (Smallpdf's "connect tools", but offline with the
-    // real file): carry the first PDF output straight into the next tool.
+    // Productivity chaining: carry the first PDF output straight into the next tool.
     const firstPdf = outs.find((o) => o.blob.type === 'application/pdf');
     if (firstPdf) {
       const next = el('div', { class: 'related' });
@@ -1891,7 +1890,7 @@ function toolPage(id: string): HTMLElement {
           about.append(d);
         }
       }
-      // Blog-style cross-links (Smallpdf pattern): guides that use this tool.
+      // Cross-links to guides that use this tool.
       const guides = (GUIDES as unknown as { guides: GuideEntry[] }).guides.filter((g) =>
         g.relatedTools.includes(current.id),
       );

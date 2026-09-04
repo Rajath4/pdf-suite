@@ -82,7 +82,7 @@ export function parseProgress(msg: string): { done: number; total: number } | nu
   return { done: Math.min(done, total), total };
 }
 
-/** Merge input kinds. Smallpdf parity: photos and documents merge alongside PDFs. */
+/** Merge input kinds. Photos and documents merge alongside PDFs. */
 export type MergeKind = 'pdf' | 'image' | 'text' | 'word' | 'sheet' | 'unsupported';
 
 export function classifyMergeFile(name: string, mime: string): MergeKind {

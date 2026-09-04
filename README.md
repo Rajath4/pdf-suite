@@ -5,8 +5,7 @@
 
 Source: [github.com/Rajath4/pdf-suite](https://github.com/Rajath4/pdf-suite) — PRs and bug reports welcome via [issues](https://github.com/Rajath4/pdf-suite/issues) (see [CONTRIBUTING.md](CONTRIBUTING.md)). Security reports: please use [private vulnerability reporting](https://github.com/Rajath4/pdf-suite/security/advisories/new), never a public issue.
 
-A full end-to-end working clone of the **ihatepdf.cv essentials**, at parity
-with the best of iLovePDF/Smallpdf — **37 tools + 16 guides, 100% client-side**. No upload,
+A complete, private PDF toolkit — **37 tools + 16 guides, 100% client-side**. No upload,
 no watermark, no sign-up, no per-hour limits. Files never leave the device.
 
 ## Features (37 tools, all functional offline after first load)

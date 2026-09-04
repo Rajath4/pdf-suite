@@ -1,7 +1,7 @@
 {
   "name": "pdf-suite",
   "version": "1.1.0",
-  "description": "Free offline-first PDF toolkit — merge, split, compress, convert, edit, secure. 100% client-side, no upload, no watermark. Clone of ihatepdf.cv essentials.",
+  "description": "Free offline-first PDF toolkit — merge, split, compress, convert, edit, secure. 100% client-side, no upload, no watermark.",
   "homepage": "https://github.com/Rajath4/pdf-suite",
   "repository": {
     "type": "git",

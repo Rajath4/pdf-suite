@@ -112,8 +112,7 @@ export function toolIdFromSlug(slug: string): string | undefined {
 
 /**
  * Productivity chaining ("Continue in …"): the natural next tools after each
- * operation, mirroring how Smallpdf connects tools — except our handoff
- * carries the actual output file, offline. Validated by registry.test.ts.
+ * operation — the handoff carries the actual output file, offline. Validated by registry.test.ts.
  */
 export const NEXT_TOOLS: Record<string, string[]> = {
   merge: ['compress', 'split', 'encrypt'],

@@ -923,7 +923,7 @@ async function fileToDataUrl(f: File): Promise<string> {
 }
 
 /**
- * Mixed-format merge support (Smallpdf parity): photos, text, Word, and
+ * Mixed-format merge support: photos, text, Word, and
  * sheets become PDF pages so they can merge alongside real PDFs.
  */
 async function convertToPdfBytes(f: File, kind: 'image' | 'text' | 'word' | 'sheet'): Promise<ArrayBuffer> {
