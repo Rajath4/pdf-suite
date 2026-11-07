@@ -25,7 +25,7 @@
     <meta name="twitter:title" content="PDF Haven — Free Offline PDF Tools" />
     <meta
       name="twitter:description"
-      content="29 private PDF tools that run 100% on-device. Install it and use it offline."
+      content="36 private PDF tools that run 100% on-device. Install it and use it offline."
     />
     <script type="application/ld+json">
       {
@@ -42,6 +42,11 @@
   </head>
   <body>
     <div id="app"></div>
+    <!-- Privacy-first, cookieless page analytics (Cloudflare Web Analytics).
+         No personal data, no cross-site tracking. Replace TOKEN below with the
+         site token from Cloudflare → Web Analytics → pdfhaven.app.
+         Allowed by CSP (script-src + connect-src) in netlify.toml / nginx.conf. -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "REPLACE_WITH_CLOUDFLARE_TOKEN"}'></script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

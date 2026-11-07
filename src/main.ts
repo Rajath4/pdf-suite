@@ -942,7 +942,7 @@ function homePage(): HTMLElement {
   hero.append(
     el('div', { class: 'hero-eyebrow' }, '✦ 36 free tools · no signup · no watermark'),
     h1,
-    el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, nothing is tracked, and it installs for offline use.'),
+    el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, no accounts, and it installs for offline use.'),
   );
   // One search surface only (header palette) — no duplicate hero search box.
   // The palette itself teaches its shortcut; nothing more needed here.
