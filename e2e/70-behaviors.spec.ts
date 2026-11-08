@@ -61,6 +61,35 @@ test.describe('File-first homepage & chaining', () => {
   });
 });
 
+test.describe('SEO navigation', () => {
+  test('category hubs link from the homepage and render their tools', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('link', { name: /^Essentials · 6$/ }).click();
+    await expect(page).toHaveURL(/\/tools\/essentials\/$/);
+    await expect(page.locator('h1')).toContainText('Essential PDF Tools');
+    await expect(page.locator('main .card')).toHaveCount(6);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://pdfhaven.app/tools/essentials/',
+    );
+  });
+
+  test('tools directory and trust pages are reachable and self-canonical', async ({ page }) => {
+    await page.goto('/tools/');
+    await expect(page.locator('h1')).toContainText(`All 37 Free PDF Tools`);
+    await expect(page.locator('main .card').first()).toBeVisible();
+    await page.getByRole('link', { name: 'About PDF Haven' }).first().click();
+    await expect(page).toHaveURL(/\/about\/$/);
+    await expect(page.locator('h1')).toContainText('About PDF Haven');
+    await page.goto('/privacy/');
+    await expect(page.locator('h1')).toContainText('Privacy Policy');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      'https://pdfhaven.app/privacy/',
+    );
+  });
+});
+
 test.describe('Robustness', () => {
   test('batch isolates a corrupt file and still returns successes', async ({ page }) => {
     await openTool(page, 'compress-pdf');

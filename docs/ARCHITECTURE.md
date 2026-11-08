@@ -74,21 +74,34 @@ and freely-openable output on success.
 
 ## Performance budgets (`scripts/check-budget.mjs`, enforced by build)
 
-Entry ≤150 KB · total JS ≤3.9 MB · dist ≤6.0 MB. Heavy engines are
-code-split and lazy (prefetched on card hover); the qpdf `.wasm` precaches
-via Workbox for offline use.
+Entry ≤150 KB · total JS ≤3.9 MB · dist ≤6.5 MB. Heavy engines are
+code-split and lazy (prefetched on card hover, loaded on first Run); the qpdf
+`.wasm` precaches via Workbox for offline use. Prerendered pages add static
+HTML but keep the shared shell shared.
 
 ## SEO
 
-Every tool and guide prerenders to a real URL with unique title/meta/canonical
-plus JSON-LD (SoftwareApplication, FAQPage, BreadcrumbList, HowTo); sitemap +
-robots regenerate per build with `SITE_URL` baked in. `npm test` enforces
-uniqueness, SERP lengths, and minimum substantive bodies (anti-thin-content gate).
+`scripts/prerender.mjs` emits 64 real URLs (home, 37 tools, 16 guides, 6
+category hubs, tools/guides directories, about/privacy) with unique
+title/description, absolute canonical, OG/Twitter tags, hreflang, and a JSON-LD
+`@graph` (Organization, WebSite, WebPage/CollectionPage/Article,
+SoftwareApplication, BreadcrumbList, FAQPage, HowTo). It also writes
+`sitemap.xml` (lastmod/priority), `robots.txt` (AI crawler allows + Host),
+`feed.xml`, `llms.txt`, IndexNow key, and a `noindex` 404. Verification metas
+come from `GOOGLE_SITE_VERIFICATION` / `BING_SITE_VERIFICATION` /
+`YANDEX_VERIFICATION` / `BAIDU_VERIFICATION`; optional analytics from
+`CF_BEACON_TOKEN`. The shell includes static header markup so hydration does
+not shift layout (CLS), and async route data reserves height while loading.
+
+`scripts/seo-audit.mjs` is a hard build gate: it validates every page's
+title/description/canonical/robots/OG/Twitter/hreflang/single-H1/JSON-LD,
+thin-content minimums, internal links, sitemap/feed/llms/og.jpg parity, and the
+404. `src/seo/seo.test.ts` unit-tests uniqueness, SERP lengths, and bodies.
 
 ## Quality gates
 
-`npm run typecheck` → `npm test` (86 tests: engines, streaming, crypto
-round-trips, search, SEO gates) → `npm run build`, on every push via CI.
-Browser user-flows (upload → run → download, byte-verified) are scripted in
-CI-external QA harnesses; pixel/render paths cannot run headless in unit tests
-(Node has no canvas) and are covered there.
+`npm run typecheck` → `npm test` (90 tests: engines, streaming, crypto
+round-trips, search, SEO gates) → `npm run build` (prerender + SEO audit +
+budgets), on every push via CI. Playwright E2E (`npx playwright test`) covers
+real Chrome user flows and production SEO/hosting assertions; CI runs it with
+system Chrome.

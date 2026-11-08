@@ -4,6 +4,23 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 
+/** Enables Cloudflare analytics only when a real token is supplied at build time. */
+function analytics(): Plugin {
+  return {
+    name: 'analytics',
+    transformIndexHtml(html) {
+      const token = process.env.CF_BEACON_TOKEN?.trim();
+      if (!token) {
+        return html.replace(
+          /\s*<script defer src="https:\/\/static\.cloudflareinsights\.com\/beacon\.min\.js"[\s\S]*?<\/script>/,
+          '',
+        );
+      }
+      return html.replaceAll('%CF_BEACON_TOKEN%', token);
+    },
+  };
+}
+
 /** Emits dist/version.json so the UI, support and uptime checks can report the exact build. */
 function buildMeta(): Plugin {
   return {
@@ -62,6 +79,7 @@ export default defineConfig({
     exclude: ['pdfjs-dist'],
   },
   plugins: [
+    analytics(),
     buildMeta(),
     VitePWA({
       registerType: 'autoUpdate',

@@ -8,6 +8,13 @@ const pkg = JSON.parse(
 const guideCount = (JSON.parse(
   readFileSync(new URL('../src/seo/guides.json', import.meta.url), 'utf8'),
 ) as { guides: unknown[] }).guides.length;
+const seoContent = JSON.parse(
+  readFileSync(new URL('../src/seo/content.json', import.meta.url), 'utf8'),
+) as {
+  categories: unknown[];
+  pages: unknown[];
+  tools: { slug: string }[];
+};
 
 test.describe('Production build / SEO', () => {
   test('every tool has a prerendered, crawlable landing page', async ({ request }) => {
@@ -45,12 +52,91 @@ test.describe('Production build / SEO', () => {
     for (const slug of Object.values(TOOL_SLUGS)) {
       expect(sitemap, `sitemap missing /${slug}/`).toContain(`https://pdfhaven.app/${slug}/`);
     }
-    // home + guides index + one URL per tool + one per guide
-    expect((sitemap.match(/<loc>/g) ?? []).length).toBe(2 + TOOLS.length + guideCount);
+    // home + tools hub + guides hub + categories + trust pages + tools + guides
+    const hubs = 3;
+    expect((sitemap.match(/<loc>/g) ?? []).length).toBe(
+      hubs + seoContent.categories.length + seoContent.pages.length + TOOLS.length + guideCount,
+    );
+    for (const path of ['/tools/', '/tools/essentials/', '/about/', '/privacy/']) {
+      expect(sitemap, `sitemap missing ${path}`).toContain(`https://pdfhaven.app${path}`);
+    }
 
     const robots = await (await request.get('/robots.txt')).text();
     expect(robots).toContain('Sitemap: https://pdfhaven.app/sitemap.xml');
+    expect(robots).toContain('Host: pdfhaven.app');
     expect(robots).not.toContain('Disallow: /');
+    for (const bot of ['GPTBot', 'OAI-SearchBot', 'PerplexityBot', 'ClaudeBot']) {
+      expect(robots).toContain(`User-agent: ${bot}`);
+    }
+  });
+
+  test('tool pages ship complete structured data and social cards', async ({ request }) => {
+    const html = await (await request.get('/merge-pdf/')).text();
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+    expect(blocks).toHaveLength(1);
+    const graph = (JSON.parse(blocks[0]![1]) as { '@graph': { '@type': string; [key: string]: unknown }[] })['@graph'];
+    const types = graph.map((node) => node['@type']);
+    for (const type of [
+      'Organization',
+      'WebSite',
+      'SoftwareApplication',
+      'BreadcrumbList',
+      'FAQPage',
+      'HowTo',
+    ]) {
+      expect(types, `missing ${type}`).toContain(type);
+    }
+    const app = graph.find((node) => node['@type'] === 'SoftwareApplication')!;
+    expect(app.url).toBe('https://pdfhaven.app/merge-pdf/');
+    expect((app.offers as { price: string }).price).toBe('0');
+    const articleTypes = graph.filter((node) => node['@type'] === 'Article');
+    expect(articleTypes).toHaveLength(0);
+
+    expect((html.match(/<h1[\s>]/g) ?? []).length).toBe(1);
+    expect(html).toContain('<meta property="og:image" content="https://pdfhaven.app/og.jpg"');
+    expect(html).toContain('<meta name="twitter:card" content="summary_large_image"');
+    expect(html.match(/property="og:title"/g) ?? []).toHaveLength(1);
+    expect(html).toContain('<link rel="alternate" hreflang="x-default"');
+    expect(html).toContain('type="application/rss+xml"');
+  });
+
+  test('category and trust pages are indexable with their own metadata', async ({ request }) => {
+    const expectations: [string, string][] = [
+      ['/tools/', 'CollectionPage'],
+      ['/tools/essentials/', 'CollectionPage'],
+      ['/about/', 'WebPage'],
+      ['/privacy/', 'WebPage'],
+    ];
+    for (const [path, pageType] of expectations) {
+      const res = await request.get(path);
+      expect(res.ok(), `${path} should return 200`).toBe(true);
+      const html = await res.text();
+      expect(html).toContain(`<link rel="canonical" href="https://pdfhaven.app${path}"`);
+      expect((html.match(/<h1[\s>]/g) ?? []).length).toBe(1);
+      expect(html).toContain(`"@type":"${pageType}"`);
+      expect(html).not.toMatch(/\b36 free/);
+      expect(html).toContain('max-image-preview:large');
+    }
+  });
+
+  test('guides feed, llms.txt, OG image and 404 are shipped correctly', async ({ request }) => {
+    const feed = await (await request.get('/feed.xml')).text();
+    expect((feed.match(/<item>/g) ?? []).length).toBe(guideCount);
+    expect(feed).toContain('https://pdfhaven.app/guides/how-to-merge-pdfs-free/');
+
+    const llms = await (await request.get('/llms.txt')).text();
+    expect(llms).toContain('https://pdfhaven.app/tools/');
+    for (const tool of seoContent.tools) {
+      expect(llms, `llms.txt missing ${tool.slug}`).toContain(`https://pdfhaven.app/${tool.slug}/`);
+    }
+
+    const image = await request.get('/og.jpg');
+    expect(image.ok()).toBe(true);
+    expect(image.headers()['content-type']).toContain('image/jpeg');
+
+    const notFound = readFileSync(new URL('../dist/404.html', import.meta.url), 'utf8');
+    expect(notFound).toContain('noindex');
+    expect(notFound).toContain('<h1');
   });
 
   test('version.json matches the package version and has build metadata', async ({ request }) => {

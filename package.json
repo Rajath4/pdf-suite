@@ -13,14 +13,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && node scripts/prerender.mjs && node scripts/check-budget.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/prerender.mjs && node scripts/seo-audit.mjs && node scripts/check-budget.mjs",
     "preview": "vite preview --port 4173",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:report": "playwright show-report",
     "budget": "node scripts/check-budget.mjs",
-    "prerender": "node scripts/prerender.mjs"
+    "prerender": "node scripts/prerender.mjs",
+    "seo:audit": "node scripts/seo-audit.mjs",
+    "seo:indexnow": "node scripts/indexnow.mjs",
+    "og": "node scripts/make-og.mjs"
   },
   "keywords": [
     "pdf",

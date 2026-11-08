@@ -6,21 +6,40 @@ work on secure origins; `localhost` is exempt for testing).
 
 ## Domain + SEO setup (read this for Google traffic)
 
-Each of the 37 tools is prerendered at build time to a real landing page
-(`/merge-pdf/`, `/sign-pdf/`, …) with unique titles, meta, canonicals,
-FAQ/HowTo/Breadcrumb schema, and a sitemap — hash URLs are legacy-redirected.
+The build prerenders 64 indexable English pages to real URLs: home, 37 tool
+landings (`/merge-pdf/`, `/sign-pdf/`, …), 16 guides (`/guides/…/`), 6 category
+hubs (`/tools/essentials/`, …), the `/tools/` and `/guides/` directories, plus
+`/about/` and `/privacy/`. Every page has a unique title/description, absolute
+canonical, Open Graph/Twitter card, hreflang, and JSON-LD (Organization,
+WebSite, WebPage/Article, SoftwareApplication, BreadcrumbList, FAQPage, HowTo).
+`/404.html` is `noindex`.
 
-1. **Set your domain:** `SITE_URL=https://yourdomain.com npm run build`
-   (default `https://pdfhaven.app`). It bakes canonicals, sitemap, and OG tags.
+1. **Set your domain for the build:**
+   `SITE_URL=https://yourdomain.com VITE_SITE_URL=https://yourdomain.com npm run build`
+   (both default to `https://pdfhaven.app`). `SITE_URL` bakes canonical/OG/
+   sitemap/feed/robots/llms.txt; `VITE_SITE_URL` keeps canonical tags correct
+   during client-side navigation. They must match.
 2. **Serve at the domain root.** The build uses absolute paths; subpath hosting
    (e.g. `example.com/app/`) needs a `base` change in `vite.config.ts` + rebuild.
-3. **Google Search Console:** add the property, submit `/sitemap.xml`, then use
-   URL Inspection on `/`, `/merge-pdf/`, and one converter page to confirm the
-   crawled HTML contains the H1/FAQ/canonical (no JS needed).
-4. **Keep URLs stable:** slugs live in `TOOL_SLUGS` (`src/tools/registry.ts`);
+3. **Search engines:** verify and submit the sitemap in
+   [Google Search Console](https://search.google.com/search-console) (`/sitemap.xml`),
+   Bing Webmaster Tools, and Yandex Webmaster. Verification metas are injected
+   when these env vars are set at build time:
+   `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`, `YANDEX_VERIFICATION`,
+   `BAIDU_VERIFICATION`. Use URL Inspection on `/`, `/merge-pdf/`, a category
+   hub and a guide to confirm crawled HTML has H1/FAQ/canonical without JS.
+4. **Instant indexing:** set `INDEXNOW_KEY` (any 8–128 char hex/string) at
+   build time; the build writes `dist/<key>.txt`, and
+   `npm run seo:indexnow` (or `SITE_URL=… INDEXNOW_KEY=… npm run seo:indexnow`)
+   submits changed URLs to Bing/Yandex/Seznam/Naver via IndexNow.
+5. **Keep URLs stable:** slugs live in `TOOL_SLUGS` (`src/tools/registry.ts`);
    renaming one without a redirect loses rankings — add server redirects.
-5. **Content quality gate:** `npm test` enforces unique titles/descriptions and
-   minimum substantive bodies per page — the anti-thin-content guardrail.
+6. **Analytics (optional):** set `CF_BEACON_TOKEN` at build time to enable the
+   Cloudflare Web Analytics beacon; without it the script is stripped and the
+   CSP stays closed.
+7. **Quality gates:** `npm test` enforces unique titles/descriptions and
+   minimum substantive bodies; `npm run seo:audit` fails the build on missing
+   canonicals/JSON-LD, thin pages, dead internal links, or sitemap/feed drift.
 
 ## Option A — Docker (recommended for enterprise/VPS)
 
@@ -31,27 +50,30 @@ docker run -p 8080:80 pdf-haven
 ```
 
 Ships hardened nginx: immutable caching for hashed `/assets/*`, no-cache for
-`index.html` / `sw.js` / `manifest.webmanifest`, SPA fallback, and the full
-security-header baseline. Uncomment the HSTS line in `deploy/nginx.conf` once
+`index.html` / `sw.js` / `manifest.webmanifest`, crawler-file caching, real
+`404.html` responses (no soft-404), and the full security-header baseline. Uncomment the HSTS line in `deploy/nginx.conf` once
 TLS terminates in front of it.
 
 ## Option B — Netlify / Cloudflare Pages / Vercel
 
 - Build command: `npm ci && npm run build`
 - Publish directory: `dist`
-- `netlify.toml` is included (headers + SPA redirect). For Cloudflare Pages /
-  Vercel, replicate the headers from `deploy/nginx.conf`.
+- `netlify.toml` is included (headers, crawler caching, real 404). For
+  Cloudflare Pages / Vercel, replicate the headers and the 404 behaviour from
+  `deploy/nginx.conf`: serve `404.html` with status 404 for unknown paths — do
+  not rewrite everything to `/index.html` (soft-404s hurt indexing).
 
 ## Option C — S3 + CloudFront / any CDN
 
 Upload `dist/` with:
 `assets/*` → `Cache-Control: public, max-age=31536000, immutable`;
 `sw.js` → `no-store`; everything else → `no-cache`. Configure the
-distribution's error page / function to serve `index.html` for 404s.
+distribution's 404 response to serve `404.html` with status 404 (never
+`index.html`, which creates soft-404s).
 
 ## Go-live checklist
 
-1. `npm run build` passes (typecheck + tests + bundle budgets enforced).
+1. `npm run build` passes (typecheck + prerender + SEO audit + bundle budgets).
 2. Load the site, open DevTools → Application: service worker active,
    manifest has no errors, icons resolve.
 3. Lighthouse PWA + Performance + Accessibility + Best Practices ≥ 90.

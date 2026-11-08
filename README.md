@@ -75,9 +75,11 @@ npm run preview  # serve dist/ at http://localhost:4173
 |---|---|
 | `npm run dev` | local dev server |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | vitest suite (86 tests) |
-| `npm run build` | typecheck + build + prerender + budget gate |
-| `npm run budget` | standalone perf check (entry ≤150 KB, JS ≤3.9 MB, dist ≤6.0 MB) |
+| `npm test` | vitest suite (90 tests) |
+| `npm run build` | typecheck + build + prerender + SEO audit + budget gate |
+| `npm run budget` | standalone perf check (entry ≤150 KB, JS ≤3.9 MB, dist ≤6.5 MB) |
+| `npm run seo:audit` | validate titles, canonicals, JSON-LD, links, sitemap, RSS, noindex 404 |
+| `npm run seo:indexnow` | submit changed URLs to IndexNow (set `INDEXNOW_KEY`) |
 | `npm run preview` | serve built app |
 
 ## Privacy & limits

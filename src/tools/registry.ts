@@ -53,6 +53,28 @@ export const TOOLS: ToolDef[] = [
 
 export const CATEGORIES: string[] = [...new Set(TOOLS.map((t) => t.category))];
 
+/** Canonical category landing-page slugs (mirrored in content.json). */
+export const CATEGORY_SLUGS: Record<string, string> = {
+  Essentials: 'essentials',
+  'Edit & Organize': 'edit-organize',
+  'Convert & Export': 'convert-export',
+  'Security & Privacy': 'security-privacy',
+  'Create from Scratch': 'create',
+  'View & Utilities': 'view-utilities',
+};
+
+export function categorySlug(category: string): string {
+  return CATEGORY_SLUGS[category] ?? category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+export function categoryFromSlug(slug: string): string | undefined {
+  return CATEGORIES.find((c) => categorySlug(c) === slug);
+}
+
+export function categoryHref(category: string): string {
+  return `/tools/${categorySlug(category)}/`;
+}
+
 export function getTool(id: string) {
   return TOOLS.find((t) => t.id === id);
 }

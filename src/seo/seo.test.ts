@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TOOLS, TOOL_SLUGS } from '../tools/registry.js';
+import { CATEGORIES, TOOLS, TOOL_SLUGS, categorySlug } from '../tools/registry.js';
 import SEO from '../seo/content.json';
 import GUIDES_JSON from '../seo/guides.json';
 
@@ -152,6 +152,94 @@ describe('Guides library (content velocity)', () => {
       }
       for (const gs of g.relatedGuides) {
         expect(slugs.has(gs), `${g.slug} → guide ${gs}`).toBe(true);
+      }
+    }
+  });
+});
+
+interface CategoryEntry {
+  category: string;
+  slug: string;
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+  choosing: string;
+  faqs: [string, string][];
+}
+
+interface PageEntry {
+  slug: string;
+  navLabel: string;
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+  sections: { h2: string; body: string[] }[];
+}
+
+const categories = (SEO as unknown as { categories: CategoryEntry[] }).categories;
+const toolsIndex = (SEO as unknown as { toolsIndex: { title: string; description: string; h1: string; intro: string; faqs: [string, string][] } }).toolsIndex;
+const guidesIndex = (SEO as unknown as { guidesIndex: { title: string; description: string; h1: string; faqs: [string, string][] } }).guidesIndex;
+const pages = (SEO as unknown as { pages: PageEntry[] }).pages;
+
+describe('Category landing pages', () => {
+  it('covers every registry category exactly once with its canonical slug', () => {
+    expect(categories.map((c) => c.category).sort()).toEqual([...CATEGORIES].sort());
+    expect(new Set(categories.map((c) => c.slug)).size).toBe(categories.length);
+    for (const c of categories) {
+      expect(c.slug, c.category).toBe(categorySlug(c.category));
+      expect(c.slug, c.category).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(TOOLS.some((t) => t.category === c.category), c.category).toBe(true);
+    }
+  });
+
+  it('keeps category metadata unique and snippet-sized', () => {
+    expect(new Set(categories.map((c) => c.title)).size).toBe(categories.length);
+    expect(new Set(categories.map((c) => c.description)).size).toBe(categories.length);
+    for (const c of categories) {
+      expect(c.title.length, c.category).toBeGreaterThan(20);
+      expect(c.title.length, c.category).toBeLessThanOrEqual(65);
+      expect(c.description.length, c.category).toBeGreaterThanOrEqual(100);
+      expect(c.description.length, c.category).toBeLessThanOrEqual(170);
+      expect(c.h1.length, c.category).toBeGreaterThan(15);
+      expect(c.intro.length, c.category).toBeGreaterThanOrEqual(300);
+      expect(c.choosing.length, c.category).toBeGreaterThanOrEqual(120);
+      expect(c.faqs.length, c.category).toBeGreaterThanOrEqual(3);
+      for (const [q, a] of c.faqs) {
+        expect(q.endsWith('?'), `${c.category}: ${q}`).toBe(true);
+        expect(a.length, `${c.category}: ${q}`).toBeGreaterThanOrEqual(60);
+      }
+    }
+  });
+
+  it('gives the tools and guides hubs unique, substantive copy', () => {
+    for (const [label, hub] of [['toolsIndex', toolsIndex], ['guidesIndex', guidesIndex]] as const) {
+      expect(hub.title.length, label).toBeLessThanOrEqual(65);
+      expect(hub.title.length, label).toBeGreaterThan(20);
+      expect(hub.description.length, label).toBeGreaterThanOrEqual(100);
+      expect(hub.description.length, label).toBeLessThanOrEqual(170);
+      expect(hub.h1.length, label).toBeGreaterThan(15);
+      for (const [q, a] of hub.faqs) {
+        expect(q.endsWith('?'), `${label}: ${q}`).toBe(true);
+        expect(a.length, `${label}: ${q}`).toBeGreaterThanOrEqual(60);
+      }
+    }
+    expect(toolsIndex.intro.length).toBeGreaterThanOrEqual(200);
+  });
+
+  it('has complete About and Privacy trust pages', () => {
+    expect(pages.map((p) => p.slug).sort()).toEqual(['about', 'privacy']);
+    for (const p of pages) {
+      expect(p.title.length, p.slug).toBeLessThanOrEqual(65);
+      expect(p.title.length, p.slug).toBeGreaterThan(20);
+      expect(p.description.length, p.slug).toBeGreaterThanOrEqual(100);
+      expect(p.description.length, p.slug).toBeLessThanOrEqual(170);
+      expect(p.intro.length, p.slug).toBeGreaterThanOrEqual(150);
+      expect(p.sections.length, p.slug).toBeGreaterThanOrEqual(2);
+      for (const s of p.sections) {
+        expect(s.h2.length, p.slug).toBeGreaterThan(5);
+        expect(s.body.join(' ').length, p.slug).toBeGreaterThan(120);
       }
     }
   });

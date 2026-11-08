@@ -13,6 +13,7 @@
   --brand: #e11d48;
   --brand-deep: #be123c;
   --brand-ink: #ffffff;
+  --brand-text: #be123c;
   --brand-grad: linear-gradient(135deg, #fb4d6d 0%, #e11d48 55%, #be123c 100%);
   --ok: #15803d;
   --err: #b91c1c;
@@ -48,6 +49,7 @@
   --line-strong: #333948;
   --brand: #f43f5e;
   --brand-deep: #fb7185;
+  --brand-text: #fb7185;
   --brand-grad: linear-gradient(135deg, #fb7185 0%, #f43f5e 55%, #e11d48 100%);
   --ok: #4ade80;
   --err: #f87171;
@@ -159,7 +161,7 @@ main { animation: rise 0.28s var(--ease-out); }
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: 0.8rem; font-weight: 750; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--brand); background: var(--tint-rose);
+  color: var(--brand-text); background: var(--tint-rose);
   border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px;
 }
 .hero h1 {
@@ -199,8 +201,13 @@ main { animation: rise 0.28s var(--ease-out); }
 .trust th, .trust td { text-align: left; padding: 8px 10px; border-top: 1px solid var(--line); }
 .trust th { color: var(--muted); font-weight: 650; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .trust td:first-child { font-weight: 650; }
+.trust th[scope="row"] { color: var(--ink); font-size: 0.9rem; font-weight: 650; text-transform: none; letter-spacing: 0; }
 .trust .yes { color: var(--ok); font-weight: 800; }
 .trust .no { color: var(--muted); }
+
+/* Async routes reserve height between prerender and hydration, preventing a
+   large layout collapse (CLS) while JSON content chunks load. */
+.route-loading { min-height: 85vh; }
 
 /* ---------- Inputs ---------- */
 .input {
@@ -255,7 +262,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .faq summary { cursor: pointer; font-weight: 650; }
 .faq h3 { margin: 22px 0 8px; font-size: 1.05rem; }
 .howto { display: grid; gap: 8px; padding-left: 22px; margin: 8px 0; }
-.howto li::marker { color: var(--brand); font-weight: 800; }
+.howto li::marker { color: var(--brand-text); font-weight: 800; }
 .seo-section { margin-top: 6px; }
 .footer { margin-top: 48px; background: #101014; color: #b9bdc7; font-size: 0.9rem; }
 [data-theme="dark"] .footer { background: #050507; }
@@ -272,7 +279,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 /* ---------- Tool page ---------- */
 .tool { padding-bottom: 30px; }
 .crumbs { margin: 20px 0 6px; font-size: 0.88rem; color: var(--muted); }
-.crumbs a { color: var(--brand); text-decoration: none; font-weight: 600; }
+.crumbs a { color: var(--brand-text); text-decoration: none; font-weight: 600; }
 .tool-head { display: flex; gap: 16px; align-items: center; margin: 8px 0 4px; }
 .tool-icon-tile {
   font-size: 2rem; width: 64px; height: 64px; flex-shrink: 0;
@@ -283,12 +290,19 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 
 /* Dropzone 2.0 */
 .drop {
+  position: relative;
   border: 2px dashed var(--line-strong); border-radius: 20px; background: var(--surface);
   padding: 38px 22px; text-align: center; cursor: pointer; margin: 18px 0;
   transition: border-color 0.12s ease, background 0.12s ease, transform 0.12s var(--ease-out);
   display: grid; gap: 6px; justify-items: center;
 }
 .drop:hover { border-color: var(--brand); }
+.drop:focus-within { border-color: var(--brand); background: var(--tint-rose); outline: none; }
+.drop-hit {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border: 0; padding: 0; margin: 0; background: transparent; opacity: 0; cursor: pointer;
+}
+.drop-hit:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 20px; }
 .drop-icon {
   font-size: 2.2rem; width: 68px; height: 68px; display: grid; place-items: center;
   border-radius: 20px; background: var(--tint-rose); margin-bottom: 4px;
@@ -410,7 +424,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
   cursor: pointer; white-space: nowrap;
   transition: all 0.1s var(--ease-out);
 }
-.chip:hover { border-color: var(--brand); color: var(--brand); transform: translateY(-1px); }
+.chip:hover { border-color: var(--brand); color: var(--brand-text); transform: translateY(-1px); }
 
 /* PWA surfaces */
 .topnav .install-btn, .topnav .palette-btn, .topnav .theme-btn {
@@ -453,7 +467,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .steps li:first-child { border-radius: 12px 0 0 12px; }
 .steps li:last-child { border-radius: 0 12px 12px 0; }
 .steps li + li { border-left: none; }
-.steps li.now { color: var(--brand); background: var(--tint-rose); box-shadow: inset 0 -3px 0 var(--brand); }
+.steps li.now { color: var(--brand-text); background: var(--tint-rose); box-shadow: inset 0 -3px 0 var(--brand); }
 .steps li.done { color: var(--ok); background: var(--tint-green); }
 
 /* Determinate progress */
@@ -561,7 +575,7 @@ input[type="color"].input { padding: 4px; height: 44px; cursor: pointer; }
 .byline { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 0.85rem; }
 .byline-cat {
   font-weight: 800; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--brand); background: var(--tint-rose); border-radius: 6px; padding: 2px 8px;
+  color: var(--brand-text); background: var(--tint-rose); border-radius: 6px; padding: 2px 8px;
 }
 .tip-list { list-style: none; padding: 0; display: grid; gap: 8px; margin: 10px 0; }
 .tip-list li {

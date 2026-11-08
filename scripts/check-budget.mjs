@@ -2,12 +2,14 @@
 // Budgets target an installable PWA that loads fast on mid-range mobile:
 //   - entry chunk (homepage shell, no PDF engines) <= 150 KB raw
 //   - total JS payload                            <= 3.9 MB raw
-//   - total dist                                  <= 6.0 MB
+//   - total dist                                  <= 6.5 MB
 // Note: the JS floor (~3.6 MB) is fixed third-party cost — pdf.js worker
 // (~1.4 MB) + SheetJS (~0.9 MB) + pdf-lib (~0.5 MB) + pptxgenjs (~0.3 MB).
 // They load lazily and precache for offline; what matters for startup is
-// the entry chunk. The 3.9 MB ceiling (up from 3.8) pays for the qpdf
-// encryption engine wrapper (~45 KB, lazy) that made Protect PDF real.
+// the entry chunk. The 3.9 MB ceiling pays for the lazy qpdf wrapper, and
+// the 6.5 MB dist ceiling (up from 6.0) covers 64 prerendered SEO pages,
+// the 1200x630 social card and feed/llms.txt — all static text compressed
+// heavily over the wire and irrelevant to startup.
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -58,7 +60,7 @@ if (jsTotal > 3.9 * MB) fail('JS payload too large — split vendors or drop a d
 
 // 3. Total dist.
 const total = dirSize(DIST);
-console.log(`dist   total ${(total / MB).toFixed(2)} MB (budget 6.0 MB)`);
-if (total > 6.0 * MB) fail('dist too large for a fast PWA install.');
+console.log(`dist   total ${(total / MB).toFixed(2)} MB (budget 6.5 MB)`);
+if (total > 6.5 * MB) fail('dist too large for a fast PWA install.');
 
 console.log('\nBudgets OK.');

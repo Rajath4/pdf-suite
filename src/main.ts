@@ -1,5 +1,16 @@
 import './styles.css';
-import { CATEGORIES, TOOLS, getTool, searchTools, toolSlug, toolIdFromSlug, nextTools } from './tools/registry.js';
+import {
+  CATEGORIES,
+  TOOLS,
+  categoryFromSlug,
+  categoryHref,
+  categorySlug,
+  getTool,
+  searchTools,
+  toolSlug,
+  toolIdFromSlug,
+  nextTools,
+} from './tools/registry.js';
 import { el, field, textInput, textArea, selectInput, statusBox } from './ui/components.js';
 import { downloadBlob, formatBytes, baseName, parseProgress, pushRecent, isPdfName, readMinutes, fmtMonth, fileLimitBytes } from './lib/fileUtils.js';
 import { LARGE_FILE_MAX_BYTES } from './lib/largeFiles.js';
@@ -8,6 +19,9 @@ import type { ToolDef } from './types.js';
 import { registerSW } from 'virtual:pwa-register';
 
 const app = document.getElementById('app')!;
+
+/** Canonical origin for client-side route updates (never the preview host). */
+const CANONICAL_ORIGIN = (import.meta.env['VITE_SITE_URL'] as string | undefined)?.replace(/\/+$/, '') || 'https://pdfhaven.app';
 
 // Heavy engines (pdf-lib, pdf.js, office libs) are code-split: the homepage
 // shell stays tiny and tools load on demand. Memoized so each chunk loads once.
@@ -266,7 +280,7 @@ let paletteOpen = false;
 /** SPA navigation to a tool (address bar + view stay in sync). */
 function goTool(id: string): void {
   history.pushState({}, '', toolHref(id));
-  render();
+  setTimeout(render, 100);
 }
 
 function openPalette(): void {
@@ -408,9 +422,12 @@ window.addEventListener('keydown', (e) => {
 
 type Route =
   | { kind: 'home' }
+  | { kind: 'tools' }
+  | { kind: 'category'; slug: string }
   | { kind: 'tool'; id: string }
   | { kind: 'guides' }
   | { kind: 'guide'; slug: string }
+  | { kind: 'page'; slug: string }
   | { kind: 'missing'; slug: string };
 
 function slugFromPath(pathname: string): string {
@@ -431,6 +448,14 @@ function resolveRoute(): Route {
   }
   const slug = slugFromPath(location.pathname);
   if (!slug || slug === 'index.html') return { kind: 'home' };
+  if (slug === 'tools') return { kind: 'tools' };
+  if (slug.startsWith('tools/')) {
+    const cslug = slug.slice('tools/'.length);
+    return cslug && !cslug.includes('/') && categoryFromSlug(cslug)
+      ? { kind: 'category', slug: cslug }
+      : { kind: 'missing', slug };
+  }
+  if (slug === 'about' || slug === 'privacy') return { kind: 'page', slug };
   if (slug === 'guides') return { kind: 'guides' };
   if (slug.startsWith('guides/')) {
     const gslug = slug.slice('guides/'.length);
@@ -465,8 +490,11 @@ function render(): void {
   app.append(header());
   const route = resolveRoute();
   if (route.kind === 'tool') app.append(toolPage(route.id));
+  else if (route.kind === 'tools') app.append(toolsIndexPage());
+  else if (route.kind === 'category') app.append(categoryPage(route.slug));
   else if (route.kind === 'guides') app.append(guidesIndexPage());
   else if (route.kind === 'guide') app.append(guidePage(route.slug));
+  else if (route.kind === 'page') app.append(contentPage(route.slug));
   else if (route.kind === 'missing') app.append(notFoundPage(route.slug));
   else app.append(homePage());
   app.append(footer());
@@ -476,35 +504,112 @@ function render(): void {
   window.scrollTo({ top: 0 });
 }
 
-/** Keeps tab titles + meta description in sync per route (prerendered HTML
- *  already carries the canonical SEO head for crawlers and first paint). */
+function setMetaTag(attr: 'name' | 'property', key: string, content: string): void {
+  let tag = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute(attr, key);
+    document.head.append(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
+function setCanonical(path: string | null): void {
+  let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!path) {
+    link?.remove();
+    return;
+  }
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'canonical';
+    document.head.append(link);
+  }
+  link.href = `${CANONICAL_ORIGIN}${path}`;
+  setMetaTag('property', 'og:url', link.href);
+}
+
+function setRobotsIndex(indexable: boolean): void {
+  setMetaTag('name', 'robots', indexable
+    ? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+    : 'noindex, follow');
+}
+
+/** Keeps title, description, canonical and social tags in sync during SPA
+ *  navigation. Crawlers get the prerendered head; users get consistent tabs
+ *  and share previews after client-side route changes. */
 async function syncRouteMeta(route: Route): Promise<void> {
   try {
-    if (route.kind === 'tool' || route.kind === 'home') {
+    let title = '';
+    let description = '';
+    let path: string | null = null;
+    let indexable = true;
+    if (route.kind === 'missing') {
+      title = 'Page not found | PDF Haven';
+      indexable = false;
+    } else if (route.kind === 'home' || route.kind === 'tool' || route.kind === 'tools' || route.kind === 'category') {
       const { default: SEO } = await import('./seo/content.json');
-      const seo = SEO as unknown as { tools: SeoEntry[]; home: SeoEntry };
-      const entry = route.kind === 'tool' ? seo.tools.find((t) => t.id === route.id) : seo.home;
-      if (!entry) return;
-      document.title = entry.title;
-      document.querySelector('meta[name="description"]')?.setAttribute('content', entry.description);
-    } else if (route.kind === 'guide' || route.kind === 'guides') {
-      const { default: GUIDES } = await import('./seo/guides.json');
-      const all = (GUIDES as unknown as { guides: GuideEntry[] }).guides;
+      const seo = SEO as unknown as {
+        tools: SeoEntry[];
+        home: SeoEntry;
+        categories?: SeoCategory[];
+        toolsIndex?: SeoToolsIndex;
+      };
       const entry =
-        route.kind === 'guide'
-          ? all.find((g) => g.slug === route.slug)
-          : null;
+        route.kind === 'tool'
+          ? seo.tools.find((t) => t.id === route.id)
+          : route.kind === 'home'
+            ? seo.home
+            : route.kind === 'tools'
+              ? seo.toolsIndex
+              : seo.categories?.find((c) => c.slug === route.slug);
       if (entry) {
-        document.title = entry.title;
-        document.querySelector('meta[name="description"]')?.setAttribute('content', entry.description);
+        title = entry.title;
+        description = entry.description;
+        path =
+          route.kind === 'tool'
+            ? `/${toolSlug(route.id)}/`
+            : route.kind === 'tools'
+              ? '/tools/'
+              : route.kind === 'category'
+                ? `/tools/${route.slug}/`
+                : '/';
+      }
+    } else if (route.kind === 'page') {
+      const { default: SEO } = await import('./seo/content.json');
+      const pages = (SEO as unknown as { pages?: SeoPage[] }).pages ?? [];
+      const entry = pages.find((p) => p.slug === route.slug);
+      if (entry) {
+        title = entry.title;
+        description = entry.description;
+        path = `/${entry.slug}/`;
+      }
+    } else if (route.kind === 'guide' || route.kind === 'guides') {
+      const all = await loadGuides();
+      const entry = route.kind === 'guide' ? all.find((g) => g.slug === route.slug) : null;
+      if (entry) {
+        title = entry.title;
+        description = entry.description;
+        path = `/guides/${entry.slug}/`;
       } else if (route.kind === 'guides') {
-        document.title = 'Free PDF Guides & Tutorials | PDF Haven';
-        document.querySelector('meta[name="description"]')?.setAttribute(
-          'content',
-          'Step-by-step PDF guides: merge, compress, sign, OCR, convert and more. Free, private, no signup.',
-        );
+        title = 'Free PDF Guides & Tutorials | PDF Haven';
+        description =
+          'Step-by-step PDF guides: merge, compress, sign, OCR, convert and more. Free, private, no signup.';
+        path = '/guides/';
       }
     }
+    if (title) {
+      document.title = title;
+      setMetaTag('property', 'og:title', title);
+      setMetaTag('name', 'twitter:title', title);
+    }
+    if (description) {
+      setMetaTag('name', 'description', description);
+      setMetaTag('property', 'og:description', description);
+      setMetaTag('name', 'twitter:description', description);
+    }
+    setCanonical(path);
+    setRobotsIndex(indexable);
   } catch {
     /* content is progressive enhancement — never break the app */
   }
@@ -519,6 +624,78 @@ interface SeoEntry {
   intro: string;
   steps?: string[];
   faqs?: [string, string][];
+}
+
+interface SeoCategory {
+  category: string;
+  slug: string;
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+  choosing: string;
+  faqs: [string, string][];
+}
+
+interface SeoToolsIndex {
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+  faqs: [string, string][];
+}
+
+interface SeoPage {
+  slug: string;
+  navLabel: string;
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+  sections: { h2: string; body: string[] }[];
+}
+
+function contentPage(slug: string): HTMLElement {
+  const root = el('main', { class: 'wrap tool route-loading', id: 'main', tabindex: '-1' });
+  root.append(
+    el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
+      el('a', { href: '/' }, 'Home'),
+      el('span', { 'aria-hidden': 'true' }, ' / '),
+      el('span', { 'aria-current': 'page' }, slug === 'privacy' ? 'Privacy' : 'About'),
+    ),
+  );
+  root.append(el('p', { class: 'muted' }, 'Loading…'));
+  void (async () => {
+    try {
+      const { default: SEO } = await import('./seo/content.json');
+      const page = ((SEO as unknown as { pages?: SeoPage[] }).pages ?? []).find((p) => p.slug === slug);
+      if (!page) {
+        root.replaceChildren(notFoundPage(slug));
+        return;
+      }
+      root.innerHTML = '';
+      root.append(
+        el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
+          el('a', { href: '/' }, 'Home'),
+          el('span', { 'aria-hidden': 'true' }, ' / '),
+          el('span', { 'aria-current': 'page' }, page.navLabel),
+        ),
+        el('h1', {}, page.h1),
+        el('p', {}, page.intro),
+      );
+      for (const section of page.sections) {
+        root.append(el('h2', {}, section.h2), ...section.body.map((p) => el('p', {}, p)));
+      }
+      root.append(
+        el('p', {},
+          el('a', { href: '/' }, `← All ${TOOLS.length} free PDF tools`), ' · ',
+          el('a', { href: '/guides/' }, 'PDF guides')),
+      );
+    } catch {
+      root.replaceChildren(el('h1', {}, 'Could not load this page'), el('p', {}, el('a', { href: '/' }, 'Go to the homepage')));
+    }
+  })();
+  return root;
 }
 
 interface GuideEntry {
@@ -541,6 +718,138 @@ interface GuideEntry {
 async function loadGuides(): Promise<GuideEntry[]> {
   const { default: GUIDES } = await import('./seo/guides.json');
   return (GUIDES as unknown as { guides: GuideEntry[] }).guides;
+}
+
+function toolCard(t: ToolDef): HTMLElement {
+  const card = el('a', { class: 'card', href: toolHref(t.id) });
+  card.setAttribute('data-cat', t.category);
+  card.append(
+    el('div', { class: 'card-icon' }, t.icon),
+    el('div', { class: 'card-title' }, t.title),
+    el('div', { class: 'card-desc' }, t.description),
+  );
+  return card;
+}
+
+function faqList(faqs: [string, string][]): HTMLElement {
+  const wrap = el('section', { class: 'faq' });
+  wrap.append(el('h2', {}, 'Frequently asked questions'));
+  for (const [q, a] of faqs) {
+    const d = el('details', {});
+    d.append(el('summary', {}, q), el('p', {}, a));
+    wrap.append(d);
+  }
+  return wrap;
+}
+
+function toolsIndexPage(): HTMLElement {
+  const root = el('main', { class: 'wrap tool route-loading', id: 'main', tabindex: '-1' });
+  root.append(
+    el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
+      el('a', { href: '/' }, 'Home'),
+      el('span', { 'aria-hidden': 'true' }, ' / '),
+      el('span', { 'aria-current': 'page' }, 'All tools'),
+    ),
+  );
+  const h1 = el('h1', {}, `All ${TOOLS.length} Free PDF Tools`);
+  const lede = el('p', { class: 'lede' }, 'Every tool, grouped by the job you need to finish.');
+  root.append(h1, lede);
+  const mount = el('div', {});
+  root.append(mount);
+  void (async () => {
+    try {
+      const seo = (await import('./seo/content.json'))
+        .default as unknown as { toolsIndex?: SeoToolsIndex };
+      const entry = seo.toolsIndex;
+      if (entry) {
+        h1.textContent = entry.h1;
+        lede.textContent = entry.intro;
+      }
+      const cats = el('div', { class: 'grid' });
+      for (const cat of CATEGORIES) {
+        const card = el('a', { class: 'card', href: categoryHref(cat) });
+        card.setAttribute('data-cat', cat);
+        card.append(
+          el('div', { class: 'card-icon' }, '🗂'),
+          el('div', { class: 'card-title' }, cat),
+          el('div', { class: 'card-desc' }, `${TOOLS.filter((t) => t.category === cat).length} private, free tools — open the category page.`),
+        );
+        cats.append(card);
+      }
+      mount.append(el('h2', {}, 'Browse by category'), cats);
+      for (const cat of CATEGORIES) {
+        const section = el('section', { class: 'cat' });
+        section.append(el('h2', {}, el('a', { href: categoryHref(cat) }, cat)));
+        const grid = el('div', { class: 'grid' });
+        for (const t of TOOLS.filter((x) => x.category === cat)) grid.append(toolCard(t));
+        section.append(grid);
+        mount.append(section);
+      }
+      if (entry?.faqs.length) mount.append(faqList(entry.faqs));
+      mount.append(
+        el('p', {}, 'Prefer reading? Browse the ', el('a', { href: '/guides/' }, 'free PDF guides'), ' for step-by-step playbooks.'),
+      );
+    } catch {
+      mount.append(el('p', { class: 'muted' }, 'Could not load the tool directory. ', el('a', { href: '/' }, 'Go to the homepage')));
+    }
+  })();
+  return root;
+}
+
+function categoryPage(slug: string): HTMLElement {
+  const category = categoryFromSlug(slug);
+  if (!category) return notFoundPage(`tools/${slug}`);
+  const root = el('main', { class: 'wrap tool route-loading', id: 'main', tabindex: '-1' });
+  root.append(
+    el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
+      el('a', { href: '/' }, 'Home'),
+      el('span', { 'aria-hidden': 'true' }, ' / '),
+      el('a', { href: '/tools/' }, 'All tools'),
+      el('span', { 'aria-hidden': 'true' }, ' / '),
+      el('span', { 'aria-current': 'page' }, category),
+    ),
+  );
+  const h1 = el('h1', {}, category);
+  const lede = el('p', { class: 'lede' }, `${TOOLS.filter((t) => t.category === category).length} tools in this category.`);
+  root.append(h1, lede);
+  const mount = el('div', {});
+  root.append(mount);
+  void (async () => {
+    try {
+      const seo = (await import('./seo/content.json'))
+        .default as unknown as { categories?: SeoCategory[] };
+      const entry = seo.categories?.find((c) => c.slug === slug);
+      if (entry) {
+        h1.textContent = entry.h1;
+        lede.textContent = entry.intro;
+      }
+      const tools = TOOLS.filter((t) => t.category === category);
+      const grid = el('div', { class: 'grid' });
+      for (const t of tools) grid.append(toolCard(t));
+      mount.append(el('h2', {}, `${category} tools`), grid);
+      if (entry?.choosing) mount.append(el('h2', {}, 'How to choose'), el('p', {}, entry.choosing));
+      if (entry?.faqs.length) mount.append(faqList(entry.faqs));
+      const ids = new Set(tools.map((t) => t.id));
+      const relevant = (await loadGuides()).filter((g) => g.relatedTools.some((id) => ids.has(id))).slice(0, 4);
+      if (relevant.length > 0) {
+        const links = el('p', {});
+        relevant.forEach((g, i) => {
+          if (i > 0) links.append(' · ');
+          links.append(el('a', { href: `/guides/${g.slug}/` }, g.h1.replace(/ —.*$/, '').slice(0, 48)));
+        });
+        mount.append(el('h2', {}, 'Guides for these tools'), links);
+      }
+      const others = el('p', {});
+      CATEGORIES.filter((c) => c !== category).forEach((c, i) => {
+        if (i > 0) others.append(' · ');
+        others.append(el('a', { href: categoryHref(c) }, c));
+      });
+      mount.append(el('h2', {}, 'Other categories'), others);
+    } catch {
+      mount.append(el('p', { class: 'muted' }, 'Could not load this category. ', el('a', { href: '/' }, 'Go to the homepage')));
+    }
+  })();
+  return root;
 }
 
 /** Full-text word count for read-time estimates. */
@@ -571,7 +880,7 @@ function guideCard(g: GuideEntry, featured = false): HTMLElement {
 }
 
 function guidesIndexPage(): HTMLElement {
-  const root = el('main', { class: 'wrap tool', id: 'main', tabindex: '-1' });
+  const root = el('main', { class: 'wrap tool route-loading', id: 'main', tabindex: '-1' });
   root.append(el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
     el('a', { href: '/' }, 'All tools'),
     el('span', { 'aria-hidden': 'true' }, ' / '),
@@ -622,6 +931,15 @@ function guidesIndexPage(): HTMLElement {
       grid.append(el('p', { class: 'muted' }, 'Could not load guides. Check your connection and retry.'));
     }
   })();
+  void (async () => {
+    try {
+      const { default: SEO } = await import('./seo/content.json');
+      const entry = (SEO as unknown as { guidesIndex?: { faqs: [string, string][] } }).guidesIndex;
+      if (entry?.faqs.length) root.append(faqList(entry.faqs));
+    } catch {
+      /* FAQ is supplemental */
+    }
+  })();
   root.append(footerNote());
   return root;
 }
@@ -631,7 +949,7 @@ function footerNote(): HTMLElement {
 }
 
 function guidePage(slug: string): HTMLElement {
-  const root = el('main', { class: 'wrap tool', id: 'main', tabindex: '-1' });
+  const root = el('main', { class: 'wrap tool route-loading', id: 'main', tabindex: '-1' });
   root.append(el('p', { class: 'muted' }, 'Loading guide…'));
   void (async () => {
     try {
@@ -846,7 +1164,8 @@ function header(): HTMLElement {
   const paletteBtn = el('button', { class: 'btn small palette-btn', type: 'button', title: 'Jump to any tool (Ctrl/⌘ K)' }, '🔍 Tools');
   const kbd = el('kbd', { class: 'kbd' }, '⌘K');
   paletteBtn.append(kbd);
-  paletteBtn.setAttribute('aria-label', 'Open command palette (Control or Command K)');
+  paletteBtn.setAttribute('aria-label', '🔍 Tools⌘K');
+  paletteBtn.setAttribute('aria-keyshortcuts', 'Control+K Meta+K');
   paletteBtn.addEventListener('click', openPalette);
   const themeBtn = el('button', { class: 'btn small theme-btn', type: 'button' }, currentTheme() === 'dark' ? '☀' : '☾');
   themeBtn.setAttribute('aria-label', 'Toggle dark mode');
@@ -895,7 +1214,8 @@ function footer(): HTMLElement {
   });
   const cols = el('div', { class: 'foot-cols' });
   const guidesCol = el('div', { class: 'foot-col' });
-  guidesCol.append(el('strong', {}, 'Guides'));
+  guidesCol.append(el('strong', {}, 'Browse'));
+  guidesCol.append(el('a', { href: '/tools/' }, 'All PDF tools'));
   guidesCol.append(el('a', { href: '/guides/' }, 'All PDF guides'));
   const guideLinks: [string, string][] = [
     ['how-to-merge-pdfs-free', 'Merge PDFs'],
@@ -909,7 +1229,7 @@ function footer(): HTMLElement {
   cols.append(guidesCol);
   for (const cat of CATEGORIES) {
     const col = el('div', { class: 'foot-col' });
-    col.append(el('strong', {}, cat));
+    col.append(el('a', { href: categoryHref(cat) }, el('strong', {}, cat)));
     for (const t of TOOLS.filter((x) => x.category === cat)) {
       col.append(el('a', { href: toolHref(t.id) }, t.title));
     }
@@ -917,6 +1237,8 @@ function footer(): HTMLElement {
   }
   const ossCol = el('div', { class: 'foot-col' });
   ossCol.append(el('strong', {}, 'Open source'));
+  ossCol.append(el('a', { href: '/about/' }, 'About PDF Haven'));
+  ossCol.append(el('a', { href: '/privacy/' }, 'Privacy policy'));
   ossCol.append(ext(`${REPO}`, 'Source code (MIT)'));
   ossCol.append(ext(`${REPO}/issues`, 'Report a bug'));
   ossCol.append(ext(`${REPO}/security/policy`, 'Security policy'));
@@ -953,7 +1275,7 @@ function homePage(): HTMLElement {
     class: 'stage',
     tabindex: '0',
     role: 'button',
-    'aria-label': 'Drop a PDF or image here to start, then choose a tool',
+    'aria-labelledby': 'home-stage-label',
   });
   const stageInput = document.createElement('input');
   stageInput.type = 'file';
@@ -962,7 +1284,7 @@ function homePage(): HTMLElement {
   stageInput.hidden = true;
   stageZone.append(
     el('span', { class: 'stage-icon', 'aria-hidden': 'true' }, '⤓'),
-    el('span', {},
+    el('span', { id: 'home-stage-label' },
       el('strong', {}, 'Drop a PDF here to start'),
       el('span', { class: 'muted' }, ` — then pick what to do with it. Files up to ${formatBytes(LARGE_FILE_MAX_BYTES)} accepted here; each tool states its own cap on arrival.`),
     ),
@@ -1140,7 +1462,7 @@ function homePage(): HTMLElement {
       const tools = TOOLS.filter((t) => t.category === cat);
       if (tools.length === 0) continue;
       const section = el('section', { class: 'cat' });
-      section.append(el('h2', {}, `${cat} · ${tools.length}`));
+      section.append(el('h2', {}, el('a', { href: categoryHref(cat) }, `${cat} · ${tools.length}`)));
       const grid = el('div', { class: 'grid' });
       for (const t of tools) {
         const card = el('a', { class: 'card', href: toolHref(t.id) });
@@ -1190,6 +1512,8 @@ function homePage(): HTMLElement {
       const headRow = document.createElement('tr');
       for (const h of ['', 'Typical online tools', 'PDF Haven']) {
         const th = document.createElement('th');
+        th.scope = 'col';
+        if (!h) th.setAttribute('aria-label', 'Feature');
         th.textContent = h;
         headRow.append(th);
       }
@@ -1197,7 +1521,8 @@ function homePage(): HTMLElement {
       const tbody = document.createElement('tbody');
       for (const [label, typical, ours] of points) {
         const tr = document.createElement('tr');
-        const tdL = document.createElement('td');
+        const tdL = document.createElement('th');
+        tdL.scope = 'row';
         tdL.textContent = label;
         const tdT = document.createElement('td');
         tdT.textContent = typical;
@@ -1279,13 +1604,11 @@ function toolPage(id: string): HTMLElement {
   }
   const current: ToolDef = tool;
   recordToolVisit(current.id);
-  // Warm the engine chunks as soon as a tool page opens — Run then feels instant.
-  void loadActions().catch(() => {});
 
   root.append(el('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' },
     el('a', { href: '/' }, 'All tools'),
     el('span', { 'aria-hidden': 'true' }, ' / '),
-    el('span', {}, current.category),
+    el('a', { href: categoryHref(current.category) }, current.category),
     el('span', { 'aria-hidden': 'true' }, ' / '),
     el('span', { 'aria-current': 'page' }, current.title),
   ));
@@ -1325,9 +1648,12 @@ function toolPage(id: string): HTMLElement {
     mergeAnchor.setAttribute('data-opt-value', JSON.stringify(mergeRanges));
   };
 
-  // Dropzone
-  const drop = el('div', { class: 'drop', tabindex: '0', role: 'button' });
-  drop.setAttribute('aria-label', current.accept ? `Upload files for ${current.title}` : `${current.title}: file upload optional`);
+  // Dropzone. A transparent full-size button carries the accessible name;
+  // the visible copy stays plain text, so label/name rules never conflict.
+  const drop = el('div', { class: 'drop' });
+  const dropTitle = el('div', { class: 'drop-title' }, current.accept ? 'Drop files here or click to browse' : 'No file needed — or optionally drop one');
+  const dropHint = el('div', { class: 'muted' }, current.multiple ? 'You can add several files — batch supported where noted.' : 'One file at a time for this tool.');
+  const dropCap = el('div', { class: 'muted' }, `Max ${formatBytes(fileLimitBytes(current.id))} per file here · Files never leave this browser.`);
   const formats = el('div', { class: 'drop-formats' });
   if (current.accept) {
     for (const part of current.accept.split(',').slice(0, 5)) {
@@ -1335,13 +1661,7 @@ function toolPage(id: string): HTMLElement {
       if (clean) formats.append(el('span', {}, clean));
     }
   }
-  drop.append(
-    el('div', { class: 'drop-icon', 'aria-hidden': 'true' }, '📄'),
-    el('div', { class: 'drop-title' }, current.accept ? 'Drop files here or click to browse' : 'No file needed — or optionally drop one'),
-    el('div', { class: 'muted' }, current.multiple ? 'You can add several files — batch supported where noted.' : 'One file at a time for this tool.'),
-    el('div', { class: 'muted' }, `Max ${formatBytes(fileLimitBytes(current.id))} per file here · Files never leave this browser.`),
-    formats,
-  );
+  drop.append(el('div', { class: 'drop-icon', 'aria-hidden': 'true' }, '📄'), dropTitle, dropHint, dropCap, formats);
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = current.accept;
@@ -1349,10 +1669,10 @@ function toolPage(id: string): HTMLElement {
   input.hidden = true;
   drop.append(input);
   const pick = () => input.click();
+  const hit = el('button', { class: 'drop-hit', type: 'button' }, '');
+  hit.setAttribute('aria-label', current.accept ? `Upload files for ${current.title}` : `${current.title}: choose a file (optional)`);
+  drop.append(hit);
   drop.addEventListener('click', pick);
-  drop.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') pick();
-  });
   for (const ev of ['dragover', 'dragenter']) {
     drop.addEventListener(ev, (e) => {
       e.preventDefault();

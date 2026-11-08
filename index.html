@@ -3,30 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PDF Haven — Free Offline PDF Tools, No Watermark</title>
-    <meta
-      name="description"
-      content="Merge, split, compress, convert, edit and secure PDFs entirely in your browser. No upload, no watermark, no sign-up. Free forever."
-    />
     <meta name="theme-color" content="#e11d48" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="PDF Haven" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23e11d48'/%3E%3Ctext x='16' y='22' font-family='Arial,sans-serif' font-size='13' font-weight='bold' fill='white' text-anchor='middle'%3EPDF%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="dns-prefetch" href="https://tessdata.projectnaptha.com" />
+    <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />
+    <!--seo:start-->
+    <title>PDF Haven — Free Offline PDF Tools, No Watermark</title>
+    <meta
+      name="description"
+      content="Merge, split, compress, convert, edit and secure PDFs entirely in your browser. No upload, no watermark, no sign-up. Free forever."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://pdfhaven.app/" />
+    <link rel="alternate" type="application/rss+xml" title="PDF Haven guides" href="/feed.xml" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="PDF Haven" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content="PDF Haven — Free Offline PDF Tools, No Watermark" />
     <meta
       property="og:description"
       content="Merge, split, compress, convert, edit and secure PDFs entirely in your browser. No upload, no watermark, no sign-up."
     />
-    <meta property="og:image" content="icons/icon-512.png" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:url" content="https://pdfhaven.app/" />
+    <meta property="og:image" content="https://pdfhaven.app/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="PDF Haven — free private PDF tools" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="PDF Haven — Free Offline PDF Tools" />
     <meta
       name="twitter:description"
       content="37 private PDF tools that run 100% on-device. Install it and use it offline."
     />
+    <meta name="twitter:image" content="https://pdfhaven.app/og.jpg" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -38,15 +53,22 @@
         "description": "Free offline-first PDF toolkit: merge, split, compress, convert, edit and secure PDFs entirely in the browser."
       }
     </script>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23e11d48'/%3E%3Ctext x='16' y='22' font-family='Arial,sans-serif' font-size='13' font-weight='bold' fill='white' text-anchor='middle'%3EPDF%3C/text%3E%3C/svg%3E" />
+    <!--seo:end-->
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <div style="max-width: 44rem; margin: 3rem auto; padding: 0 1rem; font: 16px/1.6 system-ui, sans-serif">
+        <p><strong>PDF Haven — free private PDF tools.</strong> The interactive tools need JavaScript because every document is processed locally in your browser. Browse the
+          <a href="/tools/">tool directory</a>, read the <a href="/guides/">PDF guides</a>, or learn
+          <a href="/about/">about the project</a>.</p>
+      </div>
+    </noscript>
     <!-- Privacy-first, cookieless page analytics (Cloudflare Web Analytics).
          No personal data, no cross-site tracking. Replace TOKEN below with the
          site token from Cloudflare → Web Analytics → pdfhaven.app.
          Allowed by CSP (script-src + connect-src) in netlify.toml / nginx.conf. -->
-    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "REPLACE_WITH_CLOUDFLARE_TOKEN"}'></script>
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "%CF_BEACON_TOKEN%"}'></script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

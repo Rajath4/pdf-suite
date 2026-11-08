@@ -1170,5 +1170,255 @@
     ],
     "title": "Split Large PDF Files Free — 6 GB Chunks | PDF Haven"
    }
-  ]
+  ],
+ "categories": [
+  {
+   "category": "Essentials",
+   "choosing": "Choose Merge when one document should contain everything; pick Split when the source must stay untouched and you only need certain pages. Compress is for stubborn upload limits, PDF to JPG and Extract Images are for design handoffs, and Images to PDF turns phone photos into one tidy file. All six tools run locally, so even confidential paperwork is safe to handle here.",
+   "description": "Merge, split, compress and convert PDFs free in your browser. No upload, no watermark, no signup — pick an essential tool and finish in seconds.",
+   "faqs": [
+    [
+     "Which essential PDF tool should I use first?",
+     "Start with Merge PDFs when you need one combined file, Split PDF when you need selected pages, and Compress PDF when a portal rejects your file for size. The image tools cover PDF-to-JPG, image extraction and photo-to-PDF jobs."
+    ],
+    [
+     "Are these tools really free with no limits?",
+     "Yes. There is no account, watermark, daily counter or paid tier. Processing happens in your browser, so there is no server bill to recover and no reason to meter usage."
+    ],
+    [
+     "Can I use the tools on confidential documents?",
+     "Yes. Files are opened with the browser File API and never transmitted. You can disconnect from the internet after the page loads and the tools keep working, which you can verify with airplane mode."
+    ]
+   ],
+   "h1": "Essential PDF Tools — Fast, Free and Private",
+   "intro": "Most PDF jobs are routine: combine a stack of files, pull out three pages, shrink a document under a portal limit, or turn pages into images. This collection covers those everyday tasks without friction. Every tool runs entirely in your browser, so contracts, invoices and medical records never travel to a server. There are no accounts, watermarks or daily quotas, and the flow is always the same: drop a file, adjust once, download the result. Start with Merge PDFs for reports, Split PDF for extracts, Compress PDF for email limits, or the image converters when you need JPG, PNG or a photo-only PDF.",
+   "slug": "essentials",
+   "title": "Essential PDF Tools Free — Merge, Split, Compress | PDF Haven"
+  },
+  {
+   "category": "Edit & Organize",
+   "choosing": "Use Organize Pages when the page order is wrong, Rotate for sideways scans, and Crop when margins waste space. Sign, Annotate, Fill PDF Forms and Add Watermark change what appears on top of the page, while Page Numbers and Headers & Footers add consistent structure. Redact permanently removes covered content, Extract Text copies it out, and OCR makes scans searchable before any of those edits.",
+   "description": "Edit and organise PDFs free: reorder pages, sign, annotate, crop, rotate, fill forms, watermark and permanently redact — all on your device.",
+   "faqs": [
+    [
+     "Can I reorder pages without uploading the PDF?",
+     "Yes. Organize Pages renders thumbnails locally with pdf.js, lets you drag pages into a new order, and writes a fresh PDF with pdf-lib. The original file never leaves your device."
+    ],
+    [
+     "Is the redaction permanent or just a black box?",
+     "It is permanent. Pages with redaction boxes are rasterised during export, so the text underneath is removed from the file rather than hidden. Unredacted pages keep their original vector text."
+    ],
+    [
+     "Do signatures and annotations stay editable?",
+     "They are drawn into the page content when you run the tool, which makes them portable and visible in every PDF viewer. Keep an unmarked original if you may need to change a signature later."
+    ]
+   ],
+   "h1": "Edit and Organize PDFs Without Uploading Them",
+   "intro": "A PDF is rarely finished when you receive it. Pages arrive in the wrong order, scans are sideways, forms need filling, contracts need signing, and sensitive lines need permanent redaction. The Edit & Organize collection handles all of that in one private workspace: reorder with live thumbnails, rotate or crop, draw a signature, add text and highlights, fill interactive fields, stamp watermarks, and add page numbers or running headers. Before you edit a scan, run OCR to make its text selectable and searchable. Every operation is written locally with pdf-lib and pdf.js, so legal and HR documents never pass through a third-party server.",
+   "slug": "edit-organize",
+   "title": "Edit & Organize PDFs Free — Sign, Annotate, Crop | PDF Haven"
+  },
+  {
+   "category": "Convert & Export",
+   "choosing": "Use PDF to Word when the destination is an editable document, PDF to Excel when rows and columns matter, and PDF to PowerPoint when each page should become a slide. The reverse converters — Word, Excel, PowerPoint and HTML to PDF — are best for final delivery. Recolor PDF is the odd one out: it restyles pages for dark-mode reading or grayscale printing without changing the content.",
+   "description": "Convert PDFs free to Word, Excel, PowerPoint, HTML — and back again. Tables, slides and headings preserved, entirely in your browser.",
+   "faqs": [
+    [
+     "Will formatting survive a PDF conversion?",
+     "Text, headings, lists, links and simple tables are reconstructed; complex print layouts, columns and custom fonts may shift. Conversions are best-effort editions, so review the output before sending it to a client."
+    ],
+    [
+     "Can I convert a scanned PDF to Word or Excel?",
+     "Run OCR first. The converters read the PDF text layer, so a scan without one produces empty output. OCR adds a searchable layer locally, after which the conversion tools can extract the text."
+    ],
+    [
+     "Do conversions upload my document to a cloud service?",
+     "No. Parsing and file generation use browser-side libraries such as pdf-lib, mammoth, SheetJS and pptxgenjs. Nothing is uploaded, and the converted file is created as a local download."
+    ]
+   ],
+   "h1": "Convert PDFs to Office Files and Back — Free",
+   "intro": "Conversion is where most online PDF suites send your document to a server and hand back a watermarked file. This collection does the opposite: text extraction, DOCX assembly, spreadsheet parsing, slide generation and HTML rendering all happen inside the browser tab. Turn a PDF into an editable Word document, pull tables into CSV or XLSX, export each page as a PowerPoint slide, or render a webpage as a clean PDF. The reverse tools handle Word, Excel, PowerPoint and HTML sources too. Because the source never leaves your device, the collection is practical for internal reports, financial statements and client decks that cannot be uploaded to an unknown service.",
+   "slug": "convert-export",
+   "title": "Convert PDF Free — Word, Excel, PPT, HTML | PDF Haven"
+  },
+  {
+   "category": "Security & Privacy",
+   "choosing": "Protect PDF adds AES encryption and Unlock PDF removes a password from files you own. Flatten PDF makes forms and annotations permanent, while Privacy Scanner inspects, edits or strips metadata such as author names and software fingerprints. A sensible order is: inspect metadata, redact or flatten what should not travel, then encrypt the final file with a password sent through a separate channel.",
+   "description": "Protect PDFs with AES passwords, unlock owned files, flatten forms and strip hidden metadata. Private and free — encryption runs on your device.",
+   "faqs": [
+    [
+     "What encryption does Protect PDF use?",
+     "Protect PDF uses qpdf compiled to WebAssembly and applies AES encryption with the permission level you choose. The password and file are processed locally, so neither is sent to a server."
+    ],
+    [
+     "Can I remove a password from any PDF?",
+     "Only from files you own and have the password for. Unlock PDF asks for the current password, decrypts locally, and returns an unprotected copy. It is not a cracking tool."
+    ],
+    [
+     "What does the Privacy Scanner find?",
+     "It reads the document info dictionary and XMP metadata: author, producer, creator, creation and modification dates, title, subject and keywords. You can edit fields or strip them completely before sharing."
+    ]
+   ],
+   "h1": "Secure PDFs — Password Protection, Redaction and Metadata",
+   "intro": "Sharing a PDF can leak more than the visible page. Author names, software fingerprints, hidden metadata, editable form fields and text beneath a black rectangle all travel with the file. This security collection closes those gaps without a server: add AES password protection, unlock a file you own, flatten forms and annotations into static content, and inspect or strip the metadata that identifies you. Combined with permanent redaction in the Edit & Organize collection, it covers the checks a legal, HR or finance team expects before a document leaves the organisation. Everything runs locally through qpdf and pdf-lib, so the password never crosses the network.",
+   "slug": "security-privacy",
+   "title": "Secure PDFs Free — Password, Redact, Metadata | PDF Haven"
+  },
+  {
+   "category": "Create from Scratch",
+   "choosing": "Use Create PDF for short letters, notices and one-off documents where a form-like editor is enough. Markdown to PDF is faster for structured notes, documentation and README-style content with headings and lists. HTML to PDF is the most flexible: paste existing markup or upload an HTML file when you need precise styling from a template.",
+   "description": "Create a PDF from scratch free: write text, paste Markdown or render HTML into a clean, printable document — no account and no watermark.",
+   "faqs": [
+    [
+     "Can I create a PDF without uploading anything?",
+     "Yes. The editor builds the document in the browser with pdf-lib and downloads it directly. No template, draft or final file is sent to a server."
+    ],
+    [
+     "Does Markdown to PDF support headings and lists?",
+     "It supports the common Markdown structure: headings, paragraphs, bold and italic text, bullet and numbered lists, links and code blocks. Complex tables or custom CSS belong in the HTML tool instead."
+    ],
+    [
+     "Is HTML to PDF safe for untrusted markup?",
+     "The HTML is rendered in an isolated frame before being drawn to PDF, scripts are not executed as part of the export, and the result stays local. Still avoid pasting markup from sources you do not trust."
+    ]
+   ],
+   "h1": "Create a PDF From Text, Markdown or HTML",
+   "intro": "Sometimes there is no source document to convert: you need a clean PDF from a few paragraphs, a Markdown note or an HTML template. This small collection creates documents from scratch in the browser. Write a letter or notice in the simple editor, paste Markdown for structured notes and documentation, or render HTML when you need precise styling. The output is a standard PDF with selectable text, ready to print or share, and it is generated locally rather than on a conversion server. There is no watermark, no signup and no export counter, so the same workflow works for a one-page notice or a repeated internal report.",
+   "slug": "create",
+   "title": "Create PDF Free — From Text, Markdown or HTML | PDF Haven"
+  },
+  {
+   "category": "View & Utilities",
+   "choosing": "Compare PDFs is for reviewing two versions side by side with synced scrolling. Repair PDF recovers readable pages from a damaged file, and Large File Split & Join handles gigabyte documents that ordinary tools cannot open. Scan to PDF turns a phone camera into a document scanner. Use Inspect inside Large Files before moving a huge file, and Repair before giving up on a file that will not open.",
+   "description": "Compare PDFs side by side, repair damaged files, split and rejoin huge documents, or scan with your camera. Free utilities that run locally.",
+   "faqs": [
+    [
+     "Can I compare two PDFs without uploading them?",
+     "Yes. Compare PDFs renders both documents locally and keeps their scrolling in sync. Neither file is uploaded, so you can review confidential revisions safely."
+    ],
+    [
+     "Can a damaged PDF always be repaired?",
+     "No tool can recover data that is physically missing. Repair PDF rebuilds the cross-reference data and salvages readable pages when possible, then falls back to a streaming repair pass for stubborn files."
+    ],
+    [
+     "How large a file can the split and join tool handle?",
+     "Large File Split & Join streams binary chunks and supports files up to roughly 6 GB on a typical desktop. It avoids loading the whole file into memory by reading byte ranges on demand."
+    ]
+   ],
+   "h1": "PDF Utilities — Compare, Repair, Split Huge Files, Scan",
+   "intro": "Some PDF problems do not fit a single-purpose editor. You may need to compare two revisions, rescue a file that will not open, move a multi-gigabyte document through an email portal, or turn a phone photo into a proper scan. These utilities cover those edge cases without installing desktop software. Compare PDFs keeps two documents in sync; Repair PDF rebuilds broken structures and salvages readable pages; Large File Split & Join streams huge files into transportable chunks and can rejoin them byte-for-byte; Scan to PDF uses your camera as a document scanner. Every operation runs locally, including the streaming paths, so size is limited by your device rather than an upload quota.",
+   "slug": "view-utilities",
+   "title": "PDF Utilities Free — Compare, Repair, Scan | PDF Haven"
+  }
+ ],
+ "toolsIndex": {
+  "description": "Browse all 37 free PDF tools by category: merge, split, compress, convert, edit, sign, redact, OCR and more. No uploads, no watermarks, no signup.",
+  "faqs": [
+   [
+    "How many free PDF tools are there?",
+    "PDF Haven includes 37 tools across essentials, editing, conversion, security, creation and utilities. Every one is free, runs in the browser, and adds no watermark."
+   ],
+   [
+    "Which PDF tool is most popular?",
+    "Merge PDFs, Compress PDF, Split PDF and Sign PDF are the most used. The homepage also offers a file-first flow that recommends a tool after you drop a document."
+   ],
+   [
+    "Do I need to install anything?",
+    "No installation is required to start. If you use the site often, the installable PWA adds an app icon and keeps every tool working offline after the first visit."
+   ]
+  ],
+  "h1": "All 37 Free PDF Tools, Organised by Job",
+  "intro": "Browse the complete PDF Haven directory. Tools are grouped by the job you are trying to finish — everyday essentials, editing and organising, conversion, security, document creation, and utilities for damaged or oversized files. Every entry links to a dedicated page with instructions, privacy notes and answers to common questions, and every tool runs entirely in your browser: no upload, no account, no watermark.",
+  "title": "All PDF Tools — 37 Free Browser Tools | PDF Haven"
+ },
+ "guidesIndex": {
+  "description": "Step-by-step PDF guides: merge, compress, sign, OCR, convert and more. Free, private, no signup — written and tested against the live tools.",
+  "faqs": [
+   [
+    "Are the PDF guides free to read?",
+    "Yes. Every guide is free, has no paywall or email gate, and links directly to the matching browser tool so you can follow the steps immediately."
+   ],
+   [
+    "How are the guides tested?",
+    "Each workflow is run end to end against the deployed tools, including limits and failure cases. Guides show an updated date and are revised when a tool or browser behaviour changes."
+   ],
+   [
+    "Which guide should I start with?",
+    "Start with How to Merge PDFs if you are new, Compress a PDF Under 1 MB for upload limits, or the Free PDF Tools Compared guide if you are choosing between online services."
+   ]
+  ],
+  "h1": "Free PDF Guides & Tutorials",
+  "title": "Free PDF Guides & Tutorials | PDF Haven"
+ },
+ "pages": [
+  {
+   "description": "Learn how PDF Haven keeps documents private, which open-source engines power each tool, and the editorial standards behind our PDF guides.",
+   "h1": "About PDF Haven — Private PDF Tools That Run on Your Device",
+   "intro": "PDF Haven is an open-source project built on a simple premise: everyday document work should not require uploading private files to an unknown server. Every one of the 37 tools runs in your browser using WebAssembly and JavaScript, and the complete source code is public under the MIT licence.",
+   "navLabel": "About",
+   "sections": [
+    {
+     "body": [
+      "The project is maintained by web engineers and document-tooling contributors who spend their days working with PDFs, spreadsheets and scanned paperwork. The tools are built to solve the same problems we face: a portal that rejects a file for being 200 KB too large, a contract that needs a signature, a scan that needs searchable text, a form that must be flattened before archiving.",
+      "There is no company account, advertising network or paid tier behind the site, and no document is ever transmitted. That architecture is also the business model: because processing is local, there is no server bill that has to be recovered through limits, watermarks or upsells."
+     ],
+     "h2": "Who builds PDF Haven"
+    },
+    {
+     "body": [
+      "Each tool is assembled from established open-source engines rather than a black-box conversion service. pdf-lib creates and edits documents, pdf.js renders pages and extracts text, qpdf compiled to WebAssembly handles AES encryption and repair, Tesseract.js performs OCR, Mammoth and SheetJS parse Office files, and PptxGenJS assembles slide decks.",
+      "Heavy engines load on demand and are cached for offline use, so the homepage stays light while the tool you choose gets the full machinery. Because the pipeline is visible in the repository, security reviewers can verify that file contents never leave the browser tab."
+     ],
+     "h2": "How the tools work"
+    },
+    {
+     "body": [
+      "The guides are written against the live tools, not copied from press releases. Each article is reviewed when a tool or browser behaviour changes, and the updated date is shown beside the byline. We include limitations and trade-offs: which conversions are best-effort, when rasterised output loses selectable text, and which jobs still need a desktop application.",
+      "Corrections and reproducible bug reports are handled through the public issue tracker, and security reports through the repository security policy. If a guide claims a workflow works, it has been run end to end on the build that is currently deployed."
+     ],
+     "h2": "Editorial standards"
+    }
+   ],
+   "slug": "about",
+   "title": "About PDF Haven — Private, Open-Source PDF Tools"
+  },
+  {
+   "description": "PDF Haven processes files in your browser, not on a server. Read what stays on your device, what analytics is collected, and which third-party requests are made.",
+   "h1": "Privacy Policy — Your Files Never Leave Your Device",
+   "intro": "The short version: documents you open in PDF Haven are processed in your browser and are not uploaded, stored or inspected by us. This page explains exactly what that means, what limited data the site does receive, and which third-party requests can occur.",
+   "navLabel": "Privacy",
+   "sections": [
+    {
+     "body": [
+      "Files are read with the browser File API and processed by JavaScript and WebAssembly already running in the page. The resulting download is created locally as a blob. There is no upload endpoint, no temporary storage bucket and no worker queue that receives document bytes.",
+      "You can verify this behaviour: load a tool, disconnect the device from the internet, and run it. Everything except the one-time OCR language download continues to work. Passwords added with Protect PDF are applied locally and are never transmitted; if you lose a password, it cannot be recovered by us."
+     ],
+     "h2": "Files and documents"
+    },
+    {
+     "body": [
+      "The site does not use advertising cookies, cross-site trackers or account systems. Theme preference, recently used tools and install state are stored in your browser's local storage and can be cleared at any time from your browser settings.",
+      "If Cloudflare Web Analytics is enabled on the deployment, it records aggregate page views without cookies or fingerprinting. Like any web request, it necessarily sees the IP address and user agent of the visitor for the duration of the request; it is not linked to documents or to an identity."
+     ],
+     "h2": "Analytics, cookies and local storage"
+    },
+    {
+     "body": [
+      "Most tools load no third-party resources after the app shell is cached. OCR is the exception: Tesseract.js downloads its engine and language data from jsDelivr and tessdata.projectnaptha.com on first use. Those CDNs receive the request and your IP address, but never your document, which stays in the browser.",
+      "The Cloudflare analytics beacon is served from static.cloudflareinsights.com when enabled. Fonts are system fonts, so no font CDN is contacted. Links to the GitHub repository open only when you choose to click them."
+     ],
+     "h2": "Third-party requests"
+    },
+    {
+     "body": [
+      "Questions about this policy or a security concern can be raised in the public repository issue tracker. Security reports should follow the disclosure process in the repository security policy so they can be triaged privately before public discussion.",
+      "If this policy changes, the updated date on this page and the public commit history will show exactly what changed."
+     ],
+     "h2": "Contact"
+    }
+   ],
+   "slug": "privacy",
+   "title": "Privacy Policy — Files Stay On Your Device | PDF Haven"
+  }
+ ]
 }
