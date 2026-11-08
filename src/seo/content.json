@@ -1,6 +1,6 @@
 {
  "home": {
-  "description": "36 free PDF tools that run 100% in your browser: merge, sign, compress, convert, OCR and more. No upload, no watermark, no signup. Installs for offline use.",
+  "description": "37 free PDF tools that run 100% in your browser: merge, sign, compress, convert, OCR and more. No upload, no watermark, no signup. Installs for offline use.",
   "faqs": [
    [
     "Is PDF Haven really free?",
@@ -529,8 +529,8 @@
      "No — boxes are baked permanently into the file. Always keep an unredacted original."
     ],
     [
-     "Should I do anything after redacting?",
-     "Yes. Run Flatten PDF too, so no hidden layer or selectable text remains beneath the boxes."
+     "Do I need to flatten after redacting?",
+     "No. Pages with boxes are rasterized during redaction, so covered text and images are removed from the file — not hidden under a rectangle. Unredacted pages stay selectable."
     ],
     [
      "Why do this offline?",
@@ -539,13 +539,13 @@
    ],
    "h1": "Redact PDF Online Free — Remove Sensitive Data",
    "id": "redact",
-   "intro": "Permanently black out confidential regions before sharing. Positions are percentages, boxes are baked in, and files never upload.",
+   "intro": "Permanently black out confidential regions before sharing. Positions are percentages, covered content is rasterized away, and files never upload.",
    "slug": "redact-pdf",
    "steps": [
     "Upload your PDF",
     "Add black boxes: page, position, size",
     "Review the placement list",
-    "Click Run (then Flatten) and download"
+    "Click Run and download"
    ],
    "title": "Redact PDF Online Free — Remove Sensitive Data | PDF Haven"
   },

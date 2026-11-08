@@ -9,17 +9,17 @@ import {
   mergeSelected, splitPdf, splitEvery, splitOddEven, splitBySize,
   rotatePdf, organizePdf, losslessResave,
   imagesToPdf, addTextWatermark, addPageNumbers, addHeaderFooter,
-  redactPdf, flattenPdf, readMetadata, stripMetadata, setMetadata,
+  flattenPdf, readMetadata, stripMetadata, setMetadata,
   encryptPdf, decryptPdf, repairPdf, textToPdf, markdownToPdf,
   tableToPdf, placeImages, annotatePdf, cropPages, fillFormFields,
   slidesToPdf, styledToMarkdown, extractRawImages, loadPdf,
   type TableData,
 } from '../lib/pdfCore.js';
 import {
-  renderAllPages, extractAllText, extractStyledLines, canvasToBlob, invertCanvas, tintCanvas,
+  renderAllPages, renderPage, extractAllText, extractStyledLines, canvasToBlob, invertCanvas, tintCanvas,
   openRangedDoc,
 } from '../lib/pdfRender.js';
-import { baseName, fastPathCapBytes, fileLimitBytes, formatBytes, loadImageElement, readAsArrayBuffer, readAsText, classifyMergeFile, pageWeight, pageWeightHint } from '../lib/fileUtils.js';
+import { baseName, dataUrlToEmbeddableImage, fastPathCapBytes, fileLimitBytes, fileToEmbeddableImage, formatBytes, loadImageElement, readAsArrayBuffer, readAsText, classifyMergeFile, pageWeight, pageWeightHint } from '../lib/fileUtils.js';
 import { LARGE_FILE_MAX_BYTES, chooseCompressPath, chunkFileName, inspectLargeFile, parseChunkMB, parsePagesPerFile, planBatches, planChunks, rejoinFileName, shrinkPresetCfg } from '../lib/largeFiles.js';
 
 // Office-format engines (docx / mammoth / xlsx) are heavy and rarely needed —
@@ -331,17 +331,7 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
     case 'images-to-pdf': {
       if (ctx.files.length === 0) throw new UserError('Add at least one image.');
       ctx.onProgress('Embedding images…');
-      const imgs = await Promise.all(
-        ctx.files.map(async (f) => {
-          const url = URL.createObjectURL(f);
-          try {
-            const el = await loadImageElement(url);
-            return { dataUrl: await fileToDataUrl(f), width: el.naturalWidth || 1200, height: el.naturalHeight || 1600 };
-          } finally {
-            URL.revokeObjectURL(url);
-          }
-        }),
-      );
+      const imgs = await Promise.all(ctx.files.map((f) => fileToEmbeddableImage(f)));
       const data = await imagesToPdf(imgs, {
         pageSize: (ctx.opts.pagesize ?? 'fit') as 'fit' | 'a4',
         orientation: 'auto',
@@ -374,7 +364,8 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
           throw new UserError('Upload a logo/image below first (Watermark → Image mode).');
         }
         ctx.onProgress('Stamping logo…');
-        const img = await dataUrlToBytes(imgUrl);
+        const normalized = await dataUrlToEmbeddableImage(imgUrl);
+        const img = await dataUrlToBytes(normalized.dataUrl);
         const opacity = Math.min(0.9, Math.max(0.05, Number(ctx.opts.opacity ?? 0.3) || 0.3));
         const wPct = Math.min(60, Math.max(5, Number(ctx.opts.wmwidth ?? 22) || 22));
         const tile = (ctx.opts.tile ?? 'no') === 'yes';
@@ -435,8 +426,8 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
       need(ctx, 1);
       // boxes JSON from UI
       const boxes = JSON.parse(ctx.opts.boxes || '[]') as { pageIndex: number; xPct: number; yPct: number; wPct: number; hPct: number }[];
-      const data = await redactPdf(await pdfBytes(ctx.files[0]), boxes);
-      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-redacted.pdf`, note: 'Flatten the file after redacting before sharing.' }];
+      const data = await redactRaster(await pdfBytes(ctx.files[0]), boxes, ctx.onProgress);
+      return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: `${baseName(ctx.files[0].name)}-redacted.pdf`, note: 'Redacted pages were rasterized — covered text and images are physically gone, not just hidden behind a box.' }];
     }
     case 'extract-text': {
       need(ctx, 1);
@@ -453,7 +444,9 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
       ctx.onProgress('Extracting text…');
       const pages = await extractAllText(await pdfBytes(ctx.files[0]), (d, t) => ctx.onProgress(`Page ${d}/${t}…`));
       const full = pages.map((t, i) => `===== Page ${i + 1} =====\n${t}`).join('\n\n');
-      if (!full.trim()) throw new UserError('No embedded text found. This looks like a scanned PDF — try OCR instead.');
+      // Test the page text itself: the headers above are always non-empty and
+      // would otherwise make a scanned/image-only PDF look like a success.
+      if (!pages.some((t) => t.trim())) throw new UserError('No embedded text found. This looks like a scanned PDF — try OCR instead.');
       return [{ blob: new Blob([full], { type: 'text/plain' }), filename: `${baseName(ctx.files[0].name)}.txt`, previewText: full.slice(0, 6000) }];
     }
     case 'extract-images': {
@@ -757,7 +750,8 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
         if (!stamp.startsWith('data:image/')) {
           throw new UserError('Image annotations need a stamp image — upload one in the panel below.');
         }
-        const img = await dataUrlToBytes(stamp);
+        const normalized = await dataUrlToEmbeddableImage(stamp);
+        const img = await dataUrlToBytes(normalized.dataUrl);
         const out = await placeImages(
           bytes,
           imageAnns.map((a) => ({ pageIndex: a.pageIndex, img, xPct: a.xPct, yPct: a.yPct, wPct: a.wPct || 20 })),
@@ -835,17 +829,7 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
     case 'scan': {
       // files are camera captures collected by UI; reuse images-to-pdf
       if (ctx.files.length === 0) throw new UserError('Capture at least one page with the camera.');
-      const imgs = await Promise.all(
-        ctx.files.map(async (f) => {
-          const url = URL.createObjectURL(f);
-          try {
-            const el = await loadImageElement(url);
-            return { dataUrl: await fileToDataUrl(f), width: el.naturalWidth, height: el.naturalHeight };
-          } finally {
-            URL.revokeObjectURL(url);
-          }
-        }),
-      );
+      const imgs = await Promise.all(ctx.files.map((f) => fileToEmbeddableImage(f)));
       const data = await imagesToPdf(imgs, { pageSize: 'a4', orientation: 'auto', marginPt: 24 });
       return [{ blob: new Blob([data as unknown as BlobPart], { type: 'application/pdf' }), filename: 'scan.pdf' }];
     }
@@ -913,13 +897,61 @@ export async function runTool(id: string, ctx: Ctx): Promise<ActionOut[]> {
   }
 }
 
-async function fileToDataUrl(f: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result));
-    r.onerror = () => reject(new Error('Could not read image.'));
-    r.readAsDataURL(f);
-  });
+/**
+ * True redaction: a painted black rectangle alone leaves the underlying text
+ * selectable/copyable. Pages that contain boxes are rasterized so the covered
+ * glyphs and images no longer exist in the file; untouched pages keep their
+ * original vector text and stay selectable.
+ */
+async function redactRaster(
+  bytes: ArrayBuffer,
+  boxes: { pageIndex: number; xPct: number; yPct: number; wPct: number; hPct: number }[],
+  onProgress: (message: string) => void,
+): Promise<Uint8Array> {
+  if (boxes.length === 0) throw new UserError('Add at least one redaction box.');
+  const src = await loadPdf(bytes);
+  const pageCount = src.getPageCount();
+  const byPage = new Map<number, typeof boxes>();
+  for (const b of boxes) {
+    if (!Number.isInteger(b.pageIndex) || b.pageIndex < 0 || b.pageIndex >= pageCount) {
+      throw new UserError(`Redaction box targets page ${b.pageIndex + 1}, but this PDF has ${pageCount} pages.`);
+    }
+    const list = byPage.get(b.pageIndex) ?? [];
+    list.push(b);
+    byPage.set(b.pageIndex, list);
+  }
+  const pct = (n: number) => Math.min(100, Math.max(0, Number.isFinite(n) ? n : 0));
+  const out = await PDFDocument.create();
+  for (let i = 0; i < pageCount; i++) {
+    const pageBoxes = byPage.get(i);
+    if (!pageBoxes || pageBoxes.length === 0) {
+      const [p] = await out.copyPages(src, [i]);
+      out.addPage(p);
+      continue;
+    }
+    onProgress(`Redacting page ${i + 1}/${pageCount}…`);
+    const { canvas } = await renderPage(bytes, i + 1, 2.0);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new UserError('Canvas 2D is not supported in this browser.');
+    ctx.fillStyle = '#000000';
+    for (const b of pageBoxes) {
+      const x = (pct(b.xPct) / 100) * canvas.width;
+      const w = (pct(b.wPct) / 100) * canvas.width;
+      const h = (pct(b.hPct) / 100) * canvas.height;
+      // yPct is measured from the bottom (matches the UI and PDF coordinates).
+      const y = canvas.height - ((pct(b.yPct) + pct(b.hPct)) / 100) * canvas.height;
+      ctx.fillRect(x, y, Math.max(1, w), Math.max(1, h));
+    }
+    const blob = await canvasToBlob(canvas, 'image/jpeg', 0.92);
+    const img = await out.embedJpg(new Uint8Array(await blob.arrayBuffer()));
+    // Canvas is rendered at scale 2 with page rotation applied; /2 gives the
+    // visual page size in points even for rotated source pages.
+    const width = canvas.width / 2;
+    const height = canvas.height / 2;
+    const page = out.addPage([width, height]);
+    page.drawImage(img, { x: 0, y: 0, width, height });
+  }
+  return out.save({ useObjectStreams: true });
 }
 
 /**
@@ -928,17 +960,9 @@ async function fileToDataUrl(f: File): Promise<string> {
  */
 async function convertToPdfBytes(f: File, kind: 'image' | 'text' | 'word' | 'sheet'): Promise<ArrayBuffer> {
   if (kind === 'image') {
-    const url = URL.createObjectURL(f);
-    try {
-      const img = await loadImageElement(url);
-      const data = await imagesToPdf(
-        [{ dataUrl: await fileToDataUrl(f), width: img.naturalWidth || 1200, height: img.naturalHeight || 1600 }],
-        { pageSize: 'fit', orientation: 'auto', marginPt: 0 },
-      );
-      return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
-    } finally {
-      URL.revokeObjectURL(url);
-    }
+    const img = await fileToEmbeddableImage(f);
+    const data = await imagesToPdf([img], { pageSize: 'fit', orientation: 'auto', marginPt: 0 });
+    return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
   }
   if (kind === 'text') {
     const data = await textToPdf({ title: baseName(f.name), body: await readAsText(f), fontSize: 11, lineHeight: 1.5 });

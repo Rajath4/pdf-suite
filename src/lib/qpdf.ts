@@ -131,3 +131,43 @@ export async function qpdfEncrypt(
 export async function qpdfDecrypt(bytes: ArrayBuffer, password: string): Promise<Uint8Array> {
   return runQpdf(new Uint8Array(bytes), buildDecryptArgs(password), 'decrypt');
 }
+
+/**
+ * Rebuild a damaged cross-reference table / trailer with qpdf.
+ * Exit code 3 means "warnings but usable output" (e.g. recovered xref), which
+ * is exactly the repair case; 0 is a clean pass-through. Anything else is null.
+ */
+export async function qpdfRepair(bytes: ArrayBuffer): Promise<Uint8Array | null> {
+  const q = await qpdf();
+  const n = ++fileCounter;
+  const inPath = `/q-${n}-in.pdf`;
+  const outPath = `/q-${n}-out.pdf`;
+  const mod = q as unknown as Record<string, unknown>;
+  const prevPrint = mod['print'];
+  const prevErr = mod['printErr'];
+  mod['print'] = () => {};
+  mod['printErr'] = () => {};
+  try {
+    fsOf(q).writeFile(inPath, new Uint8Array(bytes));
+    const code = q.callMain([inPath, '--', outPath]);
+    if (code !== 0 && code !== 3) return null;
+    try {
+      return fsOf(q).readFile(outPath);
+    } catch {
+      return null;
+    }
+  } catch {
+    return null;
+  } finally {
+    mod['print'] = prevPrint;
+    mod['printErr'] = prevErr;
+    const fs = fsOf(q);
+    for (const p of [inPath, outPath]) {
+      try {
+        fs.unlink(p);
+      } catch {
+        /* already gone */
+      }
+    }
+  }
+}

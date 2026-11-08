@@ -5,10 +5,13 @@
  */
 import {
   PDFArray,
+  PDFCheckBox,
   PDFDict,
   PDFDocument,
+  PDFDropdown,
   PDFName,
   PDFRawStream,
+  PDFTextField,
   StandardFonts,
   degrees,
   rgb,
@@ -407,9 +410,23 @@ export async function repairPdf(bytes: ArrayBuffer): Promise<{ data: Uint8Array;
       throwOnInvalidObject: false,
     } as never);
   } catch (err) {
-    throw new UserError(
-      `Repair failed — file is too damaged to recover: ${err instanceof Error ? err.message : err}`,
-    );
+    // Second chance: qpdf can rebuild a broken xref table/trailer that pdf-lib
+    // refuses to parse. Loaded lazily so the WASM cost is repair-only.
+    const { qpdfRepair } = await import('./qpdf.js');
+    const recovered = await qpdfRepair(bytes);
+    if (!recovered) {
+      throw new UserError(
+        `Repair failed — file is too damaged to recover: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+    try {
+      doc = await PDFDocument.load(recovered, { ignoreEncryption: true } as never);
+      warnings.push('Cross-reference table rebuilt with qpdf.');
+    } catch (err2) {
+      throw new UserError(
+        `Repair failed — file is too damaged to recover: ${err2 instanceof Error ? err2.message : err2}`,
+      );
+    }
   }
   const n = doc.getPageCount();
   if (n === 0) throw new UserError('Repair failed — no readable pages found.');
@@ -776,16 +793,14 @@ export async function listFormFields(bytes: ArrayBuffer): Promise<FormFieldInfo[
   const out: FormFieldInfo[] = [];
   for (const f of form.getFields()) {
     const name = f.getName();
-    const ctor = f.constructor.name;
-    if (ctor === 'PDFTextField') {
-      const t = f as import('pdf-lib').PDFTextField;
-      out.push({ name, type: 'text', value: t.getText() ?? '' });
-    } else if (ctor === 'PDFCheckBox') {
-      const c = f as import('pdf-lib').PDFCheckBox;
-      out.push({ name, type: 'checkbox', value: c.isChecked() ? 'yes' : 'no' });
-    } else if (ctor === 'PDFDropdown') {
-      const d = f as import('pdf-lib').PDFDropdown;
-      out.push({ name, type: 'dropdown', value: d.getSelected()[0] ?? '', options: d.getOptions() });
+    // instanceof (not constructor.name) — class names are mangled in the
+    // minified production bundle, which silently broke form detection.
+    if (f instanceof PDFTextField) {
+      out.push({ name, type: 'text', value: f.getText() ?? '' });
+    } else if (f instanceof PDFCheckBox) {
+      out.push({ name, type: 'checkbox', value: f.isChecked() ? 'yes' : 'no' });
+    } else if (f instanceof PDFDropdown) {
+      out.push({ name, type: 'dropdown', value: f.getSelected()[0] ?? '', options: f.getOptions() });
     } else {
       out.push({ name, type: 'unsupported', value: '' });
     }
@@ -810,14 +825,12 @@ export async function fillFormFields(
   for (const f of fields) {
     const v = values[f.getName()];
     if (v === undefined) continue;
-    const ctor = f.constructor.name;
     try {
-      if (ctor === 'PDFTextField') (f as import('pdf-lib').PDFTextField).setText(v);
-      else if (ctor === 'PDFCheckBox') {
-        const c = f as import('pdf-lib').PDFCheckBox;
-        if (v === 'yes') c.check();
-        else c.uncheck();
-      } else if (ctor === 'PDFDropdown' && v) (f as import('pdf-lib').PDFDropdown).select(v);
+      if (f instanceof PDFTextField) f.setText(v);
+      else if (f instanceof PDFCheckBox) {
+        if (v === 'yes') f.check();
+        else f.uncheck();
+      } else if (f instanceof PDFDropdown && v) f.select(v);
     } catch {
       /* leave fields we cannot set untouched */
     }
@@ -915,6 +928,7 @@ export async function mergeSelected(parts: MergePart[]): Promise<Uint8Array> {
     const pages = await out.copyPages(src, indices);
     pages.forEach((p) => out.addPage(p));
   }
+  copyFirstMetadata(await loadPdf(parts[0].bytes), out);
   return out.save({ useObjectStreams: true });
 }
 

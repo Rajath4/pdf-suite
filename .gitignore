@@ -32,3 +32,13 @@ yarn-error.log*
 # Temp
 tmp/
 temp/
+
+# Local tooling state
+.opencode/auto-loop.local.md
+
+# Playwright / E2E artifacts
+test-results/
+playwright-report/
+blob-report/
+e2e/.fixtures/
+e2e/.downloads/

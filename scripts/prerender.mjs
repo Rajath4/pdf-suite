@@ -166,7 +166,7 @@ function toolBody(entry, meta) {
     guides.length
       ? `<h2>Learn more</h2><p>${guides.map((g) => `<a href="/guides/${g.slug}/">📖 ${esc(g.h1.split(' — ')[0].slice(0, 44))}</a>`).join(' · ')}</p>`
       : '',
-    `<p><a href="/">← All 36 free PDF tools</a> · Canonical: <a href="${url}">${url}</a></p></div>`,
+    `<p><a href="/">← All 37 free PDF tools</a> · Canonical: <a href="${url}">${url}</a></p></div>`,
   ].join('\n');
 }
 
@@ -228,7 +228,7 @@ function guidesIndexBody() {
     `<div class="wrap"><h1>Free PDF Guides &amp; Tutorials</h1>`,
     `<p>Step-by-step playbooks for compressing, merging, signing, and converting PDFs — written from the features above and tested against the live tools.</p>`,
     `<div>${cards}</div>`,
-    `<p><a href="/">← All 36 free PDF tools</a></p></div>`,
+    `<p><a href="/">← All 37 free PDF tools</a></p></div>`,
   ].join('\n');
 }
 

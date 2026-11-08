@@ -940,7 +940,7 @@ function homePage(): HTMLElement {
   const h1 = el('h1', {});
   h1.append('Every PDF tool you need. ', el('span', { class: 'grad' }, 'Private by design.'));
   hero.append(
-    el('div', { class: 'hero-eyebrow' }, '✦ 36 free tools · no signup · no watermark'),
+    el('div', { class: 'hero-eyebrow' }, '✦ 37 free tools · no signup · no watermark'),
     h1,
     el('p', { class: 'lede' }, 'Merge, sign, compress, convert and secure documents — entirely in your browser. Nothing uploads, no accounts, and it installs for offline use.'),
   );
@@ -1839,6 +1839,9 @@ function toolPage(id: string): HTMLElement {
   };
   const onWinDrop = (e: DragEvent) => {
     e.preventDefault();
+    // The drop zone handles its own drops; without this guard the bubbling
+    // event would add the same files a second time via this fallback.
+    if ((e.target as Element | null)?.closest?.('.drop')) return;
     const list = e.dataTransfer?.files;
     if (list && list.length > 0) addFiles([...list]);
   };

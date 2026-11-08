@@ -1,4 +1,5 @@
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig } from 'vitest/config';
+import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
@@ -51,6 +52,11 @@ export default defineConfig({
   },
   worker: {
     format: 'es',
+  },
+  test: {
+    // Vitest owns src/**/*.test.ts; Playwright owns e2e/**/*.spec.ts.
+    include: ['src/**/*.test.ts'],
+    exclude: ['node_modules/**', 'dist/**', 'e2e/**'],
   },
   optimizeDeps: {
     exclude: ['pdfjs-dist'],

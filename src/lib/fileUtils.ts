@@ -214,3 +214,62 @@ export async function loadImageElement(src: string): Promise<HTMLImageElement> {
   });
   return img;
 }
+
+export interface EmbeddableImage {
+  /** A guaranteed PNG or JPEG data URL (pdf-lib can embed it directly). */
+  dataUrl: string;
+  width: number;
+  height: number;
+}
+
+function sniffImageKind(bytes: Uint8Array): 'png' | 'jpeg' | 'other' {
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return 'png';
+  if (bytes[0] === 0xff && bytes[1] === 0xd8) return 'jpeg';
+  return 'other';
+}
+
+async function toPngDataUrl(img: HTMLImageElement): Promise<string> {
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth || 1200;
+  canvas.height = img.naturalHeight || 1600;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas not supported in this browser.');
+  ctx.drawImage(img, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
+/**
+ * WebP/GIF/BMP/SVG uploads are accepted by the UI (image/*), but pdf-lib can
+ * only embed PNG/JPEG. Preserve PNG/JPEG bytes untouched and transcode
+ * everything else through a canvas so no accepted file fails at run time.
+ */
+export async function fileToEmbeddableImage(file: File): Promise<EmbeddableImage> {
+  const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+  const kind = sniffImageKind(head);
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImageElement(url);
+    const width = img.naturalWidth || 1200;
+    const height = img.naturalHeight || 1600;
+    if (kind !== 'other') return { dataUrl: await readAsDataURL(file), width, height };
+    return { dataUrl: await toPngDataUrl(img), width, height };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+/** Same normalization for in-memory data URLs (signature/logo/stamp uploads). */
+export async function dataUrlToEmbeddableImage(dataUrl: string): Promise<EmbeddableImage> {
+  const img = await loadImageElement(dataUrl);
+  const width = img.naturalWidth || 1200;
+  const height = img.naturalHeight || 1600;
+  let kind: 'png' | 'jpeg' | 'other' = 'other';
+  try {
+    const res = await fetch(dataUrl);
+    kind = sniffImageKind(new Uint8Array((await res.arrayBuffer()).slice(0, 4)));
+  } catch {
+    /* assume the common case below */
+  }
+  if (kind !== 'other') return { dataUrl, width, height };
+  return { dataUrl: await toPngDataUrl(img), width, height };
+}
