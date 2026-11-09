@@ -5,7 +5,7 @@
 
 **Live demo: [https://pdfhaven.app/](https://pdfhaven.app/)**
 
-37 PDF tools + 23 guides running **100% client-side** — merge, split, compress,
+37 PDF tools + 32 guides running **100% client-side** — merge, split, compress,
 sign, convert, OCR, redact and AES-256-protect documents with no upload, no
 watermark, no sign-up, and no per-task limits. Files never leave the device.
 
@@ -77,7 +77,7 @@ npm run preview  # serve dist/ at http://localhost:4173
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm test` | vitest suite (90 tests) |
 | `npm run build` | typecheck + build + prerender + SEO audit + budget gate |
-| `npm run budget` | standalone perf check (entry ≤150 KB, JS ≤3.9 MB, dist ≤6.5 MB) |
+| `npm run budget` | standalone perf check (entry ≤150 KB, JS ≤4.0 MB, dist ≤6.5 MB) |
 | `npm run seo:audit` | validate titles, canonicals, JSON-LD, links, sitemap, RSS, noindex 404 |
 | `npm run seo:indexnow` | submit changed URLs to IndexNow (set `INDEXNOW_KEY`) |
 | `npm run preview` | serve built app |

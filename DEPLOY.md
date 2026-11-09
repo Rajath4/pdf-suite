@@ -6,8 +6,8 @@ work on secure origins; `localhost` is exempt for testing).
 
 ## Domain + SEO setup (read this for Google traffic)
 
-The build prerenders 71 indexable English pages to real URLs: home, 37 tool
-landings (`/merge-pdf/`, `/sign-pdf/`, …), 23 guides (`/guides/…/`), 6 category
+The build prerenders 80 indexable English pages to real URLs: home, 37 tool
+landings (`/merge-pdf/`, `/sign-pdf/`, …), 32 guides (`/guides/…/`), 6 category
 hubs (`/tools/essentials/`, …), the `/tools/` and `/guides/` directories, plus
 `/about/` and `/privacy/`. Every page has a unique title/description, absolute
 canonical, Open Graph/Twitter card, hreflang, and JSON-LD (Organization,

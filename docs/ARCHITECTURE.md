@@ -33,7 +33,7 @@ src/
     registry.ts      # single source of truth: 37 tools, slugs, chaining
     actions.ts       # per-tool orchestration (files + opts → Blobs)
   ui/components.ts   # typed DOM helpers
-  seo/               # content.json (tool landing copy) + guides.json (23 guides)
+  seo/               # content.json (tool landing copy) + guides.json (32 guides)
 scripts/prerender.mjs  # static SEO pages + sitemap/robots per build
 ```
 
@@ -74,14 +74,14 @@ and freely-openable output on success.
 
 ## Performance budgets (`scripts/check-budget.mjs`, enforced by build)
 
-Entry ≤150 KB · total JS ≤3.9 MB · dist ≤6.5 MB. Heavy engines are
+Entry ≤150 KB · total JS ≤4.0 MB · dist ≤6.5 MB. Heavy engines are
 code-split and lazy (prefetched on card hover, loaded on first Run); the qpdf
 `.wasm` precaches via Workbox for offline use. Prerendered pages add static
 HTML but keep the shared shell shared.
 
 ## SEO
 
-`scripts/prerender.mjs` emits 71 real URLs (home, 37 tools, 23 guides, 6
+`scripts/prerender.mjs` emits 80 real URLs (home, 37 tools, 32 guides, 6
 category hubs, tools/guides directories, about/privacy) with unique
 title/description, absolute canonical, OG/Twitter tags, hreflang, and a JSON-LD
 `@graph` (Organization, WebSite, WebPage/CollectionPage/Article,

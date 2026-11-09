@@ -27,7 +27,8 @@
     "how-to-split-pdf-free",
     "how-to-compress-pdf-under-1mb",
     "how-to-convert-images-to-pdf-free",
-    "how-to-reorder-delete-rotate-pdf-pages"
+    "how-to-reorder-delete-rotate-pdf-pages",
+    "how-to-compare-pdf-versions-free"
    ],
    "relatedTools": [
     "merge",
@@ -148,7 +149,8 @@
    ],
    "relatedGuides": [
     "how-to-password-protect-pdf-free",
-    "how-to-remove-pdf-metadata"
+    "how-to-remove-pdf-metadata",
+    "how-to-fill-pdf-forms-free"
    ],
    "relatedTools": [
     "sign",
@@ -209,7 +211,8 @@
    "relatedGuides": [
     "how-to-merge-pdfs-free",
     "how-to-compress-pdf-under-1mb",
-    "how-to-reorder-delete-rotate-pdf-pages"
+    "how-to-reorder-delete-rotate-pdf-pages",
+    "how-to-crop-pdf-margins-free"
    ],
    "relatedTools": [
     "split",
@@ -331,7 +334,9 @@
    ],
    "relatedGuides": [
     "how-to-extract-images-from-pdf",
-    "how-to-compress-pdf-under-1mb"
+    "how-to-compress-pdf-under-1mb",
+    "how-to-scan-paper-documents-to-pdf-free",
+    "how-to-extract-text-from-pdf-free"
    ],
    "relatedTools": [
     "ocr",
@@ -392,7 +397,8 @@
    "relatedGuides": [
     "how-to-merge-pdfs-free",
     "how-to-compress-pdf-under-1mb",
-    "how-to-convert-word-to-pdf-free"
+    "how-to-convert-word-to-pdf-free",
+    "how-to-extract-text-from-pdf-free"
    ],
    "relatedTools": [
     "pdf-to-word",
@@ -636,7 +642,8 @@
    ],
    "relatedGuides": [
     "how-to-convert-pdf-to-word-free",
-    "how-to-ocr-pdf-free"
+    "how-to-ocr-pdf-free",
+    "how-to-convert-excel-to-pdf-free"
    ],
    "relatedTools": [
     "pdf-to-excel",
@@ -964,7 +971,8 @@
    "relatedGuides": [
     "how-to-compress-pdf-under-1mb",
     "send-giant-pdf-email",
-    "why-is-my-pdf-so-big"
+    "why-is-my-pdf-so-big",
+    "how-to-repair-corrupt-pdf-free"
    ],
    "relatedTools": [
     "large-files",
@@ -1129,7 +1137,8 @@
    "relatedGuides": [
     "how-to-convert-pdf-to-jpg-free",
     "how-to-compress-pdf-under-1mb",
-    "how-to-merge-pdfs-free"
+    "how-to-merge-pdfs-free",
+    "how-to-scan-paper-documents-to-pdf-free"
    ],
    "relatedTools": [
     "images-to-pdf",
@@ -1302,7 +1311,8 @@
    "relatedGuides": [
     "how-to-split-pdf-free",
     "how-to-add-page-numbers-to-pdf-free",
-    "how-to-merge-pdfs-free"
+    "how-to-merge-pdfs-free",
+    "how-to-crop-pdf-margins-free"
    ],
    "relatedTools": [
     "organize",
@@ -1563,7 +1573,8 @@
    "relatedGuides": [
     "how-to-remove-pdf-metadata",
     "how-to-password-protect-pdf-free",
-    "how-to-watermark-pdf-free"
+    "how-to-watermark-pdf-free",
+    "how-to-compare-pdf-versions-free"
    ],
    "relatedTools": [
     "redact",
@@ -1614,6 +1625,788 @@
     "Keep the unredacted master in a secured location with restricted access."
    ],
    "title": "Redact a PDF Free — Permanently Remove Sensitive Text",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Turn each PDF page into a PowerPoint slide in your browser. Output is image-based 16:9 slides — free, private, no signup, no watermark.",
+   "faqs": [
+    [
+     "Are the slides editable text?",
+     "No. Each PDF page is rendered as a high-resolution image and placed on a 16:9 slide, so you can add shapes or text boxes over it but cannot reflow the original words."
+    ],
+    [
+     "Why are there white bars beside portrait pages?",
+     "Portrait pages are fitted inside a wide slide with their aspect ratio preserved. The alternative — stretching them — would distort the page."
+    ],
+    [
+     "What render quality is used?",
+     "Pages are rendered at roughly twice their normal resolution before being placed as JPEGs, which keeps text readable on projectors and in exports."
+    ],
+    [
+     "Can I convert several PDFs into one deck?",
+     "Convert one PDF at a time, then combine the resulting .pptx files in PowerPoint or Google Slides. That keeps each browser job predictable."
+    ],
+    [
+     "Is my PDF uploaded?",
+     "No. Rendering and presentation assembly happen locally in the browser with pdf.js and PptxGenJS."
+    ]
+   ],
+   "h1": "How to Convert a PDF to PowerPoint Free (Page-per-Slide)",
+   "icon": "🖥",
+   "intro": [
+    "You have a PDF that already looks right and a meeting that needs slides. Rebuilding every page in PowerPoint wastes an afternoon; turning pages into slides preserves the exact layout in minutes.",
+    "This guide explains what the browser converter produces, when image-based slides are the right choice, and how to keep the deck sharp without making it enormous."
+   ],
+   "relatedGuides": [
+    "how-to-convert-powerpoint-to-pdf-free",
+    "how-to-convert-pdf-to-word-free",
+    "how-to-compare-pdf-versions-free"
+   ],
+   "relatedTools": [
+    "pdf-to-pptx",
+    "pdf-to-jpg",
+    "pptx-to-pdf"
+   ],
+   "sections": [
+    {
+     "body": [
+      "PDF to PowerPoint renders every page as a high-resolution image and places it on a wide 16:9 slide. The page is contained inside the slide, so portrait documents keep their proportions and show side margins instead of being stretched.",
+      "The result is a visual deck, not a native authoring file. You can add callout shapes, arrows, captions and speaker notes in PowerPoint, but the original body text remains part of the image and cannot be edited like a text box."
+     ],
+     "h2": "What the converter actually builds"
+    },
+    {
+     "body": [
+      "This workflow shines for design-heavy documents, signed contracts, certificates, report pages, brochures and anything where the PDF layout is the message. It is also the fastest way to get a fixed document into a slide review without retyping.",
+      "If the goal is to edit the words, convert to Word instead, or recreate the content as native slides. If the goal is to show the page exactly as approved, image slides are the honest choice."
+     ],
+     "h2": "When image slides are the right tool"
+    },
+    {
+     "body": [
+      "The converter uses a JPEG quality of about 0.9 and a 2× render, which is a sensible balance for projectors, PDF exports and screen sharing. Very text-dense pages may still soften when projected at low resolution; export the original PDF alongside the deck when fine print matters.",
+      "Each page adds image data to the .pptx. A 60-page colour PDF becomes a large deck. If you only need a handful of pages in the presentation, split or organize the PDF first, convert the excerpt, and keep the full document as a handout."
+     ],
+     "h2": "Keep quality high without a giant deck"
+    },
+    {
+     "body": [
+      "The PDF is rendered with pdf.js and the .pptx is assembled in your browser with PptxGenJS. Nothing is uploaded, so confidential board packs and client documents stay on the device.",
+      "Always open the generated deck once before presenting: check the slide count, the order, and that any fine print survived the image compression."
+     ],
+     "h2": "Private conversion, predictable output"
+    }
+   ],
+   "slug": "how-to-convert-pdf-to-powerpoint-free",
+   "steps": [
+    "Open PDF to PowerPoint and drop the PDF",
+    "Click Run and let each page render locally",
+    "Download the generated .pptx file",
+    "Open it in PowerPoint or Google Slides and add any notes",
+    "Spot-check small text on a projector or exported PDF"
+   ],
+   "tips": [
+    "Convert only the pages you will present; keep the full PDF as a handout.",
+    "Use PDF to Word instead when the text must be edited.",
+    "For a mixed deck, combine the generated slides with native ones in PowerPoint."
+   ],
+   "title": "PDF to PowerPoint Free — Page-per-Slide (2026 Guide)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Convert .pptx slides into a shareable PDF in your browser. Text and images survive; exact layout is simplified. Free, private, no upload.",
+   "faqs": [
+    [
+     "Are animations and transitions kept?",
+     "No. A PDF is a static format, so animations, transitions and speaker notes are not reproduced. Convert when the final viewing state is what matters."
+    ],
+    [
+     "Why does the layout look different from PowerPoint?",
+     "The converter extracts slide text and images and rebuilds them on landscape PDF pages. Complex positioning, themes and overlapping shapes are simplified."
+    ],
+    [
+     "When should I use PowerPoint's own export?",
+     "Use File → Export → PDF in PowerPoint when exact fonts, charts, SmartArt and layout must survive. The browser tool is for quick, private sharing when content matters more than pixel fidelity."
+    ],
+    [
+     "Does it support .ppt files?",
+     "Save legacy .ppt files as .pptx first; the browser converter reads the modern presentation format."
+    ],
+    [
+     "Is my presentation uploaded?",
+     "No. The .pptx is unzipped and parsed in your browser; the PDF is built locally."
+    ]
+   ],
+   "h1": "How to Convert PowerPoint to PDF Free (PPTX to PDF)",
+   "icon": "📽",
+   "intro": [
+    "A slide deck is built to be presented, not emailed: fonts change, animations disappear, and recipients on phones struggle with the original file. A PDF gives everyone the same static view.",
+    "This guide shows what the browser converter preserves, where its simplified layout shows, and how to decide between a quick local conversion and PowerPoint's own export."
+   ],
+   "relatedGuides": [
+    "how-to-convert-pdf-to-powerpoint-free",
+    "how-to-convert-word-to-pdf-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "pptx-to-pdf",
+    "pdf-to-pptx",
+    "merge"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The converter reads the .pptx package directly, preserves slide order, and extracts the text and embedded images from each slide. It then rebuilds every slide as a landscape PDF page, with the first text block treated as a heading.",
+      "That makes the output reliable for text-heavy decks, training material, reports and handouts where the ideas matter more than the theme. The words and pictures arrive in the right order."
+     ],
+     "h2": "What survives the conversion"
+    },
+    {
+     "body": [
+      "PowerPoint stores precise positions, themes, charts, SmartArt and animation timelines. Rebuilding all of that faithfully in the browser is not realistic, so the converter produces a clean approximation rather than pretending to be a print driver.",
+      "If the deck is a designed sales pitch, a portfolio, or a document where exact placement is part of the message, use PowerPoint's Export → PDF or Google Slides' Download → PDF instead. Keep this tool for quick, private conversions of content-first decks."
+     ],
+     "h2": "Where the layout is simplified"
+    },
+    {
+     "body": [
+      "Convert the presentation, open the PDF, and scan the first and last slides plus any slide with dense tables. If the deck is part of a larger submission, merge it with the other PDFs and add page numbers once the final order is set.",
+      "Need to go the other way later? PDF to PowerPoint creates image-based slides that preserve the visual page but not editable text. Choose the direction based on whether you need to edit words or freeze appearance."
+     ],
+     "h2": "A practical PPTX-to-PDF workflow"
+    },
+    {
+     "body": [
+      "The presentation never leaves the browser: JSZip reads the package, the XML is parsed locally, and pdf-lib writes the PDF. There is no account, upload queue or watermark.",
+      "Large decks with many photos take longer and produce larger PDFs. Compress the result if a portal enforces a size cap, and keep the original .pptx as the editable master."
+     ],
+     "h2": "Privacy and file handling"
+    }
+   ],
+   "slug": "how-to-convert-powerpoint-to-pdf-free",
+   "steps": [
+    "Open PowerPoint to PDF and add a .pptx file",
+    "Click Run to parse the slides",
+    "Review the generated PDF for order and missing content",
+    "Download the PDF and merge or compress if needed"
+   ],
+   "tips": [
+    "Use PowerPoint's native export when exact design fidelity matters.",
+    "Check image-heavy slides first — that is where simplification shows most.",
+    "Keep the .pptx as the master and the PDF as the shareable copy."
+   ],
+   "title": "PowerPoint to PDF Free — PPTX to PDF (2026 Guide)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Turn XLSX or CSV data into a clean PDF table in your browser. First worksheet, simplified formatting, no upload — ideal for quick reports.",
+   "faqs": [
+    [
+     "Does it convert every worksheet?",
+     "No. The converter reads the first worksheet in the workbook. Move the data you need to the first sheet, or export separate files, before converting."
+    ],
+    [
+     "Are formulas and formatting preserved?",
+     "Values are extracted into a simple table; formulas, colours, merged cells and conditional formatting are simplified. Use Excel's own print-to-PDF for presentation-perfect sheets."
+    ],
+    [
+     "Why is my wide sheet cut off?",
+     "PDF pages are fixed width. Reduce columns, use landscape print settings in Excel, or split the sheet into logical tables before converting."
+    ],
+    [
+     "Can I convert a CSV file?",
+     "Yes. Comma-separated files are parsed into rows and columns, with the first row treated as the header."
+    ],
+    [
+     "Is my spreadsheet uploaded?",
+     "No. Parsing and PDF generation happen entirely in your browser."
+    ]
+   ],
+   "h1": "How to Convert Excel to PDF Free (XLSX & CSV)",
+   "icon": "📊",
+   "intro": [
+    "Spreadsheets are excellent working tools and awkward shared documents: column widths shift, formulas recalculate, and the recipient may not have the same software. A PDF freezes the table for review.",
+    "This guide explains what the browser converter does with XLSX and CSV files, where its simplified output is appropriate, and when to use Excel's own print-to-PDF instead."
+   ],
+   "relatedGuides": [
+    "how-to-convert-pdf-to-excel-free",
+    "how-to-convert-word-to-pdf-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "excel-to-pdf",
+    "pdf-to-excel",
+    "merge"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The converter reads the first worksheet, extracts displayed values, and lays them out as a PDF table with a header row. CSV files follow the same path, with the first row becoming the header.",
+      "This is ideal for price lists, simple inventories, schedules, budgets and data extracts that need to be reviewed or attached to an email — not for reproducing a fully designed financial model."
+     ],
+     "h2": "From spreadsheet rows to a readable table"
+    },
+    {
+     "body": [
+      "Formulas are replaced by their values, because a PDF should show the result rather than a live calculation. Colours, merged cells, charts, images and conditional formatting are not reconstructed. Very wide sheets can run past the page width.",
+      "For a board pack or a customer-facing report, use Excel's Print → Save as PDF with a defined print area and page breaks. The browser tool is the fast, private option for content-first tables."
+     ],
+     "h2": "What gets simplified (and why)"
+    },
+    {
+     "body": [
+      "Move the relevant data to the first worksheet, delete empty columns, and shorten verbose headers. If the table is too wide, split it into two logical tables or transpose the layout in Excel first.",
+      "Add a title in the tool's Title field so the PDF has context when it is forwarded. For a multi-document submission, merge the resulting table with a cover letter or report afterwards."
+     ],
+     "h2": "Prepare the sheet before converting"
+    },
+    {
+     "body": [
+      "Workbook parsing uses SheetJS in the browser, and the PDF is generated locally. Financial data, staff lists and client records never leave the device.",
+      "Keep the source workbook as the editable master. The PDF is a snapshot, not a replacement for the file that contains formulas and source data."
+     ],
+     "h2": "Private by default"
+    }
+   ],
+   "slug": "how-to-convert-excel-to-pdf-free",
+   "steps": [
+    "Open Excel to PDF and add an .xlsx or .csv file",
+    "Move the target data to the first worksheet before uploading",
+    "Set a title for the PDF and click Run",
+    "Review the table, then download and share",
+    "Use Excel's print-to-PDF when exact formatting is required"
+   ],
+   "tips": [
+    "Delete empty columns and shorten headers before converting.",
+    "Split very wide tables into two logical PDFs rather than shrinking the text.",
+    "Keep the workbook as the editable master; treat the PDF as a snapshot."
+   ],
+   "title": "Excel to PDF Free — XLSX & CSV to PDF (2026 Guide)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Fill fillable PDF forms in your browser — text fields, checkboxes and dropdowns. Optionally flatten to lock the answers. No upload or signup.",
+   "faqs": [
+    [
+     "What if the PDF has no fillable fields?",
+     "The tool needs an AcroForm PDF with real form fields. If the form is a flat scan or an XFA form, it cannot fill it — use Annotate or Create PDF to overlay text, or ask the issuer for a fillable version."
+    ],
+    [
+     "Should I flatten after filling?",
+     "Flatten when the answers should be final and non-editable, which is the safe default for submissions. Keep fields editable only when the recipient must revise them."
+    ],
+    [
+     "Are radio buttons and signature fields supported?",
+     "Text fields, checkboxes and dropdowns are supported. Radio groups, signature fields and unusual XFA controls may be left untouched."
+    ],
+    [
+     "Does filling a form change the original?",
+     "No. The tool produces a new PDF with your values; the source file is not modified."
+    ],
+    [
+     "Is my form data uploaded?",
+     "No. Fields are read and filled locally with pdf-lib; answers never leave the browser."
+    ]
+   ],
+   "h1": "How to Fill a PDF Form Free (Text, Checkboxes & Dropdowns)",
+   "icon": "📝",
+   "intro": [
+    "Fillable PDFs are supposed to remove printing and handwriting. In practice, broken viewers, tiny fields and accidental edits create a new set of problems — especially when a form must be submitted in one clean pass.",
+    "This guide shows how to fill AcroForm fields locally, lock the answers with flattening, and recognise when a PDF is not actually fillable."
+   ],
+   "relatedGuides": [
+    "how-to-sign-pdf-free",
+    "how-to-redact-pdf-free",
+    "how-to-convert-word-to-pdf-free"
+   ],
+   "relatedTools": [
+    "fill-forms",
+    "flatten",
+    "sign"
+   ],
+   "sections": [
+    {
+     "body": [
+      "A PDF can look like a form and contain no interactive fields at all. After upload, this tool lists the fields it detects: text boxes, checkboxes and dropdowns. If the list is empty, the document is flat or uses an unsupported form technology.",
+      "Scanned paper forms fall into the flat category. For those, use Annotate to place text boxes over the page, or ask the issuer for an accessible fillable version. Guessing at coordinates is faster than rebuilding the form from scratch."
+     ],
+     "h2": "Check that the form is really fillable"
+    },
+    {
+     "body": [
+      "Enter values for the fields you need and leave anything optional blank. Review every page in the preview before running the tool; a missed checkbox is easier to catch now than after submission.",
+      "Keep “Lock fields after filling” enabled for forms you are sending to someone else. Flattening turns the answers into page content so they cannot be accidentally edited or cleared by a different viewer. Disable it only when the recipient must still change the values."
+     ],
+     "h2": "Fill, review, then lock"
+    },
+    {
+     "body": [
+      "If text disappears or a field refuses input, the underlying field may use a font or control this tool cannot write; the PDF still opens, but that field remains unchanged. Radio buttons and signature fields are common examples.",
+      "For signatures, use Sign PDF after filling: it places a drawn, typed or uploaded signature precisely on the page. For official filings, check whether a certified digital signature is required — an image signature is not the same thing."
+     ],
+     "h2": "Common form problems"
+    },
+    {
+     "body": [
+      "Forms often ask for addresses, ID numbers, medical details or salary information. Filling them in a browser tab keeps that data local; nothing is uploaded to a server or stored in an account.",
+      "After submitting, consider clearing the downloaded file from shared devices and running the Privacy Scanner if you need to check the document metadata before archiving it."
+     ],
+     "h2": "Privacy when forms contain personal data"
+    }
+   ],
+   "slug": "how-to-fill-pdf-forms-free",
+   "steps": [
+    "Open Fill PDF Forms and upload the document",
+    "Wait for the detected fields to appear",
+    "Enter text, tick checkboxes and choose dropdown values",
+    "Keep flatten enabled to lock the answers",
+    "Click Run, review the PDF, then download and submit"
+   ],
+   "tips": [
+    "Use the preview to review every page, not just the first field.",
+    "Flatten before submitting unless the recipient must edit the form.",
+    "For scanned paper forms, use Annotate instead of expecting fillable fields."
+   ],
+   "title": "Fill PDF Forms Free — Text, Checkboxes & Dropdowns",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Recover a damaged or unreadable PDF in your browser. The tool rebuilds broken indexes and salvages readable pages — free, local, no upload.",
+   "faqs": [
+    [
+     "What kinds of damage can be repaired?",
+     "Broken cross-reference tables, truncated trailers and minor structural corruption are the best candidates. A file with missing page content or severe byte-level damage may not be recoverable."
+    ],
+    [
+     "Will every page survive?",
+     "Not necessarily. The repair process rebuilds the document page by page and skips pages that cannot be read, reporting what was lost. Always inspect the result before deleting the original."
+    ],
+    [
+     "Can it repair a password-protected PDF?",
+     "An encrypted file may fail before repair because its contents cannot be decoded without the password. Unlock it first if you know the password, then repair the working copy."
+    ],
+    [
+     "Does repair restore the original quality?",
+     "It preserves whatever page content is still readable. It does not recreate missing objects or improve the quality of scans."
+    ],
+    [
+     "Is the damaged file uploaded?",
+     "No. Repair runs locally with pdf-lib and qpdf WebAssembly; the file stays on your device."
+    ]
+   ],
+   "h1": "How to Repair a Corrupt PDF Free (Recover Readable Pages)",
+   "icon": "🛠",
+   "intro": [
+    "A PDF that will not open is not always a lost document. Often the pages are intact but the file's index, trailer or cross-reference table is damaged — the equivalent of a book with a broken table of contents.",
+    "This guide explains how the browser repair tool rebuilds that structure, when recovery is realistic, and how to avoid destroying the only copy of a damaged file."
+   ],
+   "relatedGuides": [
+    "shrink-huge-pdf-no-crash",
+    "how-to-compare-pdf-versions-free",
+    "how-to-split-pdf-free"
+   ],
+   "relatedTools": [
+    "repair",
+    "split",
+    "compare"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Typical signs include “cannot open file”, a blank viewer, pages that stop halfway, or an error about a broken xref table. These often point to structural damage rather than missing page data, which is exactly what a rebuild can address.",
+      "A file that is zero bytes, was interrupted during download, or fails with an encryption error is a different problem. Re-download the original first; if the bytes are incomplete, no repair tool can invent the missing data."
+     ],
+     "h2": "Symptoms of a repairable PDF"
+    },
+    {
+     "body": [
+      "The tool first tries a tolerant parse with pdf-lib. If that fails, it hands the bytes to qpdf compiled to WebAssembly, which can reconstruct a broken cross-reference table and trailer. The recovered document is then rebuilt page by page.",
+      "Pages that cannot be decoded are skipped and listed in the result warnings. This page-by-page salvage is deliberate: one corrupt page should not prevent the other 40 from being recovered."
+     ],
+     "h2": "How the repair works"
+    },
+    {
+     "body": [
+      "Open the repaired PDF in a second viewer, scroll through every page, and check the page count against what you expected. Look for blank pages or missing images, then compare with the original if any copy still opens.",
+      "Keep the damaged original until the repaired version has been reviewed and backed up. If the file contains signatures or form fields, expect those structures to be simplified by the rebuild."
+     ],
+     "h2": "Verify the recovered file"
+    },
+    {
+     "body": [
+      "Download PDFs completely before opening them, avoid editing files directly on unreliable network drives, and keep versioned copies before running heavy operations such as redaction or compression.",
+      "If a file is too large to open, use Large File Split & Join or the streaming split path instead of forcing it through a normal viewer. Repair is a rescue tool, not a substitute for a reliable backup."
+     ],
+     "h2": "Prevention beats repair"
+    }
+   ],
+   "slug": "how-to-repair-corrupt-pdf-free",
+   "steps": [
+    "Open Repair PDF and add the damaged file",
+    "Click Run and wait for the structural rebuild",
+    "Read the warnings for any skipped pages",
+    "Open the repaired PDF and check every page",
+    "Keep the original until the recovery is verified"
+   ],
+   "tips": [
+    "Re-download the file first if the original transfer was interrupted.",
+    "Unlock encrypted PDFs before attempting repair.",
+    "Never overwrite the only copy of a damaged document."
+   ],
+   "title": "Repair Corrupt PDF Free — Recover Readable Pages",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "Use case",
+   "description": "Compare two PDFs side by side with synced scrolling in your browser. Spot contract changes and revised clauses without uploading files.",
+   "faqs": [
+    [
+     "Does it highlight every changed word?",
+     "No. The tool is a visual side-by-side reader with synced scrolling, not an automated text-diff engine. It makes changes easy to spot but still relies on your review."
+    ],
+    [
+     "What happens if the files have different page counts?",
+     "The viewer continues to the longer document. Pages that exist only in one file appear on that side, so missing sections are visible."
+    ],
+    [
+     "Can I compare scanned PDFs?",
+     "Yes, as images. You are comparing the rendered pages visually, so scanned and flat documents work without a text layer."
+    ],
+    [
+     "Can I download a comparison report?",
+     "No. Compare is an in-browser review tool with no output file; it is designed for checking versions before you sign or send them."
+    ],
+    [
+     "Are the files uploaded?",
+     "No. Both PDFs are rendered locally and the comparison never leaves the browser."
+    ]
+   ],
+   "h1": "How to Compare Two PDFs Free (Side-by-Side Review)",
+   "icon": "🔍",
+   "intro": [
+    "Contracts, policies and reports rarely change in one obvious place. Comparing two versions by opening them in separate windows makes it easy to miss a moved clause or a quietly edited number.",
+    "This guide shows how to review two PDFs side by side with synced scrolling, what the tool does not do, and a practical checklist for version review."
+   ],
+   "relatedGuides": [
+    "how-to-redact-pdf-free",
+    "how-to-repair-corrupt-pdf-free",
+    "how-to-merge-pdfs-free"
+   ],
+   "relatedTools": [
+    "compare",
+    "merge",
+    "repair"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The Compare tool renders both PDFs as page images and places them in two columns. Scrolling one side moves the other by the same amount, so corresponding pages stay aligned while you read.",
+      "It does not parse words, highlight insertions, or produce a change report. That is a deliberate trade: scanned documents, complex layouts and signatures compare correctly because the tool never depends on a text layer."
+     ],
+     "h2": "A visual diff, not a text diff"
+    },
+    {
+     "body": [
+      "Start with the page count and the first page of each file. Then walk through every page, watching for moved sections, changed dates, altered amounts and new exceptions. Pay particular attention to definitions, termination clauses and anything involving money or liability.",
+      "When a page differs, zoom in and read both sides rather than assuming the change is cosmetic. If the documents are long, split them into matching sections and compare one section at a time to keep concentration high."
+     ],
+     "h2": "A version-review checklist"
+    },
+    {
+     "body": [
+      "Annotate the version you are reviewing with comments or highlights, then share the marked copy with the other party. If the difference is sensitive, redact the shared copy rather than sending the full document.",
+      "For document sets, merge the reviewed files into a single packet only after the comparison is complete. Keep both original versions in your records so the change history is auditable."
+     ],
+     "h2": "What to do when you find a difference"
+    },
+    {
+     "body": [
+      "Both PDFs are rendered in the browser and never uploaded. That matters for employment contracts, legal drafts, medical reports and financial agreements that should not be sent to a third-party comparison service.",
+      "The tool works offline after the app has loaded, so you can review confidential files on a disconnected device."
+     ],
+     "h2": "Private review for sensitive documents"
+    }
+   ],
+   "slug": "how-to-compare-pdf-versions-free",
+   "steps": [
+    "Open Compare PDFs and add exactly two files",
+    "Wait for both documents to render side by side",
+    "Scroll through the pair and review each page",
+    "Annotate or redact the working copy as needed",
+    "Keep both originals for your records"
+   ],
+   "tips": [
+    "Check the page count first; missing pages are the easiest change to miss.",
+    "Compare matching sections in long documents instead of rushing the whole file.",
+    "Use Annotate to record findings before sharing the reviewed copy."
+   ],
+   "title": "Compare Two PDFs Free — Side-by-Side Review (2026)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Crop white margins or scanner borders from a PDF. Set top, bottom, left and right trims per page range — free, local, and non-destructive.",
+   "faqs": [
+    [
+     "Does cropping delete the hidden content?",
+     "No. Cropping changes the visible page box while the original content remains in the file. Use Redact PDF if content outside the crop must be permanently removed."
+    ],
+    [
+     "Can I crop only some pages?",
+     "Yes. Enter a page range such as 1-3, 5 and leave the field blank to apply the same margins to every page."
+    ],
+    [
+     "What units are the margins in?",
+     "Margins are percentages of each page's width or height, so the same values work across mixed page sizes and orientations."
+    ],
+    [
+     "Will cropping improve print quality?",
+     "It changes what is shown and printed, not the resolution of the remaining content. For smaller files, compress after cropping."
+    ],
+    [
+     "Is the original modified?",
+     "No. The tool writes a new PDF with adjusted CropBox and TrimBox values."
+    ]
+   ],
+   "h1": "How to Crop a PDF Free (Margins, Borders & Scans)",
+   "icon": "✂️",
+   "intro": [
+    "Scanned pages often carry black borders, oversized white margins or a strip of the next page. Cropping makes the document easier to read, smaller to print and cleaner in a submission portal.",
+    "This guide shows how to trim percentages from each side of a PDF, target only the pages that need it, and understand why cropping is not the same as redaction."
+   ],
+   "relatedGuides": [
+    "how-to-reorder-delete-rotate-pdf-pages",
+    "how-to-redact-pdf-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "crop",
+    "organize",
+    "redact"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The crop tool asks for a percentage to remove from the top, bottom, left and right of each page. Percentages adapt to portrait, landscape and mixed-size documents, which is more reliable than entering fixed measurements for every page.",
+      "Start with small values such as 2–5% per side, preview the result, and increase only where the unwanted border is obvious. The tool refuses margins so large that almost nothing would remain."
+     ],
+     "h2": "Trim by percentages, not guesses"
+    },
+    {
+     "body": [
+      "The page field accepts ranges like 1-3, 5, so you can trim the scanned appendix without touching the clean cover letter. Leave it blank to apply the same crop to the whole document.",
+      "This matters for mixed files: a uniform crop that fixes a phone scan may cut text from a normally formatted page. Organize the pages first if the document needs both reordering and cropping."
+     ],
+     "h2": "Crop only the pages that need it"
+    },
+    {
+     "body": [
+      "The tool sets the visible page box (CropBox and TrimBox). The content outside that box still exists in the PDF and may be recoverable with another viewer or by removing the crop.",
+      "If the hidden area contains an address, account number or other sensitive text, use Redact PDF instead. Redaction rasterizes the affected page and destroys the underlying content rather than simply hiding it."
+     ],
+     "h2": "Cropping is not redaction"
+    },
+    {
+     "body": [
+      "Open the new PDF and check the first page of each cropped range. If the document is heading to a portal, compress it afterwards; cropping alone reduces visible area but not necessarily file size.",
+      "The operation runs locally and writes a new file, leaving the original untouched. Keep the original if you may need the full page later."
+     ],
+     "h2": "After the crop"
+    }
+   ],
+   "slug": "how-to-crop-pdf-margins-free",
+   "steps": [
+    "Open Crop PDF and upload the document",
+    "Enter trim percentages for top, bottom, left and right",
+    "Optionally enter the pages to crop (blank = all)",
+    "Click Run to generate the cropped PDF",
+    "Review the page edges, then compress if needed"
+   ],
+   "tips": [
+    "Start small and preview before trimming aggressively.",
+    "Use page ranges to avoid cutting normally formatted pages.",
+    "Use Redact, not Crop, when hidden content must be destroyed."
+   ],
+   "title": "Crop a PDF Free — Margins & Scanned Borders (2026)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "Use case",
+   "description": "Turn paper into a multi-page PDF with your phone camera. Capture pages, review them, and save locally — free, private, no account or upload.",
+   "faqs": [
+    [
+     "Do I need a dedicated scanning app?",
+     "No. The browser asks for camera permission, captures each page, and assembles an A4 PDF locally. Photos can also be uploaded if the camera is unavailable."
+    ],
+    [
+     "Are the captured pages searchable?",
+     "Not automatically. Photos are images. Run the resulting PDF through OCR if you need selectable or searchable text."
+    ],
+    [
+     "What happens if I deny camera permission?",
+     "The tool explains that the camera is blocked and lets you add photos through the normal upload path instead."
+    ],
+    [
+     "Are my scans uploaded?",
+     "No. Camera captures are processed in the page and assembled with pdf-lib; the images never leave the device."
+    ],
+    [
+     "Can I scan many pages in one document?",
+     "Yes. Capture as many pages as you need before running the tool; each capture becomes one A4 page."
+    ]
+   ],
+   "h1": "How to Scan Paper Documents to PDF Free (Phone Camera)",
+   "icon": "📱",
+   "intro": [
+    "A phone camera is the scanner most people already own. The hard part is turning a stack of captures into one straight, shareable PDF without sending private paperwork through a cloud scanning service.",
+    "This guide shows how to capture clean pages in the browser, what to do about lighting and angles, and how to make the result searchable."
+   ],
+   "relatedGuides": [
+    "how-to-convert-images-to-pdf-free",
+    "how-to-ocr-pdf-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "scan",
+    "ocr",
+    "images-to-pdf"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Open Scan to PDF, allow camera access, and fill the frame with one page at a time. Keep the phone roughly parallel to the paper, use soft indirect light, and avoid casting your shadow over the text.",
+      "Each capture becomes a page. You can scan receipts, signed forms, ID documents and handwritten notes in one session, then review the page count before generating the PDF."
+     ],
+     "h2": "Capture pages, not perfect photos"
+    },
+    {
+     "body": [
+      "The scanner fits each capture onto an A4 page with a small margin. That produces a predictable document for printing and for portals that expect A4, while preserving the whole photo rather than cropping it aggressively.",
+      "If a page is rotated or badly framed, retake it. The tool does not guess document edges or apply perspective correction, so a little care at capture time beats editing later."
+     ],
+     "h2": "A4 output and readable margins"
+    },
+    {
+     "body": [
+      "The PDF is image-only until you run OCR. Upload it to OCR — Scan to Text, choose the document language, and let Tesseract.js add a text layer. The result keeps the page images and adds selectable text for search, copy and accessibility.",
+      "OCR accuracy depends on sharpness, contrast and language. For a contract or medical letter, proofread the extracted text before relying on it."
+     ],
+     "h2": "Make the scan searchable"
+    },
+    {
+     "body": [
+      "Camera frames are handled inside the browser and assembled locally. Nothing is uploaded, which makes the tool suitable for IDs, prescriptions, tax letters and other sensitive paperwork.",
+      "Photo-heavy PDFs can be large. Compress the finished file for email, and keep the original PDF as the archival copy. If the scan is one part of a larger application, merge it after compression."
+     ],
+     "h2": "Keep the scan private and manageable"
+    }
+   ],
+   "slug": "how-to-scan-paper-documents-to-pdf-free",
+   "steps": [
+    "Open Scan to PDF and allow camera access",
+    "Capture one page at a time, filling the frame",
+    "Review the captures and retake any poor pages",
+    "Click Run to assemble an A4 PDF locally",
+    "Download, then OCR or compress as needed"
+   ],
+   "tips": [
+    "Use indirect daylight; direct overhead light creates glare on glossy paper.",
+    "Retake rotated pages instead of hoping the PDF will fix them.",
+    "Run OCR after scanning if you need to search or copy the text."
+   ],
+   "title": "Scan Paper Documents to PDF Free (Phone Camera)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Extract selectable text from a PDF as plain text or Markdown in your browser. Scans need OCR first. Free, private, no upload.",
+   "faqs": [
+    [
+     "Why is the extracted text empty?",
+     "The PDF probably contains only page images, such as a scan or a photo export. Run OCR first to add a text layer, then extract the text."
+    ],
+    [
+     "Does it preserve tables and columns?",
+     "Plain text keeps reading order with page markers; Markdown adds headings and list structure. Complex tables and multi-column layouts may not match the visual arrangement exactly."
+    ],
+    [
+     "What is the difference between TXT and Markdown?",
+     "TXT is unformatted text suitable for notes and search. Markdown keeps headings and bullet structure, which is useful for documentation, wikis and content migration."
+    ],
+    [
+     "Can I extract text from a password-protected PDF?",
+     "Unlock the PDF first with Unlock PDF, then extract the text from the working copy."
+    ],
+    [
+     "Is the document uploaded?",
+     "No. Text is extracted locally with pdf.js and the output is generated in your browser."
+    ]
+   ],
+   "h1": "How to Extract Text from a PDF Free (TXT or Markdown)",
+   "icon": "📄",
+   "intro": [
+    "PDFs are good at preserving appearance and bad at giving words back. Copying from a viewer often drags in line breaks, headers and page numbers; extracting the text layer produces a cleaner starting point.",
+    "This guide shows how to pull selectable text into TXT or Markdown, understand its limits, and add OCR when the PDF is only pictures."
+   ],
+   "relatedGuides": [
+    "how-to-ocr-pdf-free",
+    "how-to-convert-pdf-to-word-free",
+    "how-to-convert-pdf-to-excel-free"
+   ],
+   "relatedTools": [
+    "extract-text",
+    "pdf-to-word",
+    "ocr"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The tool reads the text layer embedded in the PDF. Digital documents from Word, Google Docs, LaTeX and most publishing pipelines have one; scans and photos usually do not. If extraction returns nothing, the PDF is image-only rather than protected.",
+      "Page markers are inserted between pages so you can trace a quote back to its source. The extractor does not reconstruct images, charts or the visual position of every block — it returns the words in reading order."
+     ],
+     "h2": "What the extractor can and cannot read"
+    },
+    {
+     "body": [
+      "Plain text is the safest output for search, notes, translation tools and scripts. Markdown is better when headings and lists should survive into documentation, a wiki or a CMS: the extractor maps styled lines to heading levels and bullets where it can.",
+      "Neither format recreates tables perfectly. If the data is tabular, PDF to Excel is the better route; if you need an editable document, PDF to Word produces a .docx."
+     ],
+     "h2": "Choose TXT or Markdown"
+    },
+    {
+     "body": [
+      "A scan has no text layer to extract. Run OCR — Scan to Text with the correct language, then extract the text from the searchable PDF it produces. OCR reads visible characters, so blur, skew and handwriting reduce accuracy.",
+      "For a mixed document, OCR the scanned pages and extract the digital pages separately, then combine the text. This avoids paying the OCR cost twice for pages that already contain clean text."
+     ],
+     "h2": "Scanned documents need OCR first"
+    },
+    {
+     "body": [
+      "Extraction happens locally with pdf.js; the PDF and the extracted text stay in the browser. That makes the tool suitable for contracts, research papers and internal reports that should not be pasted into an online converter.",
+      "Before publishing extracted text, proofread for hyphenation, ligatures and broken line breaks. Keep the original PDF as the authoritative source."
+     ],
+     "h2": "Privacy and downstream use"
+    }
+   ],
+   "slug": "how-to-extract-text-from-pdf-free",
+   "steps": [
+    "Open Extract Text and upload the PDF",
+    "Choose TXT for plain text or Markdown for structure",
+    "Click Run to read the embedded text layer",
+    "Review page markers and clean up line breaks",
+    "Use OCR first if the document is a scan"
+   ],
+   "tips": [
+    "If extraction is empty, the PDF is image-only — try OCR, not a different extractor.",
+    "Markdown is better for docs; TXT is better for scripts and translation.",
+    "Use PDF to Excel when the content is tabular."
+   ],
+   "title": "Extract Text from PDF Free — TXT or Markdown (2026)",
    "updated": "2026-11-08"
   }
  ]
