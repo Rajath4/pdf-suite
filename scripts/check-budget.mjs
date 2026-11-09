@@ -7,7 +7,7 @@
 // (~1.4 MB) + SheetJS (~0.9 MB) + pdf-lib (~0.5 MB) + pptxgenjs (~0.3 MB).
 // They load lazily and precache for offline; what matters for startup is
 // the entry chunk. The 3.9 MB ceiling pays for the lazy qpdf wrapper, and
-// the 6.5 MB dist ceiling (up from 6.0) covers 64 prerendered SEO pages,
+// the 6.5 MB dist ceiling (up from 6.0) covers 71 prerendered SEO pages,
 // the 1200x630 social card and feed/llms.txt — all static text compressed
 // heavily over the wire and irrelevant to startup.
 import { readdirSync, readFileSync, statSync } from 'node:fs';

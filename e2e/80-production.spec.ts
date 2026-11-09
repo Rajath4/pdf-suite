@@ -33,6 +33,26 @@ test.describe('Production build / SEO', () => {
     }
   });
 
+  test('every guide has a prerendered article page with schema and canonical', async ({ request }) => {
+    test.setTimeout(180_000);
+    const guides = (JSON.parse(
+      readFileSync(new URL('../src/seo/guides.json', import.meta.url), 'utf8'),
+    ) as { guides: { slug: string }[] }).guides;
+    for (const guide of guides) {
+      const path = `/guides/${guide.slug}/`;
+      const res = await request.get(path);
+      expect(res.ok(), `${path} should return 200`).toBe(true);
+      const html = await res.text();
+      expect(html, path).toContain(`<link rel="canonical" href="https://pdfhaven.app${path}"`);
+      expect(html.match(/<h1[\s>]/g) ?? [], path).toHaveLength(1);
+      expect(html, path).toContain('"@type":"Article"');
+      expect(html, path).toContain('"@type":"FAQPage"');
+      expect(html, path).toContain('"@type":"HowTo"');
+      expect(html, path).toContain('article:published_time');
+      expect(html, path).toContain('application/rss+xml');
+    }
+  });
+
   test('tool-count copy matches the registry everywhere', async ({ request }) => {
     const home = await (await request.get('/')).text();
     expect(home).toContain(`${TOOLS.length} free PDF tools`);

@@ -5,7 +5,7 @@
 
 **Live demo: [https://pdfhaven.app/](https://pdfhaven.app/)**
 
-37 PDF tools + 16 guides running **100% client-side** — merge, split, compress,
+37 PDF tools + 23 guides running **100% client-side** — merge, split, compress,
 sign, convert, OCR, redact and AES-256-protect documents with no upload, no
 watermark, no sign-up, and no per-task limits. Files never leave the device.
 

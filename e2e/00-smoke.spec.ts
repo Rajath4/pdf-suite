@@ -5,6 +5,9 @@ import { TOOLS, TOOL_SLUGS } from '../src/tools/registry';
 const SEO = JSON.parse(
   readFileSync(new URL('../src/seo/content.json', import.meta.url), 'utf8'),
 ) as { tools: { id: string; title: string }[] };
+const guideCount = (JSON.parse(
+  readFileSync(new URL('../src/seo/guides.json', import.meta.url), 'utf8'),
+) as { guides: unknown[] }).guides.length;
 
 test.describe('app shell', () => {
   test('home page renders every tool card and the version stamp', async ({ page }) => {
@@ -94,7 +97,7 @@ test.describe('app shell', () => {
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto('/guides/');
     await expect(page.locator('main h1')).toHaveText('Free PDF Guides & Tutorials');
-    await expect(page.locator('.guide-card')).toHaveCount(16);
+    await expect(page.locator('.guide-card')).toHaveCount(guideCount);
     const filters = page.getByRole('tab');
     expect(await filters.count()).toBeGreaterThan(1);
     const first = page.locator('.guide-card').first();

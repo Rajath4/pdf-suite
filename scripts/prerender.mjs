@@ -18,6 +18,18 @@ const GUIDES = JSON.parse(readFileSync(join(ROOT, 'src', 'seo', 'guides.json'), 
 const CATEGORIES = SEO.categories;
 const TOOLS_INDEX = SEO.toolsIndex;
 const GUIDES_INDEX = SEO.guidesIndex;
+/** Keep in sync with the SPA homepage “Learn · PDF guides” strip. */
+const HOME_GUIDE_SLUGS = [
+  'how-to-merge-pdfs-free',
+  'how-to-compress-pdf-under-1mb',
+  'how-to-convert-pdf-to-jpg-free',
+  'how-to-convert-images-to-pdf-free',
+  'how-to-sign-pdf-free',
+  'how-to-redact-pdf-free',
+  'free-pdf-tools-compared',
+  'how-to-ocr-pdf-free',
+];
+const HOME_GUIDES = HOME_GUIDE_SLUGS.map((slug) => GUIDES.find((g) => g.slug === slug)).filter(Boolean);
 const PAGES = SEO.pages;
 const OG_IMAGE = `${SITE}/og.jpg`;
 const BUILD_DATE = new Date().toISOString();
@@ -501,7 +513,7 @@ function homeBody() {
     `<p>${esc(SEO.home.intro)}</p>`,
     `<h2>Browse by category</h2><p>${cats} · <a href="/tools/">all tools directory</a></p>`,
     `<h2>All free PDF tools</h2><div>${cards}</div>`,
-    `<h2>Popular PDF guides</h2><p>${GUIDES.slice(0, 6).map((g) => `<a href="/guides/${g.slug}/">${esc(g.h1.split(' — ')[0].slice(0, 44))}</a>`).join(' · ')} · <a href="/guides/">All guides →</a></p>`,
+    `<h2>Popular PDF guides</h2><p>${HOME_GUIDES.map((g) => `<a href="/guides/${g.slug}/">${esc(g.h1.split(' — ')[0].slice(0, 44))}</a>`).join(' · ')} · <a href="/guides/">All guides →</a></p>`,
     `<h2>Why PDF Haven instead of typical online tools</h2>`,
     `<table><thead><tr><th scope="col" aria-label="Feature"></th><th scope="col">Typical online tools</th><th scope="col">PDF Haven</th></tr></thead><tbody>${rows}</tbody></table>`,
     `<h2>Frequently asked questions</h2>`,

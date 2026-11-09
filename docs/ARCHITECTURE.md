@@ -33,7 +33,7 @@ src/
     registry.ts      # single source of truth: 37 tools, slugs, chaining
     actions.ts       # per-tool orchestration (files + opts → Blobs)
   ui/components.ts   # typed DOM helpers
-  seo/               # content.json (tool landing copy) + guides.json (16 guides)
+  seo/               # content.json (tool landing copy) + guides.json (23 guides)
 scripts/prerender.mjs  # static SEO pages + sitemap/robots per build
 ```
 
@@ -81,7 +81,7 @@ HTML but keep the shared shell shared.
 
 ## SEO
 
-`scripts/prerender.mjs` emits 64 real URLs (home, 37 tools, 16 guides, 6
+`scripts/prerender.mjs` emits 71 real URLs (home, 37 tools, 23 guides, 6
 category hubs, tools/guides directories, about/privacy) with unique
 title/description, absolute canonical, OG/Twitter tags, hreflang, and a JSON-LD
 `@graph` (Organization, WebSite, WebPage/CollectionPage/Article,

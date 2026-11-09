@@ -1550,9 +1550,11 @@ function homePage(): HTMLElement {
       const picks = [
         'how-to-merge-pdfs-free',
         'how-to-compress-pdf-under-1mb',
+        'how-to-convert-pdf-to-jpg-free',
+        'how-to-convert-images-to-pdf-free',
         'how-to-sign-pdf-free',
+        'how-to-redact-pdf-free',
         'free-pdf-tools-compared',
-        'compress-pdf-for-job-application',
         'how-to-ocr-pdf-free',
       ];
       const section = el('section', { class: 'cat' });

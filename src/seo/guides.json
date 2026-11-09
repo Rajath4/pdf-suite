@@ -18,13 +18,16 @@
     ]
    ],
    "h1": "How to Merge PDFs Free — No Watermark, No Signup",
+   "icon": "⧉",
    "intro": [
     "Combining PDFs should take thirty seconds: drop your files, arrange them, download one clean document. No account, no watermark, no daily counter.",
     "This guide shows the fastest way using a free offline-first merger, including the pro move most people miss — selecting exact pages from each file instead of merging whole documents."
    ],
    "relatedGuides": [
     "how-to-split-pdf-free",
-    "how-to-compress-pdf-under-1mb"
+    "how-to-compress-pdf-under-1mb",
+    "how-to-convert-images-to-pdf-free",
+    "how-to-reorder-delete-rotate-pdf-pages"
    ],
    "relatedTools": [
     "merge",
@@ -57,8 +60,7 @@
     "Merging many scans? Compress afterward to keep the file emailable."
    ],
    "title": "How to Merge PDFs Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "⧉"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -78,13 +80,15 @@
     ]
    ],
    "h1": "How to Compress a PDF Under 1 MB (Job Portals Love This)",
+   "icon": "🗜",
    "intro": [
     "Job portals, visa applications, and university admissions share one annoying trait: hard file-size caps, often 1 MB. A 12 MB scan of your certificates simply bounces.",
     "This guide shows how to hit an exact target size — not 'small-ish', but verifiably under the limit — using a free tool with a dedicated target-size mode."
    ],
    "relatedGuides": [
     "how-to-merge-pdfs-free",
-    "compress-pdf-for-job-application"
+    "compress-pdf-for-job-application",
+    "how-to-convert-pdf-to-jpg-free"
    ],
    "relatedTools": [
     "compress",
@@ -117,8 +121,7 @@
     "Need many certificates under caps? Batch mode compresses whole folders."
    ],
    "title": "Compress PDF Under 1 MB Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "🗜"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -138,6 +141,7 @@
     ]
    ],
    "h1": "How to Sign a PDF Free — Draw, Type, or Upload",
+   "icon": "✒",
    "intro": [
     "Offer letters, rental agreements, freelance contracts — they all arrive as PDFs expecting ink. Printing, signing, and rescanning in 2026 is absurd.",
     "This guide shows how to create a reusable signature once, then stamp it precisely onto any document in seconds, entirely offline."
@@ -177,8 +181,7 @@
     "After signing contracts, Protect with a password before emailing."
    ],
    "title": "How to Sign a PDF Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "✒"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -198,13 +201,15 @@
     ]
    ],
    "h1": "How to Split a PDF Free — 5 Ways",
+   "icon": "✂",
    "intro": [
     "Splitting is the most underestimated PDF skill: pull one chapter from a manual, separate invoices by month, or carve a 200 MB archive into emailable parts.",
     "This guide covers all five split modes — ranges, every-page, chunks, odd/even, and by-size — and when each one wins."
    ],
    "relatedGuides": [
     "how-to-merge-pdfs-free",
-    "how-to-compress-pdf-under-1mb"
+    "how-to-compress-pdf-under-1mb",
+    "how-to-reorder-delete-rotate-pdf-pages"
    ],
    "relatedTools": [
     "split",
@@ -237,8 +242,7 @@
     "Name parts clearly — 'contract-odd-pages.pdf' beats 'split-1.pdf'."
    ],
    "title": "How to Split a PDF Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "✂"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -258,13 +262,16 @@
     ]
    ],
    "h1": "How to Extract Images from a PDF Free",
+   "icon": "🖼",
    "intro": [
     "Catalogs, presentations, and reports lock their best photos inside PDFs. Screenshots degrade them; extraction recovers the originals.",
     "This guide shows how to pull every embedded image at native quality — and what to do with the tricky ones."
    ],
    "relatedGuides": [
     "how-to-merge-pdfs-free",
-    "how-to-compress-pdf-under-1mb"
+    "how-to-compress-pdf-under-1mb",
+    "how-to-convert-pdf-to-jpg-free",
+    "how-to-convert-images-to-pdf-free"
    ],
    "relatedTools": [
     "extract-images",
@@ -297,8 +304,7 @@
     "Extraction beats screenshots: no UI chrome, no scaling loss."
    ],
    "title": "Extract Images from PDF Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "🖼"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -318,6 +324,7 @@
     ]
    ],
    "h1": "How to OCR a PDF Free — Scans to Searchable Text",
+   "icon": "👁",
    "intro": [
     "A scanned PDF is just photos of text: unsearchable, uncopyable, invisible to Ctrl+F. OCR (optical character recognition) reads the pictures and returns real text.",
     "This guide shows how to run OCR in 14 languages entirely on your device — no uploads, no per-page fees."
@@ -357,8 +364,7 @@
     "Batch-unlock first: OCR needs readable, unprotected files."
    ],
    "title": "How to OCR a PDF Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "👁"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -378,13 +384,15 @@
     ]
    ],
    "h1": "How to Convert PDF to Word Free (DOCX)",
+   "icon": "📝",
    "intro": [
     "You received the report as PDF; you need to edit it in Word. Retyping is not a plan.",
     "This guide converts text PDFs to clean, editable .docx files — privately, with no page caps or watermarks."
    ],
    "relatedGuides": [
     "how-to-merge-pdfs-free",
-    "how-to-compress-pdf-under-1mb"
+    "how-to-compress-pdf-under-1mb",
+    "how-to-convert-word-to-pdf-free"
    ],
    "relatedTools": [
     "pdf-to-word",
@@ -417,8 +425,7 @@
     "Convert once, then keep the .docx as your editable master."
    ],
    "title": "Convert PDF to Word Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "📝"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -438,13 +445,16 @@
     ]
    ],
    "h1": "How to Password Protect a PDF Free",
+   "icon": "🔒",
    "intro": [
     "Salary letters, bank statements, medical records — some PDFs should never travel unprotected. Password encryption takes seconds and works everywhere.",
     "This guide locks files with AES encryption locally, so the password is never transmitted, stored, or seen by anyone but you."
    ],
    "relatedGuides": [
     "how-to-unlock-pdf-free",
-    "how-to-sign-pdf-free"
+    "how-to-sign-pdf-free",
+    "how-to-redact-pdf-free",
+    "how-to-watermark-pdf-free"
    ],
    "relatedTools": [
     "encrypt",
@@ -477,8 +487,7 @@
     "After redacting, always re-protect before sending."
    ],
    "title": "Password Protect PDF Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "🔒"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -498,6 +507,7 @@
     ]
    ],
    "h1": "How to Unlock a PDF Free — Remove Password",
+   "icon": "🔓",
    "intro": [
     "Locked out of your own file, or need to edit a PDF whose password you legitimately hold? Unlocking takes seconds — locally.",
     "This guide removes password protection from PDFs you own, without the file or password ever leaving your browser."
@@ -538,8 +548,7 @@
     "On shared computers, delete the unlocked copy when finished — and empty the trash."
    ],
    "title": "Unlock PDF Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "🔓"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -559,13 +568,15 @@
     ]
    ],
    "h1": "How to Remove PDF Metadata Free",
+   "icon": "🕵",
    "intro": [
     "Every PDF carries a hidden info card: who made it, with what software, and when. Before sharing sensitive documents, read that card — then decide what stays.",
     "This guide inspects, rewrites, or wipes PDF metadata entirely in your browser."
    ],
    "relatedGuides": [
     "how-to-password-protect-pdf-free",
-    "how-to-sign-pdf-free"
+    "how-to-sign-pdf-free",
+    "how-to-redact-pdf-free"
    ],
    "relatedTools": [
     "privacy",
@@ -598,8 +609,7 @@
     "Set final metadata on publish-ready documents — it aids search and archiving."
    ],
    "title": "Remove PDF Metadata Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "🕵"
+   "updated": "2026-09-04"
   },
   {
    "category": "How-to",
@@ -619,6 +629,7 @@
     ]
    ],
    "h1": "How to Convert PDF to Excel Free",
+   "icon": "📊",
    "intro": [
     "Bank statements, invoices, reports locked in PDF tables — and you need them in Excel. Manual retyping is error-prone and slow.",
     "This guide extracts PDF text into editable CSV and XLSX files in one run, entirely offline."
@@ -659,8 +670,7 @@
     "For monthly statements, save the verified column mapping once and reuse it every cycle."
    ],
    "title": "Convert PDF to Excel Free (2026 Guide) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "📊"
+   "updated": "2026-09-04"
   },
   {
    "category": "Use case",
@@ -680,6 +690,7 @@
     ]
    ],
    "h1": "Compress PDFs for Job Applications (Caps, Photos & Batches)",
+   "icon": "🎓",
    "intro": [
     "A perfect application rejected by a file-size error: every job seeker knows the pain. Certificates, resumes, and photos must each squeeze under strict caps.",
     "This playbook covers the full application pack — which pages to keep, what sizes to target, and how to batch-compress everything in one go."
@@ -719,8 +730,7 @@
     "Keep a folder of originals — never submit your only copy."
    ],
    "title": "Compress PDFs for Job Applications (2026) | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "🎓"
+   "updated": "2026-09-04"
   },
   {
    "category": "Comparison",
@@ -740,6 +750,7 @@
     ]
    ],
    "h1": "Best Free PDF Tools Compared (2026, Honest Edition)",
+   "icon": "⚖️",
    "intro": [
     "Every 'free' PDF tool hides its real price somewhere: a watermark, a 2-task daily cap, a signup wall before download, or your files on someone's server.",
     "This honest comparison lays out what the popular options actually cost you — in limits, privacy, and friction — so you can pick with eyes open."
@@ -779,52 +790,11 @@
     "Bookmark the winner — and install it if it supports offline use."
    ],
    "title": "Best Free PDF Tools Compared 2026 | PDF Haven",
-   "updated": "2026-09-04",
-   "icon": "⚖️"
+   "updated": "2026-09-04"
   },
   {
-   "slug": "why-is-my-pdf-so-big",
-   "icon": "🔍",
-   "title": "Why Is My PDF So Big? Shrink It Free (2026 Guide) | PDF Haven",
-   "description": "Two-page PDF weighing 9 MB? Diagnose KB-per-page, fix phone scans, decks, and fonts, then compress free. No signup.",
-   "h1": "Why Is My PDF So Big? (And How to Actually Shrink It)",
    "category": "How-to",
-   "updated": "2026-09-04",
-   "intro": [
-    "You scanned a lease with your phone — eight pages, 9.4 MB — and the agency inbox rejected it. Meanwhile a 40-page contract arrives as a 300 KB attachment. Same format, wildly different weight.",
-    "This guide diagnoses where your megabytes hide with one number (KB per page), then fixes each cause: oversized scans, bloated decks, and font packing."
-   ],
-   "sections": [
-    {
-     "h2": "The one-number diagnosis: KB per page",
-     "body": [
-      "Divide file size by page count. Under 200 KB per page is a normal text document with little fat to trim. Between 200 KB and 1 MB means text plus images or heavy fonts — moderate savings available. Over 1 MB per page means every page is essentially a photograph, and compression works miracles there."
-     ]
-    },
-    {
-     "h2": "The three usual culprits",
-     "body": [
-      "Phone scanning apps save each page as a full-resolution 12-megapixel photo — twelve times more pixels than anyone views. Slide decks carry every background and screenshot at original size; a 30-slide deck quietly becomes 25 MB. And quick-export tools sometimes embed entire font families (1–2 MB of typefaces) instead of just used characters.",
-      "Scan text documents at 150 DPI instead of 300 — file size quarters with no visible difference on screen. Shrink photos to display size before pasting into Word. Prefer exporters that subset fonts."
-     ]
-    },
-    {
-     "h2": "Why email bounces 'fitting' files",
-     "body": [
-      "Attachments travel base64-encoded, inflating them by a third in transit: a 19 MB file becomes ~25 MB of message and bounces off Gmail's 25 MB wall. Outlook allows 20 MB, Exchange defaults to 10 MB. Rule of thumb: aim for 70% of the stated cap."
-     ]
-    }
-   ],
-   "steps": [
-    "Check KB per page to name the culprit",
-    "Split out only the pages you need",
-    "Compress with the matching preset — or an exact MB target",
-    "Verify the result opens, then send at 70% of the cap"
-   ],
-   "tips": [
-    "Merge first, compress second — optimizers dedupe shared resources across the whole file.",
-    "A 600 DPI scan holds sixteen times the data of 150 DPI. Nothing on screen needs 600."
-   ],
+   "description": "Two-page PDF weighing 9 MB? Diagnose KB-per-page, fix phone scans, decks, and fonts, then compress free. No signup.",
    "faqs": [
     [
      "Why is my 2-page PDF 9 MB?",
@@ -839,62 +809,59 @@
      "Base64 transit encoding adds ~33%. A file at 95% of the cap routinely fails — aim for 70%."
     ]
    ],
+   "h1": "Why Is My PDF So Big? (And How to Actually Shrink It)",
+   "icon": "🔍",
+   "intro": [
+    "You scanned a lease with your phone — eight pages, 9.4 MB — and the agency inbox rejected it. Meanwhile a 40-page contract arrives as a 300 KB attachment. Same format, wildly different weight.",
+    "This guide diagnoses where your megabytes hide with one number (KB per page), then fixes each cause: oversized scans, bloated decks, and font packing."
+   ],
+   "relatedGuides": [
+    "how-to-compress-pdf-under-1mb",
+    "compress-pdf-for-job-application"
+   ],
    "relatedTools": [
     "compress",
     "split",
     "merge"
    ],
-   "relatedGuides": [
-    "how-to-compress-pdf-under-1mb",
-    "compress-pdf-for-job-application"
-   ]
-  },
-  {
-   "slug": "send-giant-pdf-email",
-   "icon": "📦",
-   "title": "Send a Giant PDF by Email (2026 Guide) | PDF Haven",
-   "description": "Gmail bounces PDFs over 25 MB and office servers often cap at 10 MB. Split giant PDFs into email-size chunks and rejoin them byte-identical — offline, no signup.",
-   "h1": "How to Send a Giant PDF by Email Without Bounces",
-   "category": "Use case",
-   "updated": "2026-09-04",
-   "intro": [
-    "A 300 MB scan set will never survive an email server: Gmail caps attachments at 25 MB, Outlook at 20 MB, and corporate servers often enforce 10 MB — before the ~37% base64 inflation email encoding adds on top.",
-    "The fix is not another cloud link. Split the file into email-size chunks, send them as ordinary attachments across one or several emails, and have the recipient rejoin them into a byte-identical copy."
-   ],
    "sections": [
     {
-     "h2": "Pick a chunk size the server cannot refuse",
      "body": [
-      "Size chunks for the strictest server in the chain, not yours: 20 MB slides under Gmail and Yahoo, while 9 MB clears almost every corporate Exchange default. Smaller chunks also resume painlessly — one failed 9 MB attachment re-sends in seconds, a failed 2 GB upload restarts from zero.",
-      "As a rule of thumb, divide the portal or mailbox limit by 1.4 to cover encoding overhead, then round down. A 25 MB Gmail ceiling becomes ~17 MB safe chunks; a 10 MB office server becomes ~7 MB."
-     ]
+      "Divide file size by page count. Under 200 KB per page is a normal text document with little fat to trim. Between 200 KB and 1 MB means text plus images or heavy fonts — moderate savings available. Over 1 MB per page means every page is essentially a photograph, and compression works miracles there."
+     ],
+     "h2": "The one-number diagnosis: KB per page"
     },
     {
-     "h2": "Split, send, and rejoin without losing a byte",
      "body": [
-      "Binary chunks are transport copies, not mini-PDFs — nobody can open a single .part file, and that is expected. Numbering keeps order unambiguous: big.pdf.part001 through big.pdf.partNNN rejoin in exactly that sequence.",
-      "Rejoining concatenates bytes, so one missing or renamed part corrupts the result. Always count parts before rejoining (a 10-part set needs all ten), and verify the rejoined size equals the sum of the chunks."
-     ]
+      "Phone scanning apps save each page as a full-resolution 12-megapixel photo — twelve times more pixels than anyone views. Slide decks carry every background and screenshot at original size; a 30-slide deck quietly becomes 25 MB. And quick-export tools sometimes embed entire font families (1–2 MB of typefaces) instead of just used characters.",
+      "Scan text documents at 150 DPI instead of 300 — file size quarters with no visible difference on screen. Shrink photos to display size before pasting into Word. Prefer exporters that subset fonts."
+     ],
+     "h2": "The three usual culprits"
     },
     {
-     "h2": "Check the giant file before moving gigabytes",
      "body": [
-      "Moving gigabytes to discover a truncated trailer wastes an afternoon. Inspect the header (%PDF version) and trailer (startxref plus %%EOF markers) with a no-load check first — it reads kilobytes, not gigabytes.",
-      "A healthy trailer means the file will survive the trip; a missing one means repair or re-export before you split, because no transport method fixes corruption."
-     ]
+      "Attachments travel base64-encoded, inflating them by a third in transit: a 19 MB file becomes ~25 MB of message and bounces off Gmail's 25 MB wall. Outlook allows 20 MB, Exchange defaults to 10 MB. Rule of thumb: aim for 70% of the stated cap."
+     ],
+     "h2": "Why email bounces 'fitting' files"
     }
    ],
+   "slug": "why-is-my-pdf-so-big",
    "steps": [
-    "Open Large File Split & Join directly and upload the giant file",
-    "Choose Split mode and set MB per chunk for the strictest recipient server",
-    "Download the .part files and attach them across one or several emails",
-    "On the receiving end, upload all parts in numeric order with Join mode",
-    "Download the rejoined file and confirm its size matches the original"
+    "Check KB per page to name the culprit",
+    "Split out only the pages you need",
+    "Compress with the matching preset — or an exact MB target",
+    "Verify the result opens, then send at 70% of the cap"
    ],
    "tips": [
-    "Name the email subject with part counts ('Plans 3/10') so nothing goes missing.",
-    "Keep one local copy of the original until the recipient confirms the rejoin."
+    "Merge first, compress second — optimizers dedupe shared resources across the whole file.",
+    "A 600 DPI scan holds sixteen times the data of 150 DPI. Nothing on screen needs 600."
    ],
+   "title": "Why Is My PDF So Big? Shrink It Free (2026 Guide) | PDF Haven",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "Use case",
+   "description": "Gmail bounces PDFs over 25 MB and office servers often cap at 10 MB. Split giant PDFs into email-size chunks and rejoin them byte-identical — offline, no signup.",
    "faqs": [
     [
      "Why does a 24 MB PDF bounce on a 25 MB limit?",
@@ -913,63 +880,63 @@
      "Splitting streams without loading, so files up to 6 GB work on desktops. Shrinking (compression) is different — it must decode pages and caps around 1 GB."
     ]
    ],
-   "relatedTools": [
-    "large-files",
-    "split",
-    "compress"
+   "h1": "How to Send a Giant PDF by Email Without Bounces",
+   "icon": "📦",
+   "intro": [
+    "A 300 MB scan set will never survive an email server: Gmail caps attachments at 25 MB, Outlook at 20 MB, and corporate servers often enforce 10 MB — before the ~37% base64 inflation email encoding adds on top.",
+    "The fix is not another cloud link. Split the file into email-size chunks, send them as ordinary attachments across one or several emails, and have the recipient rejoin them into a byte-identical copy."
    ],
    "relatedGuides": [
     "how-to-split-pdf-free",
     "why-is-my-pdf-so-big",
     "shrink-huge-pdf-no-crash"
-   ]
-  },
-  {
-   "slug": "shrink-huge-pdf-no-crash",
-   "icon": "🗜",
-   "title": "Shrink a Huge PDF Without Crashing (2026) | PDF Haven",
-   "description": "Big PDFs freeze tabs because browsers cap memory per tab. Shrink huge PDFs with page-by-page streaming into batched files up to ~1 GB — free, private, no uploads.",
-   "h1": "How to Shrink a Huge PDF Without Crashing Your Browser",
-   "category": "How-to",
-   "updated": "2026-09-04",
-   "intro": [
-    "Opening a 900 MB PDF in a normal compressor freezes the tab for a simple reason: browsers give each tab about 4 GB of memory, and classic PDF libraries expand documents to several times their file size while rendering every page at once.",
-    "Streaming compression avoids the pile-up — it opens the file through on-demand byte ranges, renders one page at a time, and writes finished batches to disk as it goes, so memory stays flat no matter the page count."
+   ],
+   "relatedTools": [
+    "large-files",
+    "split",
+    "compress"
    ],
    "sections": [
     {
-     "h2": "Why the regular compress chokes on giants",
      "body": [
-      "Standard compression loads the entire document, renders all pages to full bitmaps (one 300-DPI page costs ~35 MB), holds every canvas, then rebuilds the file — sometimes ten times over when hunting an exact target size. A 300-page scan can briefly demand a double-digit gigabyte heap that no tab will ever grant.",
-      "The symptom is always the same: the spinner stalls, the tab goes white, and the work is lost. The file is fine — the method is wrong for the size."
-     ]
+      "Size chunks for the strictest server in the chain, not yours: 20 MB slides under Gmail and Yahoo, while 9 MB clears almost every corporate Exchange default. Smaller chunks also resume painlessly — one failed 9 MB attachment re-sends in seconds, a failed 2 GB upload restarts from zero.",
+      "As a rule of thumb, divide the portal or mailbox limit by 1.4 to cover encoding overhead, then round down. A 25 MB Gmail ceiling becomes ~17 MB safe chunks; a 10 MB office server becomes ~7 MB."
+     ],
+     "h2": "Pick a chunk size the server cannot refuse"
     },
     {
-     "h2": "Stream it: one page in memory at a time",
      "body": [
-      "Streaming mode renders page 1, compresses it, writes it out, drops the bitmap, and only then touches page 2. Peak memory is one page plus one small output batch — typically under 200 MB even for gigabyte inputs.",
-      "Output arrives as one valid PDF per batch (50 pages by default) instead of a single file, because no browser can hold a rebuilt gigabyte document either. Batches open, print, and share exactly like normal PDFs."
-     ]
+      "Binary chunks are transport copies, not mini-PDFs — nobody can open a single .part file, and that is expected. Numbering keeps order unambiguous: big.pdf.part001 through big.pdf.partNNN rejoin in exactly that sequence.",
+      "Rejoining concatenates bytes, so one missing or renamed part corrupts the result. Always count parts before rejoining (a 10-part set needs all ten), and verify the rejoined size equals the sum of the chunks."
+     ],
+     "h2": "Split, send, and rejoin without losing a byte"
     },
     {
-     "h2": "Know the honest ceilings before you start",
      "body": [
-      "Streaming reaches roughly 1 GB on a capable desktop: every page must still be decoded once, so time becomes the limit — thousands of pages take a genuinely long time, with progress shown per page. Lossless re-saving never streams (it needs the whole object graph), so it stays capped low.",
-      "All streaming output is rasterized, meaning text is no longer selectable. If selectability matters more than size, extract the text first, or keep the original and ship shrunken copies for distribution."
-     ]
+      "Moving gigabytes to discover a truncated trailer wastes an afternoon. Inspect the header (%PDF version) and trailer (startxref plus %%EOF markers) with a no-load check first — it reads kilobytes, not gigabytes.",
+      "A healthy trailer means the file will survive the trip; a missing one means repair or re-export before you split, because no transport method fixes corruption."
+     ],
+     "h2": "Check the giant file before moving gigabytes"
     }
    ],
+   "slug": "send-giant-pdf-email",
    "steps": [
-    "Open Large File Split & Join and choose Shrink mode",
-    "Pick Light for archiving, Medium for sharing, Heavy for smallest size",
-    "Set pages per output file (50 is a good default for email-friendly parts)",
-    "Click Run and watch per-page progress on very long documents",
-    "Download each batched PDF — every one opens and prints normally"
+    "Open Large File Split & Join directly and upload the giant file",
+    "Choose Split mode and set MB per chunk for the strictest recipient server",
+    "Download the .part files and attach them across one or several emails",
+    "On the receiving end, upload all parts in numeric order with Join mode",
+    "Download the rejoined file and confirm its size matches the original"
    ],
    "tips": [
-    "Shrink a copy and archive the original — rasterizing cannot be undone.",
-    "For files over ~1 GB, split first or shrink in two passes."
+    "Name the email subject with part counts ('Plans 3/10') so nothing goes missing.",
+    "Keep one local copy of the original until the recipient confirms the rejoin."
    ],
+   "title": "Send a Giant PDF by Email (2026 Guide) | PDF Haven",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Big PDFs freeze tabs because browsers cap memory per tab. Shrink huge PDFs with page-by-page streaming into batched files up to ~1 GB — free, private, no uploads.",
    "faqs": [
     [
      "Why does my browser freeze on big PDFs?",
@@ -988,15 +955,666 @@
      "Exact targeting needs repeated full rebuilds, which giants cannot afford. Streaming uses quality presets per batch instead — predictable size, one pass."
     ]
    ],
-   "relatedTools": [
-    "large-files",
-    "compress"
+   "h1": "How to Shrink a Huge PDF Without Crashing Your Browser",
+   "icon": "🗜",
+   "intro": [
+    "Opening a 900 MB PDF in a normal compressor freezes the tab for a simple reason: browsers give each tab about 4 GB of memory, and classic PDF libraries expand documents to several times their file size while rendering every page at once.",
+    "Streaming compression avoids the pile-up — it opens the file through on-demand byte ranges, renders one page at a time, and writes finished batches to disk as it goes, so memory stays flat no matter the page count."
    ],
    "relatedGuides": [
     "how-to-compress-pdf-under-1mb",
     "send-giant-pdf-email",
     "why-is-my-pdf-so-big"
-   ]
+   ],
+   "relatedTools": [
+    "large-files",
+    "compress"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Standard compression loads the entire document, renders all pages to full bitmaps (one 300-DPI page costs ~35 MB), holds every canvas, then rebuilds the file — sometimes ten times over when hunting an exact target size. A 300-page scan can briefly demand a double-digit gigabyte heap that no tab will ever grant.",
+      "The symptom is always the same: the spinner stalls, the tab goes white, and the work is lost. The file is fine — the method is wrong for the size."
+     ],
+     "h2": "Why the regular compress chokes on giants"
+    },
+    {
+     "body": [
+      "Streaming mode renders page 1, compresses it, writes it out, drops the bitmap, and only then touches page 2. Peak memory is one page plus one small output batch — typically under 200 MB even for gigabyte inputs.",
+      "Output arrives as one valid PDF per batch (50 pages by default) instead of a single file, because no browser can hold a rebuilt gigabyte document either. Batches open, print, and share exactly like normal PDFs."
+     ],
+     "h2": "Stream it: one page in memory at a time"
+    },
+    {
+     "body": [
+      "Streaming reaches roughly 1 GB on a capable desktop: every page must still be decoded once, so time becomes the limit — thousands of pages take a genuinely long time, with progress shown per page. Lossless re-saving never streams (it needs the whole object graph), so it stays capped low.",
+      "All streaming output is rasterized, meaning text is no longer selectable. If selectability matters more than size, extract the text first, or keep the original and ship shrunken copies for distribution."
+     ],
+     "h2": "Know the honest ceilings before you start"
+    }
+   ],
+   "slug": "shrink-huge-pdf-no-crash",
+   "steps": [
+    "Open Large File Split & Join and choose Shrink mode",
+    "Pick Light for archiving, Medium for sharing, Heavy for smallest size",
+    "Set pages per output file (50 is a good default for email-friendly parts)",
+    "Click Run and watch per-page progress on very long documents",
+    "Download each batched PDF — every one opens and prints normally"
+   ],
+   "tips": [
+    "Shrink a copy and archive the original — rasterizing cannot be undone.",
+    "For files over ~1 GB, split first or shrink in two passes."
+   ],
+   "title": "Shrink a Huge PDF Without Crashing (2026) | PDF Haven",
+   "updated": "2026-09-04"
+  },
+  {
+   "category": "How-to",
+   "description": "Turn PDF pages into crisp JPG or PNG images in your browser. Pick ~150, ~300 or ~600 DPI, download single pages or a ZIP. Free and private.",
+   "faqs": [
+    [
+     "What is the difference between PDF to JPG and Extract Images?",
+     "PDF to JPG renders whole pages as new images. Extract Images pulls the original embedded photos from the file, often byte-identical and without page layout."
+    ],
+    [
+     "What DPI should I choose?",
+     "Use ~150 DPI for screens and chat, ~300 DPI for printing or presentations, and ~600 DPI only when you need archival detail or OCR preprocessing."
+    ],
+    [
+     "Why is my ZIP so large?",
+     "High DPI and many pages multiply pixel data. Lower the DPI, choose JPG instead of PNG, or split the PDF and convert only the pages you need."
+    ],
+    [
+     "Does conversion keep annotations and signatures?",
+     "Yes. Rendering captures the page exactly as it appears, including annotations, form field appearances and visible signatures."
+    ],
+    [
+     "Are my files uploaded?",
+     "No. Rendering runs in your browser canvas; the PDF and the exported images never leave your device."
+    ]
+   ],
+   "h1": "How to Convert a PDF to JPG Free (High-Resolution Pages)",
+   "icon": "🖼",
+   "intro": [
+    "Sometimes you do not need an editable document — you need a picture of a page for a slide, a listing, a chat message or a print shop. Converting PDF pages to images is the fastest way to get there.",
+    "This guide shows how to render pages as sharp JPGs or PNGs at the right resolution, download one page or the whole document, and avoid the two mistakes that make exports blurry or enormous."
+   ],
+   "relatedGuides": [
+    "how-to-extract-images-from-pdf",
+    "how-to-compress-pdf-under-1mb",
+    "how-to-convert-images-to-pdf-free"
+   ],
+   "relatedTools": [
+    "pdf-to-jpg",
+    "extract-images",
+    "compress"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The extract-images tool and PDF to JPG solve different problems. Extraction pulls the original photos and graphics out of the PDF file — no re-rendering, sometimes byte-identical. PDF to JPG treats each finished page as a picture instead: layout, charts, signatures and annotations are all captured exactly as they appear.",
+      "Choose page rendering when you need a visual copy for a slide, a thumbnail, a marketplace listing or a preview. Choose extraction when you need the source photo itself, at its original resolution, without the page around it."
+     ],
+     "h2": "PDF to JPG vs. extracting embedded images"
+    },
+    {
+     "body": [
+      "Use ~150 DPI for screen previews, chat and email; ~300 DPI for printing, presentations and most print-on-demand requirements; ~600 DPI only for archival scans, OCR preprocessing or large-format output. Higher DPI means more pixels, more memory and a bigger result.",
+      "JPG is the sensible default for photos and mixed pages because it is much smaller. PNG is lossless and sharper for screenshots, line art, diagrams and pages with transparent graphics, at the cost of file size."
+     ],
+     "h2": "Pick the right DPI and image format"
+    },
+    {
+     "body": [
+      "One-page PDFs download as a single .jpg or .png. Longer documents become a ZIP with one image per page, named in reading order. Everything renders locally; a 200-page colour document can take a while and needs enough free memory, so close other heavy tabs first.",
+      "Only need a handful of pages? Split or organize the source PDF first, convert the trimmed file, then rebuild a PDF from the images if needed. That avoids rendering pages you will never use."
+     ],
+     "h2": "Single page or the whole document"
+    },
+    {
+     "body": [
+      "Conversion happens in a canvas inside your browser — there is no upload step, no queue and no account. You can confirm in DevTools that the file never leaves the machine.",
+      "If the images are destined for email, render at 150 DPI or convert only the required pages. For print, inspect at 100% zoom before sending: soft edges usually mean the source was a low-resolution scan, not that the DPI setting was wrong."
+     ],
+     "h2": "Private by design (and ready for print)"
+    }
+   ],
+   "slug": "how-to-convert-pdf-to-jpg-free",
+   "steps": [
+    "Open PDF to JPG and drop your PDF",
+    "Choose JPG or PNG and a DPI preset (~150, ~300 or ~600)",
+    "Click Run and let every page render locally",
+    "Download the single image or the ZIP archive",
+    "Check sharpness at 100% before using it in print"
+   ],
+   "tips": [
+    "300 DPI is the sweet spot for most print and slide work; 600 DPI files get large fast.",
+    "For text-heavy pages, PNG keeps letter edges crisper than JPG.",
+    "Convert only the pages you need by splitting or organizing first."
+   ],
+   "title": "Convert PDF to JPG Free — High-Resolution Pages (2026)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Combine JPG, PNG and WebP images into one PDF. Choose fit-to-image or A4, set margins, and keep pages in order. Runs offline — nothing uploaded.",
+   "faqs": [
+    [
+     "Which image formats can I combine?",
+     "JPG, PNG, WebP, GIF and BMP uploads are accepted and normalised into pages. JPG and PNG are the best choices for photos and screenshots."
+    ],
+    [
+     "Fit-to-image or A4 — which page size should I pick?",
+     "Fit-to-image keeps every photo at its own shape and is best for receipts, IDs and photo books. A4 gives a uniform printable document for forms and submissions."
+    ],
+    [
+     "Can I control the page order?",
+     "Yes. Files are added in upload order and can be reordered in the file list before you run the conversion, so page 1 is the file at the top."
+    ],
+    [
+     "Will the images be compressed?",
+     "Images keep their source dimensions when embedded and are not deliberately downscaled. Final PDF size depends on how many photos and pixels you add."
+    ],
+    [
+     "Are my photos uploaded to a server?",
+     "No. The PDF is assembled in your browser with pdf-lib; the images never leave your device."
+    ]
+   ],
+   "h1": "How to Convert JPG to PDF Free (Photos, Scans & Screenshots)",
+   "icon": "📷",
+   "intro": [
+    "Portals, landlords and application forms still ask for one tidy PDF, while your evidence arrives as a camera roll full of JPGs. Combining those images should not require an online upload or a desktop app.",
+    "This guide shows how to turn photos, scans and screenshots into a single ordered PDF, choose the right page size, and keep the result small enough to send."
+   ],
+   "relatedGuides": [
+    "how-to-convert-pdf-to-jpg-free",
+    "how-to-compress-pdf-under-1mb",
+    "how-to-merge-pdfs-free"
+   ],
+   "relatedTools": [
+    "images-to-pdf",
+    "compress",
+    "scan"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Phone photos of receipts, ID cards, signed forms and whiteboards are already good enough for most submissions. Wrapping them into one PDF removes the awkward multi-attachment email and gives the recipient a single document with a predictable page count.",
+      "The camera scanner inside the Scan to PDF tool is the better choice when you are capturing paper right now. Images to PDF is for files you already have: photos, screenshots, exported diagrams or scans from another app."
+     ],
+     "h2": "When images-to-PDF beats printing and scanning"
+    },
+    {
+     "body": [
+      "Fit-to-image creates a page the same shape as each picture, so nothing is cropped and photo books look natural. A4 creates a uniform document for offices and portals; the image is fitted inside the page with your chosen margin, preserving its aspect ratio.",
+      "A 24 pt margin (about 8.5 mm) is a sensible default. Increase it for binding or signature space; set it to zero for edge-to-edge artwork."
+     ],
+     "h2": "Fit to image vs. A4 (and why margins matter)"
+    },
+    {
+     "body": [
+      "The file list is the document outline: the top file becomes page 1. Add all images at once, then reorder rows before converting. If a photo is sideways, rotate it in your phone's editor first — this tool fits the image as supplied rather than guessing orientation from every camera.",
+      "For a mixed document — a cover letter followed by certificates — merge the image PDF with your existing PDFs afterwards, or use Merge PDFs and arrange both kinds of file in one pass."
+     ],
+     "h2": "Get the page order right before you run"
+    },
+    {
+     "body": [
+      "Every photo carries a lot of pixel data. If the finished file exceeds a portal cap, run it through Compress PDF with target-size mode instead of deleting evidence. For image-only PDFs, compression rasterizes pages, so preview the text before submitting anything important.",
+      "The whole workflow runs locally: no account, no upload, no watermark. That matters for IDs, medical letters and anything else you would rather not hand to an unknown server."
+     ],
+     "h2": "Keep the final PDF emailable"
+    }
+   ],
+   "slug": "how-to-convert-images-to-pdf-free",
+   "steps": [
+    "Open Images to PDF and add your JPG, PNG or WebP files",
+    "Use the ↑/↓ arrows to set the page order",
+    "Choose Fit to image or A4 and set a margin",
+    "Click Run to assemble the PDF locally",
+    "Download, then compress if a portal enforces a size cap"
+   ],
+   "tips": [
+    "Crop screenshots before adding them; black borders waste space and look unprofessional.",
+    "Name files 01-cover, 02-id, 03-proof so the intended order is obvious before uploading.",
+    "For scanned paper, use Scan to PDF instead — it captures and assembles pages in one flow."
+   ],
+   "title": "JPG to PDF Free — Combine Photos & Scans (2026 Guide)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Convert .docx text into a clean, shareable PDF in your browser. Simple text-focused documents, no upload or signup — plus when print-to-PDF wins.",
+   "faqs": [
+    [
+     "Does the converter preserve tables, images and columns?",
+     "No. This tool extracts the document text into a clean PDF; complex layouts are intentionally simplified. Use Word, LibreOffice or Google Docs export-to-PDF when pixel-perfect layout matters."
+    ],
+    [
+     "Can I convert an old .doc file?",
+     "Save or export it as .docx first. The browser converter reads the modern DOCX format only."
+    ],
+    [
+     "Why would I use this instead of Word's Save as PDF?",
+     "It is faster for text-only documents on a machine without Office, and the file never leaves your browser. Use the native exporter when formatting, images or exact pagination must survive."
+    ],
+    [
+     "Are headings kept?",
+     "DOCX headings and paragraph breaks are carried into the PDF as structured text, which keeps outlines readable. Decorative fonts and colours are not reproduced."
+    ],
+    [
+     "Is my document uploaded?",
+     "No. The DOCX is parsed in the browser with Mammoth and rendered locally; nothing is transmitted."
+    ]
+   ],
+   "h1": "How to Convert Word to PDF Free (DOCX to Clean PDF)",
+   "icon": "📘",
+   "intro": [
+    "A Word document is easy to edit and awkward to share: fonts shift, comments travel with the file, and recipients may not have the same software. PDF fixes the page for everyone.",
+    "This guide covers the fast browser route for text-focused DOCX files, and the cases where you should deliberately use Word's own PDF export instead."
+   ],
+   "relatedGuides": [
+    "how-to-convert-pdf-to-word-free",
+    "how-to-merge-pdfs-free",
+    "how-to-compress-pdf-under-1mb"
+   ],
+   "relatedTools": [
+    "word-to-pdf",
+    "pdf-to-word",
+    "merge"
+   ],
+   "sections": [
+    {
+     "body": [
+      "The Word to PDF tool extracts the text from a .docx and lays it out as a clean, readable PDF with sensible margins and spacing. It is ideal for notes, reports, cover letters, manuscripts and policy documents where words are the point.",
+      "Because the conversion happens locally, confidential drafts never pass through a conversion website. There is no account, watermark or daily limit."
+     ],
+     "h2": "What the browser converter does well"
+    },
+    {
+     "body": [
+      "If the document depends on precise layout — tables, multi-column pages, text boxes, headers and footers, embedded images, tracked changes or brand fonts — export from the editor instead. In Word choose File → Save As → PDF; in Google Docs choose File → Download → PDF Document.",
+      "That is not a flaw in the converter; it is a deliberate trade. Reconstructing a complex Word layout faithfully in the browser is unreliable, so the tool promises clean text rather than pretending to preserve design."
+     ],
+     "h2": "When print-to-PDF is the right tool"
+    },
+    {
+     "body": [
+      "Convert the DOCX, open the preview and check that the text ends where you expect. If the document is part of a larger submission, merge it with the other PDFs next, then add page numbers once the final order is settled.",
+      "Need the reverse direction later? PDF to Word extracts text into an editable .docx. It is a text round-trip, not a layout round-trip, so keep the original DOCX as the master copy."
+     ],
+     "h2": "A reliable DOCX-to-PDF workflow"
+    },
+    {
+     "body": [
+      "Mammoth reads the DOCX in your browser and the PDF renderer runs on the same device. Nothing is uploaded, and the result downloads directly.",
+      "Very large documents are bounded by available browser memory rather than an artificial page limit. For a 300-page manuscript, close other heavy tabs and convert before opening the PDF for review."
+     ],
+     "h2": "Privacy and file limits"
+    }
+   ],
+   "slug": "how-to-convert-word-to-pdf-free",
+   "steps": [
+    "Open Word to PDF and drop a .docx file",
+    "Click Run to extract the text and build the PDF",
+    "Review the preview for truncation or missing sections",
+    "Download the PDF and merge or compress it if needed"
+   ],
+   "tips": [
+    "Use Save As → PDF in Word when images or exact layout must be preserved.",
+    "Keep the .docx as the editable master; treat the PDF as the shareable copy.",
+    "Add page numbers after merging, not before."
+   ],
+   "title": "Word to PDF Free — DOCX to Clean PDF (2026 Guide)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Drag pages into a new order, delete blanks or duplicates, and rotate sideways scans — then download a fresh PDF. Free, local, no signup.",
+   "faqs": [
+    [
+     "Does this change my original PDF?",
+     "No. The tool builds a new PDF from your page plan and downloads it; the source file on disk is never modified."
+    ],
+    [
+     "Can I rotate only one page?",
+     "Yes. Rotation is applied per page in the visual grid, so a single upside-down scan can be fixed without turning the whole document."
+    ],
+    [
+     "What happens to deleted pages?",
+     "They are omitted from the newly generated PDF. Because the original is untouched, you can always start again from it."
+    ],
+    [
+     "Can I edit a password-protected PDF?",
+     "Unlock it first with Unlock PDF, then organize the pages. The unlock step creates a working copy you can edit."
+    ],
+    [
+     "Is there a page limit?",
+     "Only device memory limits the job. Very large documents take longer to thumbnail; close other heavy tabs and work from the original if the browser struggles."
+    ]
+   ],
+   "h1": "How to Reorder, Delete & Rotate PDF Pages Free",
+   "icon": "🔀",
+   "intro": [
+    "A PDF often arrives almost right: the cover page is last, page 7 is upside down, and two blank scans sit in the middle. Rebuilding the document from scratch is unnecessary.",
+    "This guide shows how to fix page order, remove junk pages and rotate individual scans in one pass — then download a clean PDF with the original safely untouched."
+   ],
+   "relatedGuides": [
+    "how-to-split-pdf-free",
+    "how-to-add-page-numbers-to-pdf-free",
+    "how-to-merge-pdfs-free"
+   ],
+   "relatedTools": [
+    "organize",
+    "rotate",
+    "split"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Page order is part of the message. A proposal with the appendix before the pricing, or a scanned application with the signature page hidden, creates friction even when every page is present.",
+      "Rotation matters too: sideways scans are hard to read on phones and often get rejected by upload portals that expect upright pages. Fixing both issues before sharing is faster than explaining them."
+     ],
+     "h2": "Why page-level editing matters"
+    },
+    {
+     "body": [
+      "Open Organize Pages and drop a single PDF. The tool renders page thumbnails and gives each page four controls: move left, move right, rotate, and delete. Work through the grid until the document matches the story you want to tell.",
+      "When you click Run, a new PDF is assembled in your chosen order with the chosen rotations. Deleted pages are simply not copied. The original file is never altered."
+     ],
+     "h2": "Reorder, rotate and delete in one pass"
+    },
+    {
+     "body": [
+      "For long reports, split out the chapters first, organize each one, then merge them in the final order. That keeps each browser job small and makes it easy to replace a single chapter without redoing the whole document.",
+      "If you are assembling a packet from several sources, merge first and organize second. Page numbers and watermarks should come last, once the order is final."
+     ],
+     "h2": "Combine organizing with split and merge"
+    },
+    {
+     "body": [
+      "Scroll the finished PDF once from top to bottom. Check that the first page is the intended cover, that no required exhibit disappeared, and that rotated pages are upright in a second viewer as well as the preview.",
+      "Everything runs locally through pdf-lib and canvas thumbnails. No page image or document is uploaded, which makes the tool suitable for contracts, medical records and internal reports."
+     ],
+     "h2": "Verify before you send"
+    }
+   ],
+   "slug": "how-to-reorder-delete-rotate-pdf-pages",
+   "steps": [
+    "Open Organize Pages and add one PDF",
+    "Use the arrows to move pages into order",
+    "Rotate sideways pages and delete blanks or duplicates",
+    "Click Run to generate the new PDF",
+    "Review the result, then add page numbers if needed"
+   ],
+   "tips": [
+    "Keep the original until the new document has been checked in a second viewer.",
+    "Delete blank scans before compressing — fewer pages means a smaller file.",
+    "Organize before adding page numbers so the numbering matches the final order."
+   ],
+   "title": "Reorder, Delete & Rotate PDF Pages Free (2026)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Stamp “Page X of Y” or simple numbers on any PDF. Choose the start number, position and size — no upload, no account, no watermark.",
+   "faqs": [
+    [
+     "Can I start numbering at a number other than 1?",
+     "Yes. Set the first number to match a continuation, such as 12 for a chapter that follows a previously numbered section."
+    ],
+    [
+     "Which positions and formats are available?",
+     "Choose Page X of Y, Page X, X / Y or just X, placed at the top centre/right or along the bottom left, centre or right of every page."
+    ],
+    [
+     "How do I skip the cover page?",
+     "The number is applied to every page. Split the cover from the rest, number the body, then merge the cover back at the front."
+    ],
+    [
+     "Are the numbers editable after saving?",
+     "They are drawn into the PDF as page content, so they are not form fields. Keep the original if you may need a different format later."
+    ],
+    [
+     "Does it work on scanned PDFs?",
+     "Yes. Numbers are overlaid on each page regardless of whether the page contains selectable text or a scan."
+    ]
+   ],
+   "h1": "How to Add Page Numbers to a PDF Free",
+   "icon": "🔢",
+   "intro": [
+    "Page numbers look trivial until a 40-page packet is printed, dropped, and reassembled in the wrong order. They also make review comments precise: “page 12, second paragraph” beats “somewhere near the end”.",
+    "This guide shows how to add clean, consistent numbering to any PDF locally, including how to choose a format, starting number and position that survive printing."
+   ],
+   "relatedGuides": [
+    "how-to-reorder-delete-rotate-pdf-pages",
+    "how-to-merge-pdfs-free",
+    "how-to-convert-word-to-pdf-free"
+   ],
+   "relatedTools": [
+    "page-numbers",
+    "header-footer",
+    "organize"
+   ],
+   "sections": [
+    {
+     "body": [
+      "Digital readers scroll, but legal filings, grant applications, printed reports and course packets are still paginated. Reviewers cite page numbers, printers collate by page numbers, and missing numbers make a document look unfinished.",
+      "Consistent numbering also catches assembly mistakes early: if the footer jumps from 3 to 5, a page is missing before the file reaches the recipient."
+     ],
+     "h2": "Why page numbers still matter"
+    },
+    {
+     "body": [
+      "“Page X of Y” is the friendliest format for submissions because it shows both progress and total length. Use the compact “X / Y” for design-heavy documents, or a bare number when the layout is already busy.",
+      "Start at 1 for a standalone file. If the PDF continues a previous document, set the first number to the correct offset. Bottom-centre is the safest default; bottom-right is conventional for reports; top-right suits forms with dense footers."
+     ],
+     "h2": "Choose a format, start number and position"
+    },
+    {
+     "body": [
+      "If you merge already-numbered files, the sequence restarts or duplicates. Merge the documents first, organize the final page order, and only then add numbers in one pass.",
+      "For a cover page without a number, split the cover away, number the body starting at 1, then merge the cover back. The body sequence stays correct because the cover is added after numbering."
+     ],
+     "h2": "Number after merging, not before"
+    },
+    {
+     "body": [
+      "The Headers & Footers tool handles running titles and dates with {page} and {total} placeholders when a bare number is not enough. Both tools draw the text directly into the PDF, so it prints identically everywhere.",
+      "Processing is local: the PDF is opened, stamped and saved in your browser. Nothing is uploaded, and there is no watermark or signup step."
+     ],
+     "h2": "Headers, footers and privacy"
+    }
+   ],
+   "slug": "how-to-add-page-numbers-to-pdf-free",
+   "steps": [
+    "Open Add Page Numbers and upload your PDF",
+    "Set the first number and choose a numbering format",
+    "Pick a position and text size",
+    "Click Run to stamp every page",
+    "Download and spot-check the first and last pages"
+   ],
+   "tips": [
+    "Keep the margin clear of existing footers by choosing a different corner or reducing the font size.",
+    "Number after merging and organizing so the sequence matches the final file.",
+    "For multi-part documents, use the start number instead of numbering each part separately."
+   ],
+   "title": "Add Page Numbers to a PDF Free (2026 Guide)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Stamp CONFIDENTIAL, your name or a logo on every page. Control opacity, size, tilt and tiling — locally, with no upload or signup.",
+   "faqs": [
+    [
+     "Can a watermark be removed later?",
+     "A stamped watermark is drawn into the page content, so removing it is not a one-click operation. That is the point: use it for deterrence, not as a substitute for encryption."
+    ],
+    [
+     "What opacity should I use?",
+     "0.15–0.25 keeps text readable while making the mark visible. Use stronger opacity for draft stamps and lighter marks when the document must remain highly legible."
+    ],
+    [
+     "Why would I tile a watermark?",
+     "Tiling repeats the mark across the page, making crops and screenshots harder to reuse. It is useful for confidential drafts and review copies."
+    ],
+    [
+     "Which logo formats work?",
+     "PNG with transparency or a clean JPG works best. Size the logo as a percentage of page width so it stays proportionate on mixed page sizes."
+    ],
+    [
+     "Is my document uploaded when I watermark it?",
+     "No. The stamp is applied in your browser and the file stays on your device."
+    ]
+   ],
+   "h1": "How to Watermark a PDF Free — Text or Logo",
+   "icon": "💧",
+   "intro": [
+    "A watermark tells readers what a document is before they open it: draft, confidential, sample, or a reminder of who owns the copy. It also makes casual reuse and screenshotting less attractive.",
+    "This guide shows how to stamp text or a logo with sensible opacity, placement and tiling — and where a watermark stops being useful."
+   ],
+   "relatedGuides": [
+    "how-to-password-protect-pdf-free",
+    "how-to-redact-pdf-free",
+    "how-to-merge-pdfs-free"
+   ],
+   "relatedTools": [
+    "watermark",
+    "flatten",
+    "encrypt"
+   ],
+   "sections": [
+    {
+     "body": [
+      "A watermark is visible content, not access control. Anyone who can open the file can screenshot it or attempt to edit it. If the goal is to stop unauthorised access, protect the PDF with a password or encrypt it; a watermark is a complementary signal, not a lock.",
+      "Used honestly, it is still valuable: DRAFT and CONFIDENTIAL stamps prevent accidental circulation, and a company mark establishes ownership after a document leaves its original context."
+     ],
+     "h2": "A watermark is deterrence, not encryption"
+    },
+    {
+     "body": [
+      "Short text works best: CONFIDENTIAL, DRAFT, the recipient's name, or a date. Set opacity around 0.15–0.25 for documents people must read, and place the mark diagonally so it crosses the page without hiding a sentence.",
+      "Tiling repeats the watermark in a grid. Use it for sensitive drafts where cropping one mark would otherwise remove the warning. Preview the result: a tiled mark at high opacity can make a contract unreadable."
+     ],
+     "h2": "Text watermarks that stay readable"
+    },
+    {
+     "body": [
+      "Use a PNG with transparency for the cleanest result. A logo sized at roughly 15–25% of page width sits comfortably in the centre; tiled layouts should use a smaller logo and lower opacity.",
+      "Mixed page sizes and orientations are handled per page, so a logo remains proportionate rather than stretching on landscape pages."
+     ],
+     "h2": "Logo watermarks without the clutter"
+    },
+    {
+     "body": [
+      "Merge and organize first, watermark the final document second, and protect it last. If the PDF contains form fields or annotations that must be fixed in place, run Flatten after watermarking; flattening does not remove the watermark.",
+      "The entire process runs locally with pdf-lib and canvas. No upload, no account, no server-side copy of the document."
+     ],
+     "h2": "Put watermarking in the right order"
+    }
+   ],
+   "slug": "how-to-watermark-pdf-free",
+   "steps": [
+    "Open Add Watermark and upload your PDF",
+    "Choose text or logo mode and enter the mark",
+    "Set opacity, size, tilt and single or tiled layout",
+    "Click Run to stamp every page",
+    "Review the output, then protect or flatten if required"
+   ],
+   "tips": [
+    "Keep watermark text short; long sentences become visual noise.",
+    "Use 15–25% opacity for documents that must remain easy to read.",
+    "Watermark the final merged document, not the individual source files."
+   ],
+   "title": "Watermark a PDF Free — Text or Logo (2026 Guide)",
+   "updated": "2026-11-08"
+  },
+  {
+   "category": "How-to",
+   "description": "Drawing a black box is not redaction. This tool rasterizes redacted pages so covered text is physically removed. Free, local, no upload.",
+   "faqs": [
+    [
+     "Isn't drawing a black box enough?",
+     "No. Many PDFs keep the original text underneath a rectangle or annotation, so copying, searching or a different viewer can still reveal it. True redaction must destroy the underlying content."
+    ],
+    [
+     "Does this remove the text underneath?",
+     "Yes, on pages that contain redaction boxes. Those pages are rendered to an image, the boxes are burned in, and the original page content is discarded."
+    ],
+    [
+     "Why can't I select text after redacting?",
+     "Redacted pages become images, so there is no selectable text layer left on them. Unredacted pages in the same document keep their original text."
+    ],
+    [
+     "Should I run OCR after redacting?",
+     "Only if the redacted pages must be searchable again. OCR reads the visible image, so hidden text cannot come back — but review the result carefully before sharing."
+    ],
+    [
+     "Are files uploaded for redaction?",
+     "No. Rendering and redaction happen in your browser; the document never leaves your device."
+    ]
+   ],
+   "h1": "How to Redact a PDF Free — Remove Sensitive Text Permanently",
+   "icon": "⬛",
+   "intro": [
+    "Redaction failures have leaked medical records, court filings and personal addresses because someone drew a black rectangle over text and called it done. In many PDFs the text underneath is still there, selectable and searchable.",
+    "This guide explains how true rasterized redaction differs from cosmetic boxes and how to verify that sensitive content is actually gone before you send the file."
+   ],
+   "relatedGuides": [
+    "how-to-remove-pdf-metadata",
+    "how-to-password-protect-pdf-free",
+    "how-to-watermark-pdf-free"
+   ],
+   "relatedTools": [
+    "redact",
+    "privacy",
+    "flatten"
+   ],
+   "sections": [
+    {
+     "body": [
+      "A rectangle drawn by an editor is often stored as a separate object on top of the page. The original words remain in the content stream and in the file's text layer. Press Ctrl/Cmd+A in a viewer, copy the page, or search for the hidden phrase and it may still appear.",
+      "The same problem affects highlights, sticky notes and many “redaction” features that only hide content visually. If the underlying bytes were not removed, the redaction is cosmetic."
+     ],
+     "h2": "The black-box trap"
+    },
+    {
+     "body": [
+      "In Redact PDF you place black boxes on the pages that need them. On Run, each affected page is rendered at high resolution, the boxes are painted into the bitmap, and that image becomes the new page. The original page content — text, vector data and hidden objects — is not copied into the output.",
+      "Pages without boxes are copied untouched, so the rest of the document keeps its selectable text and small file size. This is why the tool warns that redacted pages are rasterized: a deliberate trade to guarantee removal."
+     ],
+     "h2": "How rasterized redaction removes the data"
+    },
+    {
+     "body": [
+      "Open the redacted PDF in a second viewer. Try to select the area under each box, search for the removed phrase, and copy a full page into a text editor. If nothing appears, the content is gone from those pages.",
+      "Also inspect metadata and hidden document properties: author names, file paths and original titles can leak context even after the visible text is removed. Run the Privacy Scanner on the result and strip metadata if necessary."
+     ],
+     "h2": "Verify before you send"
+    },
+    {
+     "body": [
+      "Work from the original, keep a secured master copy, and create a separate redacted version for distribution. If the PDF is encrypted, unlock a working copy first; if it contains form fields, flatten the result so the fields cannot retain old values.",
+      "Everything runs locally in the browser. For legal, medical or regulated documents, follow your organisation's review process as well — technical redaction removes data, but it does not replace a second pair of eyes."
+     ],
+     "h2": "Redact before sharing, not after"
+    }
+   ],
+   "slug": "how-to-redact-pdf-free",
+   "steps": [
+    "Open Redact PDF and upload the document",
+    "Add a black box over every sensitive area on each page",
+    "Click Run to rasterize the affected pages",
+    "Search and copy-test the output in a second viewer",
+    "Run the Privacy Scanner and remove metadata before sharing"
+   ],
+   "tips": [
+    "Redact the original, not a screenshot of a screenshot — start from the highest-quality source.",
+    "Check headers, footers and page margins where identifiers often hide.",
+    "Keep the unredacted master in a secured location with restricted access."
+   ],
+   "title": "Redact a PDF Free — Permanently Remove Sensitive Text",
+   "updated": "2026-11-08"
   }
  ]
 }
