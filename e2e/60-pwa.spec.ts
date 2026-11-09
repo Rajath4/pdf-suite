@@ -23,6 +23,27 @@ test.describe('PWA install & offline', () => {
     expect((await request.get('/version.json')).ok()).toBe(true);
   });
 
+  test('service worker leaves sitemap and crawler files to the network', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) {
+        await new Promise<void>((resolve) => {
+          navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true });
+          setTimeout(resolve, 15_000);
+        });
+      }
+    });
+    expect(await page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+
+    const res = await page.goto('/sitemap.xml');
+    expect(res?.status()).toBe(200);
+    expect(res?.headers()['content-type']).toContain('xml');
+    const body = await res!.text();
+    expect(body).toContain('<urlset');
+    expect(body).toContain('https://pdfhaven.app/');
+  });
+
   test('works fully offline after the service worker precaches the app', async ({ page, context }) => {
     test.setTimeout(180_000);
     await page.goto('/');

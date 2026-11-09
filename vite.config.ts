@@ -132,8 +132,13 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // App shell is a hash-router SPA: serve index.html for navigations.
+        // Serve the app shell for SPA navigations, but never for crawler and
+        // static files: /sitemap.xml, /feed.xml, /robots.txt etc. must reach
+        // the network instead of rendering the app's 404 page.
         navigateFallback: 'index.html',
+        navigateFallbackDenylist: [
+          /\.(?:xml|txt|json|webmanifest|jpg|jpeg|png|gif|webp|svg|ico|pdf|css|js|mjs|wasm)$/i,
+        ],
         // Main bundle + pdf.js worker exceed workbox's 2 MB default.
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         // The qpdf engine (.wasm) lazy-loads on first encrypt/decrypt use and
